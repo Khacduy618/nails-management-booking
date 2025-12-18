@@ -10,7 +10,8 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Search, Calendar, Clock, CheckCircle, XCircle, AlertCircle, Trash2, Loader2 } from "lucide-react"
 import { useState } from "react"
 import { toast } from "sonner"
-import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog"
+import { OTPVerificationDialog } from "@/components/otp-verification-dialog"
 
 // --- Định nghĩa kiểu dữ liệu ---
 type AppointmentStatus = "pending" | "confirmed" | "completed" | "cancelled" | "in-progress";
@@ -35,9 +36,12 @@ export function AppointmentLookup() {
   const [phoneNumber, setPhoneNumber] = useState("")
   const [appointments, setAppointments] = useState<Appointment[]>([])
   const [isLoading, setIsLoading] = useState(false)
-  const [isCancelling, setIsCancelling] = useState<number | null>(null); // State để biết đang hủy lịch nào
+  const [isCancelling, setIsCancelling] = useState<number | null>(null)
   const [hasSearched, setHasSearched] = useState(false)
   const [error, setError] = useState("")
+  const [otpDialogOpen, setOtpDialogOpen] = useState(false)
+  const [selectedAppointmentId, setSelectedAppointmentId] = useState<number | null>(null)
+  const [isLoadingOTP, setIsLoadingOTP] = useState(false)
 
   const handleSearch = async () => {
     if (!phoneNumber.trim() || !/^[0-9]{10,11}$/.test(phoneNumber.replace(/\s/g, ""))) {
@@ -72,31 +76,44 @@ export function AppointmentLookup() {
   }
 
   const handleCancelAppointment = async (appointmentId: number) => {
-    // if (!confirm("Bạn có chắc chắn muốn hủy lịch hẹn này không?")) return;
+    setSelectedAppointmentId(appointmentId)
+    setIsLoadingOTP(true)
+    setError("")
 
-    setIsCancelling(appointmentId);
-    setError("");
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || '';
-      const sanitized = phoneNumber.replace(/\D/g, "");
-      const res = await fetch(`${apiUrl}appointments/${appointmentId}?phone=${encodeURIComponent(sanitized)}`, {
-        method: 'DELETE',
-      });
-      const result = await res.json();
+      const res = await fetch("/api/otp/send", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          appointmentId,
+          phone: phoneNumber,
+        }),
+      })
+
+      const result = await res.json()
+
       if (!res.ok || !result.success) {
-        throw new Error(result.error?.message || "Không thể hủy lịch hẹn.");
+        throw new Error(result.error?.message || "Không thể gửi mã OTP")
       }
 
-      // Cập nhật lại trạng thái của lịch hẹn trong danh sách
-      setAppointments((prev) =>
-        prev.map((apt) => (apt.id === appointmentId ? { ...apt, status: "cancelled" } : apt)),
-      );
-      toast.success("Hủy lịch hẹn thành công!"); // Hiển thị thông báo
+      toast.success("Mã OTP đã được gửi đến số điện thoại của bạn")
+      setOtpDialogOpen(true)
     } catch (err: any) {
-      setError(err.message);
-      toast.error(err.message);
+      setError(err.message)
+      toast.error(err.message)
     } finally {
-      setIsCancelling(null);
+      setIsLoadingOTP(false)
+    }
+  }
+
+  const handleOTPVerified = () => {
+    if (selectedAppointmentId) {
+      setAppointments((prev) =>
+        prev.map((apt) =>
+          apt.id === selectedAppointmentId ? { ...apt, status: "cancelled" } : apt
+        )
+      )
+      setSelectedAppointmentId(null)
     }
   }
 
@@ -190,19 +207,19 @@ export function AppointmentLookup() {
                         {canCancelAppointment(appointment) && (
                           <ConfirmDialog
                             title="Xác nhận hủy lịch hẹn?"
-                            description="Hành động này không thể hoàn tác. Bạn có chắc chắn muốn hủy lịch hẹn này không?"
+                            description="Bạn sẽ nhận được mã OTP để xác thực hủy lịch hẹn này. Hành động không thể hoàn tác."
                             onConfirm={() => handleCancelAppointment(appointment.id)}
                           >
                             <Button
                               variant="destructive"
                               size="sm"
-                              disabled={isCancelling === appointment.id}
+                              disabled={isLoadingOTP}
                               className="w-full"
                             >
-                              {isCancelling === appointment.id ? (
+                              {isLoadingOTP ? (
                                 <>
                                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                                  Đang hủy...
+                                  Đang gửi OTP...
                                 </>
                               ) : (
                                 <>
@@ -232,6 +249,7 @@ export function AppointmentLookup() {
               <p className="text-sm font-medium">Lưu ý quan trọng</p>
               <ul className="text-sm text-muted-foreground space-y-1">
                 <li>• Chỉ có thể hủy lịch hẹn trước 2 giờ so với thời gian đặt</li>
+                <li>• Hủy lịch hẹn cần xác thực bằng mã OTP được gửi tới số điện thoại</li>
                 <li>• Liên hệ trực tiếp với cửa hàng nếu cần thay đổi lịch hẹn</li>
                 <li>• Vui lòng đến đúng giờ để đảm bảo chất lượng dịch vụ</li>
               </ul>
@@ -239,6 +257,18 @@ export function AppointmentLookup() {
           </div>
         </CardContent>
       </Card>
+
+      {/* OTP Verification Dialog */}
+      {selectedAppointmentId && (
+        <OTPVerificationDialog
+          open={otpDialogOpen}
+          onOpenChange={setOtpDialogOpen}
+          appointmentId={selectedAppointmentId}
+          phone={phoneNumber}
+          onVerified={handleOTPVerified}
+          isLoadingOTP={isLoadingOTP}
+        />
+      )}
     </div>
   )
 }
