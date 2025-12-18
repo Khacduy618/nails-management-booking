@@ -8,6 +8,7 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
+  serverExternalPackages: ['import-in-the-middle', 'require-in-the-middle'],
   turbopack: {
     root: '/Users/khacduy/Downloads/appointment-booking/nailsapp',
   },
