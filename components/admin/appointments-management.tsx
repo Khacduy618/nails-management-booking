@@ -1,0 +1,274 @@
+"use client"
+
+import { useState, useEffect, useCallback } from "react"
+import { Card, CardContent } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Badge } from "@/components/ui/badge"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Search, Eye, Edit, Trash2, Calendar, Phone, Clock, User, Loader2, AlertCircle } from "lucide-react"
+import { AppointmentDetails } from "./appointment-details"
+import { AppointmentStatusUpdate } from "./appointment-status-update"
+import { useDebounce } from "@/hooks/use-debounce"
+import { format } from "date-fns"
+import { toast } from "sonner"
+import { ConfirmDialog } from "@/components/ui/confirm-dialog"
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import { ApiStaff, ApiAppointment, AppointmentStatus, PaginationInfo  } from "@/types";
+import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination"
+import { Plus } from "lucide-react"
+import { BookingForm } from "@/components/booking-form" 
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+
+const statusConfig: Record<AppointmentStatus, { label: string; color: string }> = {
+  pending: { label: "Chờ xác nhận", color: "bg-yellow-100 text-yellow-800 border-yellow-200" },
+  confirmed: { label: "Đã xác nhận", color: "bg-blue-100 text-blue-800 border-blue-200" },
+  'in-progress': { label: "Đang làm", color: "bg-green-100 text-green-800 border-green-200" },
+  completed: { label: "Hoàn thành", color: "bg-gray-100 text-gray-800 border-gray-200" },
+  cancelled: { label: "Đã hủy", color: "bg-red-100 text-red-800 border-red-200" },
+};
+
+export function AppointmentsManagement() {
+  const [appointments, setAppointments] = useState<ApiAppointment[]>([]);
+  const [staffList, setStaffList] = useState<ApiStaff[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [pagination, setPagination] = useState<PaginationInfo | null>(null);
+  const [showBookingForm, setShowBookingForm] = useState(false);
+
+  const [filters, setFilters] = useState({ searchTerm: "", status: "all", date: "", staffId: "all", page: 1 });
+  const debouncedSearchTerm = useDebounce(filters.searchTerm, 500);
+
+  const [showDetails, setShowDetails] = useState(false);
+  const [showStatusUpdate, setShowStatusUpdate] = useState(false);
+  const [selectedAppointment, setSelectedAppointment] = useState<ApiAppointment | null>(null);
+
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || '';
+
+  const fetchAppointments = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const params = new URLSearchParams();
+      params.append('page', filters.page.toString());
+      if (debouncedSearchTerm) params.append('search', debouncedSearchTerm);
+      if (filters.status !== 'all') params.append('status', filters.status);
+      if (filters.date) params.append('date', filters.date);
+      if (filters.staffId !== 'all') params.append('staffId', filters.staffId);
+
+      const res = await fetch(`${apiUrl}admin/appointments?${params.toString()}`);
+      if (!res.ok) throw new Error("Không thể tải danh sách lịch hẹn.");
+
+      const data = await res.json();
+      setAppointments(data.appointments || []);
+      setPagination(data.pagination || null);
+    } catch (e: any) {
+      setError(e.message);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [debouncedSearchTerm, filters.status, filters.date, filters.staffId, filters.page, apiUrl]);
+
+  useEffect(() => { fetchAppointments(); }, [fetchAppointments]);
+  useEffect(() => { fetch(`${apiUrl}admin/staff`).then(res => res.json()).then(data => setStaffList(data.staff || [])); }, [apiUrl]);
+
+  const handleFilterChange = (filterName: 'searchTerm' | 'status' | 'date' | 'staffId', value: string) => {
+    setFilters(prev => ({ ...prev, [filterName]: value, page: 1 }));
+  };
+
+  // Hàm chỉ để thay đổi trang
+  const handlePageChange = (newPage: number) => {
+    if (newPage > 0 && (!pagination || newPage <= pagination.totalPages)) {
+      setFilters(prev => ({ ...prev, page: newPage }));
+    }
+  };
+
+  const handleViewDetails = (appointment: ApiAppointment) => { setSelectedAppointment(appointment); setShowDetails(true); };
+  const handleOpenStatusUpdate = (appointment: ApiAppointment) => { setSelectedAppointment(appointment); setShowStatusUpdate(true); };
+
+  const handleDeleteAppointment = async (appointmentId: number) => {
+    const promise = fetch(`${apiUrl}admin/appointments/${appointmentId}`, { method: 'DELETE' });
+    toast.promise(promise, {
+      loading: 'Đang hủy lịch hẹn...',
+      success: () => {
+        fetchAppointments(); // Tải lại dữ liệu
+        return "Đã hủy lịch hẹn thành công!";
+      },
+      error: "Hủy lịch hẹn thất bại."
+    });
+  };
+
+  const handleStatusChange = async (appointmentId: number, newStatus: string, notes?: string) => {
+    const promise = fetch(`${apiUrl}admin/appointments/${appointmentId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: newStatus, notes: notes })
+    });
+
+    toast.promise(promise, {
+      loading: 'Đang cập nhật...',
+      success: () => {
+        fetchAppointments(); // Tải lại dữ liệu
+        setShowStatusUpdate(false);
+        setSelectedAppointment(null);
+        return "Cập nhật trạng thái thành công!";
+      },
+      error: "Cập nhật thất bại."
+    });
+  };
+
+  const handleBookingSuccess = () => {
+    setShowBookingForm(false); // Đóng modal
+    toast.success("Tạo lịch hẹn mới thành công!");
+    fetchAppointments(); // Tải lại danh sách để hiển thị lịch hẹn mới
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h1 className="text-3xl font-bold">Quản lý đặt lịch</h1>
+        <div className="flex itemts-center justify-end gap-4">
+          
+          {!isLoading && pagination && (
+            <div className="text-sm text-muted-foreground flex items-center">
+              <p>Tổng số lịch: <span className="font-medium text-primary">{pagination.total}</span> </p> 
+            </div>
+          )}
+          <Button onClick={() => setShowBookingForm(true)}>
+            <Plus className="h-4 w-4 mr-2" />
+            Thêm lịch mới
+          </Button>
+        </div>
+        
+      </div>
+
+      <Card>
+        <CardContent className="p-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <Input placeholder="Tìm kiếm..." value={filters.searchTerm} onChange={(e) => setFilters(p => ({ ...p, searchTerm: e.target.value }))} className="pl-10" />
+            <Select value={filters.status} onValueChange={(v) => setFilters(p => ({ ...p, status: v }))}>
+              <SelectTrigger><SelectValue placeholder="Trạng thái" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Tất cả trạng thái</SelectItem>
+                {Object.entries(statusConfig).map(([key, value]) => (
+                  <SelectItem key={key} value={key}>{value.label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Input type="date" value={filters.date} onChange={(e) => setFilters(p => ({ ...p, date: e.target.value }))} />
+            <Select value={filters.staffId} onValueChange={(v) => setFilters(p => ({ ...p, staffId: v }))}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="all">Tất cả nhân viên</SelectItem>{staffList.map((staff) => (<SelectItem key={staff.id} value={staff.id.toString()}>{staff.name}</SelectItem>))}</SelectContent></Select>
+          </div>
+        </CardContent>
+      </Card>
+
+      {error && <Alert variant="destructive"><AlertCircle className="h-4 w-4" /><AlertDescription>{error}</AlertDescription></Alert>}
+
+      <Card>
+        <CardContent className="p-0">
+          <div className="overflow-x-auto">
+            {isLoading ? <div className="h-96 flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin" /></div> :
+              <table className="w-full text-sm">
+                <thead className="border-b bg-muted/50"><tr><th className="p-4 font-medium text-left">Khách hàng</th><th className="p-4 font-medium text-left">Dịch vụ</th><th className="p-4 font-medium text-left">Nhân viên</th><th className="p-4 font-medium text-left">Thời gian</th><th className="p-4 font-medium text-left">Giá</th><th className="p-4 font-medium text-left">Trạng thái</th><th className="p-4 font-medium text-left">Thao tác</th></tr></thead>
+                <tbody>
+                  {appointments.map((appointment) => {
+                    const staffNames = [...new Set(appointment.appointmentServices.map(as => as.staff?.name).filter(Boolean))].join(', ');
+                    const serviceNames = appointment.appointmentServices.map(as => as.service.name).join(' + ');
+                    const config = statusConfig[appointment.status];
+                    return (
+                      <tr key={appointment.id} className="border-b hover:bg-muted/30">
+                        <td className="p-4 align-top"><div className="font-medium">{appointment.customerName}</div><div className="text-muted-foreground">{appointment.customerPhone}</div></td>
+                        <td className="p-4 align-top max-w-xs"><div className="font-medium truncate">{serviceNames}</div><div className="text-muted-foreground">{appointment.durationAtBooking} phút</div></td>
+                        <td className="p-4 align-top"><div className="truncate">{staffNames}</div></td>
+                        <td className="p-4 align-top"><div>{format(new Date(appointment.appointmentDate), "dd/MM/yyyy")}</div><div className="text-muted-foreground">{appointment.appointmentTime.substring(0, 5)}</div></td>
+                        <td className="p-4 align-top font-medium text-primary">{Number(appointment.priceAtBooking).toLocaleString("vi-VN")}₫</td>
+                        <td className="p-4 align-top">
+                          {config ? (
+                            <Badge className={config.color}>{config.label}</Badge>
+                          ) : (
+                            <Badge variant="secondary">{appointment.status}</Badge> // Fallback
+                          )}
+                        </td>
+                        <td className="p-4 align-top"><div className="flex gap-1">
+                          <Button size="icon" variant="ghost" onClick={() => handleViewDetails(appointment)}><Eye className="h-4 w-4" /></Button>
+                          <Button size="icon" variant="ghost" onClick={() => handleOpenStatusUpdate(appointment)}><Edit className="h-4 w-4" /></Button>
+                          {appointment.status !== 'cancelled' &&
+                            <ConfirmDialog title="Xác nhận hủy lịch?" description="Hành động này sẽ chuyển trạng thái lịch hẹn thành 'Đã hủy'. Bạn có chắc chắn?" onConfirm={() => handleDeleteAppointment(appointment.id)}>
+                              <Button size="icon" variant="ghost" className="text-destructive hover:text-destructive"><Trash2 className="h-4 w-4" /></Button>
+                            </ConfirmDialog>
+                          }
+                        </div></td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            }
+            {!isLoading && appointments.length === 0 && <div className="p-12 text-center text-muted-foreground">Không tìm thấy lịch hẹn nào.</div>}
+          </div>
+        </CardContent>
+      </Card>
+      {/* Pagination */}
+      {pagination && pagination.totalPages > 1 && !isLoading && (
+        <div className="flex items-center justify-between pt-4">
+          <div className="text-sm text-muted-foreground">
+            Hiển thị {appointments.length} trên tổng số {pagination.total} kết quả
+          </div>
+          <Pagination className="mx-0 w-auto"> {/* Thêm class để căn chỉnh */}
+            <PaginationContent>
+              <PaginationItem>
+                <PaginationPrevious
+                  onClick={() => handlePageChange(filters.page - 1)}
+                  className={filters.page === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                />
+              </PaginationItem>
+
+              {/* Logic hiển thị các nút số trang */}
+              {[...Array(pagination.totalPages)].map((_, i) => (
+                <PaginationItem key={i}>
+                  <PaginationLink
+                    onClick={() => handlePageChange(i + 1)}
+                    isActive={filters.page === i + 1}
+                    className="cursor-pointer"
+                  >
+                    {i + 1}
+                  </PaginationLink>
+                </PaginationItem>
+              ))}
+
+              <PaginationItem>
+                <PaginationNext
+                  onClick={() => handlePageChange(filters.page + 1)}
+                  className={filters.page === pagination.totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                />
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
+        </div>
+      )}
+      {showDetails && selectedAppointment && <AppointmentDetails appointment={selectedAppointment} onClose={() => setShowDetails(false)} onUpdateStatus={() => { setShowDetails(false); handleOpenStatusUpdate(selectedAppointment); }} />}
+      {showStatusUpdate && selectedAppointment && <AppointmentStatusUpdate appointment={selectedAppointment} onSave={handleStatusChange} onCancel={() => setShowStatusUpdate(false)} />}
+      <Dialog open={showBookingForm} onOpenChange={setShowBookingForm}>
+        <DialogContent
+          // Thêm các class này để tùy chỉnh kích thước và style
+          className="sm:max-w-4xl max-h-[90vh] flex flex-col"
+        >
+          {/* 
+            Tách Header của Dialog ra để có thanh cuộn cho nội dung bên trong,
+            giữ cho header và progress bar cố định.
+          */}
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-bold">Tạo lịch hẹn mới</DialogTitle>
+            <p className="text-muted-foreground">
+              Điền thông tin theo các bước để tạo lịch hẹn cho khách hàng.
+            </p>
+          </DialogHeader>
+
+          {/* Nội dung có thể cuộn */}
+          <div className="flex-grow overflow-y-auto">
+            <BookingForm onBookingComplete={handleBookingSuccess} />
+          </div>
+        </DialogContent>
+      </Dialog>
+    </div>
+  )
+}

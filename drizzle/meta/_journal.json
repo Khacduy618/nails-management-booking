@@ -1,0 +1,41 @@
+{
+  "version": "7",
+  "dialect": "mysql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "5",
+      "when": 1763085957130,
+      "tag": "0000_cute_xorn",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1763172446424,
+      "tag": "0001_typical_silverclaw",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1763372093296,
+      "tag": "0002_add_soft_delete_to_categories",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "5",
+      "when": 1763392785366,
+      "tag": "0003_blue_yellowjacket",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "5",
+      "when": 1763447043538,
+      "tag": "0004_late_mister_sinister",
+      "breakpoints": true
+    }
+  ]
+}
