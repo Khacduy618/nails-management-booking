@@ -96,6 +96,9 @@ export async function middleware(req: NextRequest) {
   return NextResponse.next()
 }
 
+// Export as 'proxy' for Next.js 16
+export { middleware as proxy }
+
 export const config = {
   matcher: ["/admin/:path*", "/api/admin/:path*"],
 }

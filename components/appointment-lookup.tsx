@@ -154,41 +154,66 @@ export function AppointmentLookup() {
                 const config = statusConfig[appointment.status];
                 const StatusIcon = config.icon;
                 return (
-                  <Card key={appointment.id} className="overflow-hidden">
-                    <CardHeader className="pb-3">
-                      <div className="flex items-start justify-between">
-                        <div className="space-y-1">
-                          <CardTitle className="text-lg">Lịch hẹn #{appointment.id}</CardTitle>
-                          <Badge variant={config.variant}><StatusIcon className="h-3 w-3 mr-1.5" />{config.label}</Badge>
+                  <Card key={appointment.id} className="overflow-hidden border-l-4 border-l-primary hover:shadow-md transition-shadow">
+                    <CardContent className="pt-6">
+                      <div className="space-y-4">
+                        {/* Header: ID and Status */}
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <h3 className="font-semibold text-base">Lịch hẹn • {phoneNumber.slice(-4)}</h3>
+                          </div>
+                          <Badge variant={config.variant} className="flex items-center gap-1">
+                            <StatusIcon className="h-3 w-3" />
+                            {config.label}
+                          </Badge>
                         </div>
-                      </div>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      <div className="space-y-3">
-                        <div className="flex items-center space-x-2 text-sm"><Calendar className="h-4 w-4 text-muted-foreground" /><span>{formatDate(appointment.date)}</span></div>
-                        <div className="flex items-center space-x-2 text-sm"><Clock className="h-4 w-4 text-muted-foreground" /><span>{appointment.time.substring(0, 5)}</span></div>
-                      </div>
-                      {canCancelAppointment(appointment) && (<><Separator /><div className="flex justify-end">
-                        <ConfirmDialog
-                          title="Xác nhận hủy lịch hẹn?"
-                          description="Hành động này không thể hoàn tác. Bạn có chắc chắn muốn hủy lịch hẹn này không?"
-                          onConfirm={() => handleCancelAppointment(appointment.id)}
-                        >
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            disabled={isCancelling === appointment.id}
-                            className="text-destructive hover:text-destructive"
+
+                        {/* Date and Time */}
+                        <div className="grid grid-cols-2 gap-4 bg-muted/50 rounded-lg p-4">
+                          <div className="flex items-center gap-3">
+                            <Calendar className="h-5 w-5 text-primary" />
+                            <div>
+                              <p className="text-xs text-muted-foreground font-medium">Ngày</p>
+                              <p className="text-sm font-semibold">{formatDate(appointment.date)}</p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <Clock className="h-5 w-5 text-primary" />
+                            <div>
+                              <p className="text-xs text-muted-foreground font-medium">Giờ</p>
+                              <p className="text-sm font-semibold">{appointment.time.substring(0, 5)}</p>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Cancel Button */}
+                        {canCancelAppointment(appointment) && (
+                          <ConfirmDialog
+                            title="Xác nhận hủy lịch hẹn?"
+                            description="Hành động này không thể hoàn tác. Bạn có chắc chắn muốn hủy lịch hẹn này không?"
+                            onConfirm={() => handleCancelAppointment(appointment.id)}
                           >
-                            {isCancelling === appointment.id ? (
-                              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                            ) : (
-                              <Trash2 className="h-4 w-4 mr-2" />
-                            )}
-                            {isCancelling === appointment.id ? "Đang hủy..." : "Hủy lịch hẹn"}
-                          </Button>
-                        </ConfirmDialog>
-                      </div></>)}
+                            <Button
+                              variant="destructive"
+                              size="sm"
+                              disabled={isCancelling === appointment.id}
+                              className="w-full"
+                            >
+                              {isCancelling === appointment.id ? (
+                                <>
+                                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                  Đang hủy...
+                                </>
+                              ) : (
+                                <>
+                                  <Trash2 className="h-4 w-4 mr-2" />
+                                  Hủy lịch hẹn
+                                </>
+                              )}
+                            </Button>
+                          </ConfirmDialog>
+                        )}
+                      </div>
                     </CardContent>
                   </Card>
                 )
