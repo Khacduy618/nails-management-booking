@@ -19,9 +19,14 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
         staffServices: {
           with: {
             staff: {
+              with: {
+                user: {
+                  columns: { email: true }
+                }
+              },
               columns: {
                 id: true,
-                name: true,
+                position: true,
               }
             }
           }

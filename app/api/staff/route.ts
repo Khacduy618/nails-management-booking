@@ -1,7 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { db } from "@/db"
-import { staff } from "@/db/schema"
-import { asc, desc } from "drizzle-orm"
+import { staff, users } from "@/db/schema"
+import { asc, desc, eq } from "drizzle-orm"
 
 /**
  * GET /api/staff
@@ -18,68 +18,54 @@ export async function GET(request: NextRequest) {
 
     // Build ORDER BY
     let orderBy: any = desc(staff.createdAt)
-    if (sort === 'name') orderBy = asc(staff.name)
+    if (sort === 'name') orderBy = asc(users.email)
     else if (sort === 'joinDate') orderBy = desc(staff.joinDate)
     else if (sort === 'rating') orderBy = desc(staff.rating)
 
-    // Fetch only active staff
-    const data = await db
-      .select({
-        id: staff.id,
-        firstName: staff.name, // name contains both first and last name, or we split it
-        lastName: staff.name,  // In this case, will be empty or use the full name field
-        name: staff.name,
-        role: staff.position,
-        position: staff.position,
-        bio: staff.experience,
-        experience: staff.experience,
-        image: staff.avatarUrl,
-        avatarUrl: staff.avatarUrl,
-        specialties: staff.specialties,
-        rating: staff.rating,
-        phone: staff.phone,
-        email: staff.email,
-        status: staff.status,
-        joinDate: staff.joinDate,
-        createdAt: staff.createdAt,
-      })
-      .from(staff)
-      .where(() => {
-        // Only active staff
-        return undefined // No where clause - return all for now, can filter if needed
-      })
-      .orderBy(orderBy)
-      .limit(limit)
+    // Fetch only active staff with user relationship using query builder
+    const staffList = await db.query.staff.findMany({
+      with: {
+        user: true
+      },
+      orderBy: orderBy,
+      limit: limit,
+    })
 
-    console.log('[API] Got', data.length, 'staff records')
+    // Transform response to match expected format
+    const transformed = staffList.map(s => {
+      const email = s.user?.email || 'unknown@example.com'
+      const phone = s.user?.phone || ''
+      const namePrefix = email.split('@')[0]
 
-    // Transform data to match TeamSection component expectations
-    const transformedData = data.map((s) => ({
-      id: s.id,
-      firstName: s.name.split(' ')[0] || s.name,
-      lastName: s.name.split(' ').slice(1).join(' ') || '',
-      name: s.name,
-      role: s.position || 'Staff',
-      position: s.position || 'Staff',
-      bio: s.experience,
-      experience: s.experience,
-      image: s.avatarUrl,
-      avatarUrl: s.avatarUrl,
-      specialties: s.specialties || [],
-      rating: parseFloat(s.rating || '0'),
-      phone: s.phone || '',
-      email: s.email || '',
-      status: s.status,
-      joinDate: s.joinDate,
-      createdAt: s.createdAt,
-    }))
+      return {
+        id: s.id,
+        firstName: namePrefix,
+        lastName: '',
+        name: namePrefix,
+        role: s.position || 'Staff',
+        position: s.position || 'Staff',
+        bio: s.experience,
+        experience: s.experience,
+        image: s.avatarUrl,
+        avatarUrl: s.avatarUrl,
+        specialties: s.specialties || [],
+        rating: s.rating ? parseFloat(String(s.rating)) : 0,
+        phone: phone,
+        email: email,
+        status: s.status,
+        joinDate: s.joinDate,
+        createdAt: s.createdAt,
+      }
+    })
+
+    console.log('[API] Got', transformed.length, 'staff records')
 
     return NextResponse.json(
       {
         success: true,
-        data: transformedData,
+        data: transformed,
         meta: {
-          total: transformedData.length,
+          total: transformed.length,
           limit,
         },
       },

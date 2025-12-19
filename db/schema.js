@@ -22,11 +22,11 @@ const serviceStatusEnum = pgEnum('service_status', ['active', 'archived'])
 const payrollStatusEnum = pgEnum('payroll_status', ['pending', 'calculated', 'paid', 'cancelled'])
 const appointmentStatusEnum = pgEnum('appointment_status', ['pending', 'confirmed', 'completed', 'cancelled', 'in-progress'])
 
-// --- Bảng Users ---
+// --- Bảng Users (Authentication) ---
 export const users = pgTable('users', {
   id: serial('id').primaryKey(),
   name: varchar('name', { length: 255 }).notNull(),
-  email: varchar('email', { length: 255 }).unique(),
+  email: varchar('email', { length: 255 }).unique().notNull(),
   phone: varchar('phone', { length: 20 }).notNull().unique(),
   password: varchar('password', { length: 255 }),
   role: roleEnum('role').default('customer').notNull(),
@@ -37,9 +37,7 @@ export const users = pgTable('users', {
 // --- Bảng Staff (Nhân viên) ---
 export const staff = pgTable('staff', {
   id: serial('id').primaryKey(),
-  name: varchar('name', { length: 255 }).notNull(),
-  email: varchar('email', { length: 255 }).unique(),
-  phone: varchar('phone', { length: 20 }),
+  userId: integer('user_id').notNull().unique().references(() => users.id, { onDelete: 'cascade' }),
   position: varchar('position', { length: 100 }),
   specialties: jsonb('specialties'),
   experience: varchar('experience', { length: 50 }),
@@ -165,7 +163,8 @@ export const appointmentServices = pgTable('appointment_services', {
 })
 
 // --- RELATIONS ---
-export const usersRelations = relations(users, ({ many }) => ({
+export const usersRelations = relations(users, ({ one, many }) => ({
+  staff: one(staff),
   appointments: many(appointments),
 }))
 
@@ -174,6 +173,10 @@ export const customersRelations = relations(customers, ({ many }) => ({
 }))
 
 export const staffRelations = relations(staff, ({ many, one }) => ({
+  user: one(users, {
+    fields: [staff.userId],
+    references: [users.id],
+  }),
   staffServices: many(staffServices),
   staffSchedules: many(staffSchedules),
   staffBaseSalary: one(staffBaseSalaries),

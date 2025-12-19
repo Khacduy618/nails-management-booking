@@ -120,10 +120,13 @@ export async function POST(request: NextRequest) {
     const totalPrice = servicesSelected.reduce((sum, svc) => sum + Number(svc.price), 0)
     const appointmentEnd = addMinutes(appointmentStart, totalDuration)
 
+    const appointmentDateStr = format(appointmentStart, "yyyy-MM-dd")
+    const appointmentStartTimeStr = format(appointmentStart, "HH:mm:ss")
+    const appointmentEndTimeStr = format(appointmentEnd, "HH:mm:ss")
+
     logDebug('Computed appointment totals', { totalDuration, totalPrice, appointmentStart: appointmentStart.toISOString(), appointmentEnd: appointmentEnd.toISOString() })
 
     const commission = isBusinessHours(appointmentStart) ? 10 : 30
-    const existingEnd = sql`ADDTIME(${appointments.appointmentTime}, SEC_TO_TIME(${appointments.durationAtBooking} * 60))`
 
     const conflicting = await db
       .select({ id: appointments.id })
@@ -131,10 +134,10 @@ export async function POST(request: NextRequest) {
       .where(
         and(
           sql`${staffId} IN (SELECT ${appointmentServices.staffId} FROM ${appointmentServices} WHERE ${appointmentServices.appointmentId} = ${appointments.id})`,
-          sql`DATE(${appointments.appointmentDate}) = DATE(${format(appointmentStart, "yyyy-MM-dd")})`,
+          eq(appointments.appointmentDate, appointmentDateStr),
           not(eq(appointments.status, "cancelled")),
-          sql`${appointments.appointmentTime} < ${format(appointmentEnd, "HH:mm:ss")}`,
-          sql`${existingEnd} > ${format(appointmentStart, "HH:mm:ss")}`,
+          sql`${appointments.appointmentTime} < ${appointmentEndTimeStr}::time`,
+          sql`${appointments.appointmentTime} + (${appointments.durationAtBooking} * interval '1 minute') > ${appointmentStartTimeStr}::time`,
         ),
       )
 
@@ -153,7 +156,7 @@ export async function POST(request: NextRequest) {
       customerName,
       customerPhone: sanitizedPhone,
       notes,
-      appointmentDate: format(appointmentStart, 'yyyy-MM-dd'),
+      appointmentDate: appointmentDateStr,
       appointmentTime: time,
       status: 'pending' as const,
       priceAtBooking: totalPrice.toString(),
@@ -247,7 +250,13 @@ export async function POST(request: NextRequest) {
           appointmentServices: {
             with: {
               service: { columns: { name: true } },
-              staff: { columns: { name: true } },
+              staff: {
+                with: {
+                  user: {
+                    columns: { email: true, phone: true }
+                  }
+                }
+              },
             },
           },
         },
@@ -267,7 +276,7 @@ export async function POST(request: NextRequest) {
 
     // Send confirmation email if customer provided email
     if (customerEmail && createdAppointment) {
-      const staffName = createdAppointment.appointmentServices?.[0]?.staff?.name || 'Nhân viên'
+      const staffName = createdAppointment.appointmentServices?.[0]?.staff?.user?.email || 'Nhân viên'
       sendConfirmationEmail({
         appointmentId: createdAppointment.id,
         customerName,

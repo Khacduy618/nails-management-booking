@@ -44,6 +44,9 @@ export async function GET(request: NextRequest) {
 
     const totalDuration = servicesInfo.reduce((sum, svc) => sum + svc.duration, 0)
     const end = addMinutes(start, totalDuration)
+    const startDateStr = format(start, "yyyy-MM-dd")
+    const startTimeStr = format(start, "HH:mm:ss")
+    const endTimeStr = format(end, "HH:mm:ss")
 
     const capableStaffSubquery = db
       .select({ staffId: staffServices.staffId })
@@ -60,7 +63,6 @@ export async function GET(request: NextRequest) {
       return ok({ staff: [] })
     }
 
-    const existingEnd = sql`ADDTIME(${appointments.appointmentTime}, SEC_TO_TIME(${appointments.durationAtBooking} * 60))`
     const busyStaffQuery = db
       .selectDistinct({ staffId: appointmentServices.staffId })
       .from(appointmentServices)
@@ -68,10 +70,10 @@ export async function GET(request: NextRequest) {
       .where(
         and(
           inArray(appointmentServices.staffId, capableStaffIds),
-          sql`DATE(${appointments.appointmentDate}) = DATE(${format(start, "yyyy-MM-dd")})`,
+          eq(appointments.appointmentDate, startDateStr),
           not(eq(appointments.status, "cancelled")),
-          sql`${appointments.appointmentTime} < ${format(end, "HH:mm:ss")}`,
-          sql`${existingEnd} > ${format(start, "HH:mm:ss")}`,
+          sql`${appointments.appointmentTime} < ${endTimeStr}::time`,
+          sql`${appointments.appointmentTime} + (${appointments.durationAtBooking} * interval '1 minute') > ${startTimeStr}::time`,
         ),
       )
 
@@ -92,8 +94,11 @@ export async function GET(request: NextRequest) {
         staffSchedules: {
           where: eq(staffSchedules.dayOfWeek, dayOfWeek),
         },
+        user: {
+          columns: { name: true },
+        },
       },
-      columns: { id: true, name: true },
+      columns: { id: true },
     })
 
     // Lọc nhân viên có lịch làm hợp lệ
@@ -122,7 +127,7 @@ export async function GET(request: NextRequest) {
 
     const availableStaffDetails = staffWithValidSchedule.map((s) => ({
       id: s.id,
-      name: s.name,
+      name: s.user?.name ?? "", // return empty string if somehow missing, frontend can handle fallback
     }))
 
     return ok({ staff: availableStaffDetails })

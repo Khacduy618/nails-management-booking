@@ -1,16 +1,11 @@
 import { drizzle } from 'drizzle-orm/node-postgres'
 import { Pool } from 'pg'
-import * as dotenv from 'dotenv'
-import path from 'path'
-import { fileURLToPath } from 'url'
+import dotenv from 'dotenv'
 import * as schema from './schema.js'
 
-// Load .env files (check .env.local first, then .env)
-const __dirname = path.dirname(fileURLToPath(import.meta.url))
-const projectRoot = path.join(__dirname, '..')
-
-dotenv.config({ path: path.join(projectRoot, '.env.local') })
-dotenv.config({ path: path.join(projectRoot, '.env') })
+// Load env vars
+dotenv.config({ path: '.env.local' })
+dotenv.config({ path: '.env' })
 
 const fallbackUrl = (() => {
   const host = process.env.DATABASE_HOST

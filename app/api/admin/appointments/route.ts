@@ -1,7 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { appointments, appointmentServices, services, staff } from "@/db/schema";
-import { eq, and, inArray, sql, asc, desc, like, or, SQL, count} from "drizzle-orm";
+import { eq, and, inArray, sql, asc, desc, like, or, SQL, count } from "drizzle-orm";
 
 const validStatuses = appointments.status.enumValues;
 type AppointmentStatus = (typeof validStatuses)[number];
@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
     const conditions: (SQL | undefined)[] = [];
 
     if (date) {
-      conditions.push(eq(appointments.appointmentDate, new Date(date)));
+      conditions.push(eq(appointments.appointmentDate, date));
     }
 
     if (status && status !== "all" && validStatuses.includes(status as AppointmentStatus)) {
@@ -56,7 +56,18 @@ export async function GET(request: NextRequest) {
       db.query.appointments.findMany({
         where: whereClause,
         with: {
-          appointmentServices: { with: { service: { columns: { name: true } }, staff: { columns: { name: true } } } }
+          appointmentServices: {
+            with: {
+              service: { columns: { name: true } },
+              staff: {
+                with: {
+                  user: {
+                    columns: { email: true, phone: true }
+                  }
+                }
+              }
+            }
+          }
         },
         orderBy: [desc(appointments.appointmentDate), desc(appointments.appointmentTime)],
         limit: limit,

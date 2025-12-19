@@ -4,10 +4,17 @@
   "entries": [
     {
       "idx": 0,
-      "version": "7",
-      "when": 1766130553411,
+      "version": "5",
+      "when": 1713000000000,
       "tag": "0000_free_black_bolt",
-      "breakpoints": true
+      "contents": "initial schema setup"
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1713000100000,
+      "tag": "0001_add_user_id_to_staff",
+      "contents": "add userId FK to staff"
     }
   ]
 }

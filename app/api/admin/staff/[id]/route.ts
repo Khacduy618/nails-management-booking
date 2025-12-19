@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
-import { staff, appointments, appointmentServices, services, staffBaseSalaries } from "@/db/schema";
+import { staff, appointments, appointmentServices, services, staffBaseSalaries, users } from "@/db/schema";
 import { eq, count, sql } from "drizzle-orm";
 
 // --- GET: Lấy chi tiết nhân viên với lịch hẹn và thống kê ---
@@ -14,9 +14,19 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
       );
     }
 
-    // Get staff info
+    // Get staff info with user relationship
     const staffMember = await db.query.staff.findFirst({
       where: eq(staff.id, id),
+      with: {
+        user: {
+          columns: {
+            id: true,
+            email: true,
+            phone: true,
+            role: true,
+          }
+        }
+      }
     });
 
     if (!staffMember) {
@@ -59,9 +69,9 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
         } else {
           acc.push({
             id: row.id,
-            appointmentDate: row.appointmentDate instanceof Date
-              ? row.appointmentDate.toISOString().split('T')[0]
-              : row.appointmentDate,
+            appointmentDate: typeof row.appointmentDate === 'string'
+              ? row.appointmentDate
+              : new Date(row.appointmentDate as any).toISOString().split('T')[0],
             appointmentTime: row.appointmentTime,
             status: row.status,
             customerName: row.customerName,
@@ -146,48 +156,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 
     // ===== VALIDATION =====
 
-    // 1. Validate Name (required, string, 2-255 chars)
-    if (!body.name || typeof body.name !== 'string' || !body.name.trim()) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: { code: "VALIDATION_ERROR", message: "Tên nhân viên là bắt buộc" },
-        },
-        { status: 400 }
-      )
-    }
-    if (body.name.trim().length < 2 || body.name.trim().length > 255) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: { code: "VALIDATION_ERROR", message: "Tên nhân viên phải từ 2-255 ký tự" },
-        },
-        { status: 400 }
-      )
-    }
-
-    // 2. Validate Phone (required, string, 10-11 digits)
-    if (!body.phone || typeof body.phone !== 'string' || !body.phone.trim()) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: { code: "VALIDATION_ERROR", message: "Số điện thoại là bắt buộc" },
-        },
-        { status: 400 }
-      )
-    }
-    const phoneDigits = body.phone.replace(/\D/g, '')
-    if (!/^\d{10,11}$/.test(phoneDigits)) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: { code: "VALIDATION_ERROR", message: "Số điện thoại không hợp lệ (10-11 chữ số)" },
-        },
-        { status: 400 }
-      )
-    }
-
-    // 3. Validate Email (optional but must be valid string if provided)
+    // 1. Validate Email (optional but must be valid string if provided)
     if (body.email) {
       if (typeof body.email !== 'string') {
         return NextResponse.json(
@@ -221,7 +190,30 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
       }
     }
 
-    // 4. Validate Position (optional, must be string if provided)
+    // 2. Validate Phone (optional, string, 10-11 digits)
+    if (body.phone) {
+      if (typeof body.phone !== 'string') {
+        return NextResponse.json(
+          {
+            success: false,
+            error: { code: "VALIDATION_ERROR", message: "Số điện thoại phải là một chuỗi" },
+          },
+          { status: 400 }
+        )
+      }
+      const phoneDigits = body.phone.replace(/\D/g, '')
+      if (!/^\d{10,11}$/.test(phoneDigits)) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: { code: "VALIDATION_ERROR", message: "Số điện thoại không hợp lệ (10-11 chữ số)" },
+          },
+          { status: 400 }
+        )
+      }
+    }
+
+    // 3. Validate Position (optional, must be string if provided)
     if (body.position) {
       if (typeof body.position !== 'string') {
         return NextResponse.json(
@@ -243,7 +235,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
       }
     }
 
-    // 5. Validate Experience (optional, must be string if provided)
+    // 4. Validate Experience (optional, must be string if provided)
     if (body.experience) {
       if (typeof body.experience !== 'string') {
         return NextResponse.json(
@@ -265,7 +257,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
       }
     }
 
-    // 6. Validate BaseSalary (optional, must be a valid positive number if provided)
+    // 5. Validate BaseSalary (optional, must be a valid positive number if provided)
     if (body.baseSalary !== undefined && body.baseSalary !== null) {
       const salaryNum = Number(body.baseSalary)
       if (isNaN(salaryNum)) {
@@ -306,7 +298,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
       }
     }
 
-    // 7. Validate Specialties (optional, must be array if provided)
+    // 6. Validate Specialties (optional, must be array if provided)
     if (body.specialties !== undefined && body.specialties !== null) {
       if (!Array.isArray(body.specialties)) {
         return NextResponse.json(
@@ -340,7 +332,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
       }
     }
 
-    // 8. Validate avatarUrl (optional, must be string if provided)
+    // 7. Validate avatarUrl (optional, must be string if provided)
     if (body.avatarUrl && typeof body.avatarUrl !== 'string') {
       return NextResponse.json(
         {
@@ -351,27 +343,48 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
       )
     }
 
-    const updatedStaff = await db.transaction(async (tx) => {
-      const result = await tx
-        .update(staff)
-        .set({
-          name: body.name,
-          email: body.email || null,
-          phone: body.phone,
-          position: body.position || null,
-          specialties: body.specialties || null,
-          experience: body.experience || null,
-          avatarUrl: body.avatarUrl || null,
-        })
-        .where(eq(staff.id, id))
-        .returning();
+    // Get the staff member first
+    const existingStaff = await db.query.staff.findFirst({
+      where: eq(staff.id, id),
+      with: { user: true }
+    })
 
-      if (result.length === 0) {
-        return null;
+    if (!existingStaff) {
+      return NextResponse.json(
+        { success: false, error: { code: "NOT_FOUND", message: "Staff member not found" } },
+        { status: 404 }
+      );
+    }
+
+    const updatedStaff = await db.transaction(async (tx) => {
+      // Update user table if email or phone provided
+      if (body.email || body.phone) {
+        const userUpdateData: any = {}
+        if (body.email) userUpdateData.email = body.email
+        if (body.phone) userUpdateData.phone = body.phone
+
+        await tx
+          .update(users)
+          .set(userUpdateData)
+          .where(eq(users.id, existingStaff.userId))
+      }
+
+      // Update staff table
+      const staffUpdateData: any = {}
+      if (body.position !== undefined) staffUpdateData.position = body.position
+      if (body.specialties !== undefined) staffUpdateData.specialties = body.specialties
+      if (body.experience !== undefined) staffUpdateData.experience = body.experience
+      if (body.avatarUrl !== undefined) staffUpdateData.avatarUrl = body.avatarUrl
+
+      if (Object.keys(staffUpdateData).length > 0) {
+        await tx
+          .update(staff)
+          .set(staffUpdateData)
+          .where(eq(staff.id, id))
       }
 
       // Handle baseSalary if provided
-      if (body.baseSalary || body.baseSalary === 0) {
+      if (body.baseSalary !== undefined && body.baseSalary !== null) {
         const baseSalaryStr = String(body.baseSalary)
         const existing = await tx.query.staffBaseSalaries.findFirst({
           where: eq(staffBaseSalaries.staffId, id),
@@ -394,7 +407,10 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
         }
       }
 
-      return await tx.query.staff.findFirst({ where: eq(staff.id, id) });
+      return await tx.query.staff.findFirst({
+        where: eq(staff.id, id),
+        with: { user: true }
+      });
     });
 
     if (!updatedStaff) {

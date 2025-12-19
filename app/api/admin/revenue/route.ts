@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
-import { appointments, services, staff, appointmentServices } from "@/db/schema";
+import { appointments, services, staff, appointmentServices, users } from "@/db/schema";
 import { sql, sum, count, eq, and, gte, lte } from "drizzle-orm";
 import { parseISO, endOfDay } from "date-fns";
 
@@ -60,15 +60,17 @@ export async function GET(request: NextRequest) {
         // 3. Hiệu suất nhân viên
         const staffPerformance = await db
             .select({
-                staffName: staff.name,
+                staffName: users.email,
+                staffId: staff.id,
                 revenue: sql<number>`CAST(COALESCE(sum(${appointmentServices.priceAtBooking}), 0) AS DECIMAL(10,2))`.mapWith(Number),
                 appointments: sql<number>`count(distinct ${appointments.id})`.mapWith(Number),
             })
             .from(appointments)
             .innerJoin(appointmentServices, eq(appointments.id, appointmentServices.appointmentId))
             .leftJoin(staff, eq(appointmentServices.staffId, staff.id))
+            .leftJoin(users, eq(staff.userId, users.id))
             .where(and(eq(appointments.status, 'completed'), ...dateConditions))
-            .groupBy(staff.id, staff.name)
+            .groupBy(staff.id, users.email)
             .orderBy(sql`COALESCE(sum(${appointmentServices.priceAtBooking}), 0) desc`);
 
         // 4. Doanh thu theo ngày cho chart - GROUP BY date và SUM revenue
@@ -83,7 +85,7 @@ export async function GET(request: NextRequest) {
                 status: appointments.status,
                 serviceName: services.name,
                 staffId: staff.id,
-                staffName: staff.name,
+                staffName: users.email,
                 priceAtBooking: appointmentServices.priceAtBooking,
                 revenue: appointmentServices.priceAtBooking,
             })
@@ -91,6 +93,7 @@ export async function GET(request: NextRequest) {
             .leftJoin(appointmentServices, eq(appointments.id, appointmentServices.appointmentId))
             .leftJoin(services, eq(appointmentServices.serviceId, services.id))
             .leftJoin(staff, eq(appointmentServices.staffId, staff.id))
+            .leftJoin(users, eq(staff.userId, users.id))
             .where(and(eq(appointments.status, 'completed'), ...dateConditions))
             .orderBy(appointments.appointmentDate);
 

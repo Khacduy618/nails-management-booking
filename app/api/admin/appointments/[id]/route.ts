@@ -3,6 +3,16 @@ import { db } from "@/db";
 import { appointments } from "@/db/schema";
 import { eq } from "drizzle-orm";
 
+async function executeQuery<T>(query: any): Promise<T[]> {
+  if (query && typeof query.returning === "function") {
+    return query.returning();
+  }
+  if (query && typeof query.execute === "function") {
+    return query.execute();
+  }
+  return query as T[];
+}
+
 // --- GET: Lấy chi tiết một lịch hẹn ---
 export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
   try {
@@ -17,7 +27,13 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
         appointmentServices: {
           with: {
             service: { columns: { name: true } },
-            staff: { columns: { name: true } }
+            staff: {
+              with: {
+                user: {
+                  columns: { email: true, phone: true }
+                }
+              }
+            }
           }
         }
       }
@@ -49,11 +65,9 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
     if (status) updateData.status = status;
     if (notes !== undefined) updateData.notes = notes;
 
-    const result = await db
-      .update(appointments)
-      .set(updateData)
-      .where(eq(appointments.id, id))
-      .returning();
+    const updateQuery = db.update(appointments).set(updateData).where(eq(appointments.id, id))
+
+    const result = await executeQuery(updateQuery)
 
     if (result.length === 0) {
       return NextResponse.json({ success: false, error: "Appointment not found or no changes made" }, { status: 404 });
@@ -77,11 +91,9 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
     }
 
     // Thay vì db.delete, chúng ta dùng db.update để xóa mềm
-    const result = await db
-      .update(appointments)
-      .set({ status: 'cancelled' })
-      .where(eq(appointments.id, id))
-      .returning();
+    const deleteQuery = db.update(appointments).set({ status: 'cancelled' }).where(eq(appointments.id, id))
+
+    const result = await executeQuery(deleteQuery)
 
     if (result.length === 0) {
       return NextResponse.json({ success: false, error: "Appointment not found" }, { status: 404 });
