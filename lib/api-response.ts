@@ -11,6 +11,12 @@ export type ApiErrorCode =
   | "CONFLICT"
   | "NOT_FOUND"
   | "UNAUTHORIZED"
+  | "MISSING_FIELDS"
+  | "INVALID_STATUS"
+  | "TOO_LATE"
+  | "INVALID_OTP"
+  | "OTP_EXPIRED"
+  | "RATE_LIMITED"
 
 export function ok<T extends object>(payload: T, status = 200) {
   return NextResponse.json({ success: true, ...payload }, { status })

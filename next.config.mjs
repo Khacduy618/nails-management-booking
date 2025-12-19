@@ -2,30 +2,38 @@ import { withSentryConfig } from "@sentry/nextjs"
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
   typescript: {
     ignoreBuildErrors: true,
   },
   images: {
     unoptimized: true,
   },
+  serverExternalPackages: ['import-in-the-middle', 'require-in-the-middle'],
+  turbopack: {
+    root: '/Users/khacduy/Downloads/appointment-booking/nailsapp',
+  },
   async headers() {
+    // Development mode requires 'unsafe-eval' for HMR and debugging
+    const isDev = process.env.NODE_ENV === 'development'
+
     // Note: tune CSP to your script/style usage as needed
     const csp = [
       "default-src 'self'",
       "img-src 'self' data: blob:",
       "media-src 'self'",
-      "connect-src 'self' https: http:",
+      "connect-src 'self' https: http: ws: wss:", // Added ws/wss for dev server
       "style-src 'self' 'unsafe-inline'",
-      "script-src 'self' 'unsafe-inline'",
+      // Allow unsafe-eval in development for Next.js HMR
+      isDev
+        ? "script-src 'self' 'unsafe-inline' 'unsafe-eval'"
+        : "script-src 'self' 'unsafe-inline'",
       "font-src 'self' data:",
       "frame-ancestors 'none'",
       "object-src 'none'",
       "base-uri 'self'",
       "form-action 'self'",
     ].join('; ')
+
     return [
       {
         source: '/:path*',

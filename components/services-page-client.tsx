@@ -43,11 +43,11 @@
 //   const [priceRange, setPriceRange] = useState([0, 1000000]);
 //   const [currentPage, setCurrentPage] = useState(1);
 //   const [selectedDurations, setSelectedDurations] = useState<string[]>([]);
-  
+
 //   // Sử dụng debounce cho searchTerm và priceRange để tránh gọi API liên tục
 //   const debouncedSearchTerm = useDebounce(searchTerm, 500);
 //   const debouncedPriceRange = useDebounce(priceRange, 500);
-    
+
 //   // 2. useEffect gọi API, lắng nghe tất cả các thay đổi
 //   useEffect(() => {
 //     async function fetchServices() {
@@ -76,7 +76,7 @@
 //         params.append('duration', selectedDurations.join(','));
 //         }
 //         const url = `${apiUrl}services?${params.toString()}`;
-        
+
 //         const res = await fetch(url);
 //         if (!res.ok) {
 //           throw new Error("Không thể tải danh sách dịch vụ.");
@@ -151,7 +151,7 @@ export interface ApiService {
   duration: number;
   popular: boolean | null;
   imageUrl: string | null;
-  category?: { name: string } | null; 
+  category?: { name: string } | null;
 }
 
 export interface PaginationInfo {
@@ -162,9 +162,9 @@ export interface PaginationInfo {
 }
 
 interface FilterOptions {
-    categories: { id: number; name: string; count: number }[];
-    durations: { id: string; label: string; count: number }[];
-    priceRange: { min: number; max: number };
+  categories: { id: number; name: string; count: number }[];
+  durations: { id: string; label: string; count: number }[];
+  priceRange: { min: number; max: number };
 }
 
 export function ServicesPageClient() {
@@ -180,7 +180,7 @@ export function ServicesPageClient() {
   const [selectedDurations, setSelectedDurations] = useState<string[]>([]);
   const [priceRange, setPriceRange] = useState([0, 1000000]);
   const [currentPage, setCurrentPage] = useState(1);
-  
+
   // State cho các tùy chọn bộ lọc (để ràng buộc lẫn nhau)
   const [filterOptions, setFilterOptions] = useState<FilterOptions | null>(null);
   const [isMetaLoading, setIsMetaLoading] = useState(true);
@@ -197,7 +197,7 @@ export function ServicesPageClient() {
       setIsMetaLoading(true);
       setError(null);
 
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || '';
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || '/api/';
       const params = new URLSearchParams();
 
       // Xây dựng query params từ state
@@ -212,6 +212,9 @@ export function ServicesPageClient() {
       const servicesUrl = `${apiUrl}services?${params.toString()}`;
       const metaUrl = `${apiUrl}services-meta?${params.toString()}`;
 
+      console.log('Fetching services from:', servicesUrl);
+      console.log('Fetching meta from:', metaUrl);
+
       try {
         // Gọi cả 2 API song song để tăng tốc độ
         const [servicesRes, metaRes] = await Promise.all([
@@ -221,17 +224,17 @@ export function ServicesPageClient() {
 
         if (!servicesRes.ok) throw new Error("Không thể tải danh sách dịch vụ.");
         if (!metaRes.ok) throw new Error("Không thể tải dữ liệu bộ lọc.");
-        
+
         const servicesData = await servicesRes.json();
         const metaData = await metaRes.json();
 
         setServices(servicesData.data);
         setPagination(servicesData.pagination);
         setFilterOptions(metaData.meta);
-        
+
         // Cập nhật lại thanh trượt giá lần đầu tiên
         if (priceRange[0] === 0 && priceRange[1] === 1000000) {
-            setPriceRange([metaData.meta.priceRange.min, metaData.meta.priceRange.max]);
+          setPriceRange([metaData.meta.priceRange.min, metaData.meta.priceRange.max]);
         }
 
       } catch (err: any) {
@@ -247,8 +250,8 @@ export function ServicesPageClient() {
 
   // Hàm xử lý chung khi bộ lọc thay đổi, sẽ reset về trang 1
   const handleFilterChange = (setter: React.Dispatch<React.SetStateAction<any>>) => (value: any) => {
-      setter(value);
-      setCurrentPage(1); // Quan trọng: Reset về trang đầu tiên khi thay đổi bộ lọc
+    setter(value);
+    setCurrentPage(1); // Quan trọng: Reset về trang đầu tiên khi thay đổi bộ lọc
   };
 
   return (
@@ -265,7 +268,7 @@ export function ServicesPageClient() {
             onDurationChange={handleFilterChange(setSelectedDurations)}
             priceRange={priceRange}
             onPriceRangeChange={handleFilterChange(setPriceRange)}
-            
+
             // Props động được truyền xuống
             availableCategories={filterOptions?.categories}
             availableDurations={filterOptions?.durations}

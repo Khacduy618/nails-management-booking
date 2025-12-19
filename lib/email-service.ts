@@ -317,3 +317,31 @@ export async function sendConfirmationEmail(data: AppointmentEmailData) {
         return false
     }
 }
+
+export async function sendOTP(phone: string, code: string, customerName: string) {
+    try {
+        const message = `Mã OTP của bạn để hủy lịch hẹn: ${code}. Mã này có hiệu lực trong 5 phút. Đừng chia sẻ mã này với bất kỳ ai.`
+
+        console.log('[OTP] Sending OTP:', {
+            to: phone,
+            code,
+            customerName,
+            message,
+        })
+
+        // Placeholder for actual SMS sending
+        // In production, integrate with SMS service (Twilio, AWS SNS, etc.)
+        // await sendSMSViaService({
+        //   to: phone,
+        //   message: message,
+        // })
+
+        // For now, just log it (development only)
+        console.log('[OTP] OTP would be sent to:', phone, 'Code:', code)
+
+        return true
+    } catch (error) {
+        console.error('[OTP] Error sending OTP:', error)
+        throw error
+    }
+}
