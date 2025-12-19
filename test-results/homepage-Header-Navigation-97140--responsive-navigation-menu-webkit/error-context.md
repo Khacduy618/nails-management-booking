@@ -1,0 +1,166 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - banner [ref=e3]:
+      - generic [ref=e5]:
+        - link "KTs K.Tay Nails" [ref=e6]:
+          - /url: /
+          - generic [ref=e8]: KTs
+          - generic [ref=e9]: K.Tay Nails
+        - button [ref=e10]:
+          - img [ref=e11]
+    - main [ref=e12]:
+      - generic [ref=e15]:
+        - generic [ref=e16]:
+          - generic [ref=e17]:
+            - heading "Làm đẹp tự nhiên, chăm sóc chuyên nghiệp" [level=1] [ref=e18]
+            - paragraph [ref=e19]: Trải nghiệm dịch vụ làm đẹp cao cấp với đội ngũ chuyên gia giàu kinh nghiệm. Đặt lịch dễ dàng, không cần tài khoản.
+          - generic [ref=e20]:
+            - generic [ref=e21]:
+              - img [ref=e23]
+              - generic [ref=e26]:
+                - paragraph [ref=e27]: Dịch vụ cao cấp
+                - paragraph [ref=e28]: Chất lượng hàng đầu
+            - generic [ref=e29]:
+              - img [ref=e31]
+              - generic [ref=e34]:
+                - paragraph [ref=e35]: Đặt lịch nhanh
+                - paragraph [ref=e36]: Chỉ cần số điện thoại
+            - generic [ref=e37]:
+              - img [ref=e39]
+              - generic [ref=e44]:
+                - paragraph [ref=e45]: Đội ngũ chuyên nghiệp
+                - paragraph [ref=e46]: Kinh nghiệm 10+ năm
+          - generic [ref=e47]:
+            - link "Đặt lịch ngay" [ref=e48]:
+              - /url: /services
+            - link "Tra cứu lịch hẹn" [ref=e49]:
+              - /url: /lookup
+        - generic [ref=e50]:
+          - img "K.Tay Nails" [ref=e52]
+          - generic [ref=e54]:
+            - img [ref=e56]
+            - generic [ref=e59]:
+              - paragraph [ref=e60]: ...
+              - paragraph [ref=e61]: Tin tưởng & hài lòng
+      - generic [ref=e63]:
+        - generic [ref=e64]:
+          - heading "Dịch vụ nổi bật" [level=2] [ref=e65]
+          - paragraph [ref=e66]: Khám phá các dịch vụ được yêu thích nhất tại salon của chúng tôi
+        - link "Xem tất cả dịch vụ" [ref=e101]:
+          - /url: /services
+      - generic [ref=e103]:
+        - generic [ref=e104]:
+          - heading "Khách hàng nói gì về chúng tôi" [level=2] [ref=e105]
+          - paragraph [ref=e106]: Hàng nghìn khách hàng đã tin tưởng và hài lòng với dịch vụ của chúng tôi
+        - generic [ref=e107]:
+          - generic [ref=e109]:
+            - generic [ref=e110]:
+              - img [ref=e111]
+              - img [ref=e113]
+              - img [ref=e115]
+              - img [ref=e117]
+              - img [ref=e119]
+            - paragraph [ref=e121]: "\"Dịch vụ tuyệt vời! Tóc được cắt rất đẹp và phù hợp với khuôn mặt. Nhân viên thân thiện, chuyên nghiệp.\""
+            - generic [ref=e122]:
+              - img "Nguyễn Thị Lan" [ref=e123]
+              - generic [ref=e124]:
+                - paragraph [ref=e125]: Nguyễn Thị Lan
+                - paragraph [ref=e126]: Cắt tóc & Chăm sóc da
+          - generic [ref=e128]:
+            - generic [ref=e129]:
+              - img [ref=e130]
+              - img [ref=e132]
+              - img [ref=e134]
+              - img [ref=e136]
+              - img [ref=e138]
+            - paragraph [ref=e140]: "\"Không gian thư giãn, massage rất chuyên nghiệp. Sau buổi massage cảm thấy rất thoải mái và tràn đầy năng lượng.\""
+            - generic [ref=e141]:
+              - img "Trần Văn Minh" [ref=e142]
+              - generic [ref=e143]:
+                - paragraph [ref=e144]: Trần Văn Minh
+                - paragraph [ref=e145]: Massage thư giãn
+          - generic [ref=e147]:
+            - generic [ref=e148]:
+              - img [ref=e149]
+              - img [ref=e151]
+              - img [ref=e153]
+              - img [ref=e155]
+              - img [ref=e157]
+            - paragraph [ref=e159]: "\"Màu tóc đẹp đúng như mong muốn, không hề hư tổn tóc. Tư vấn rất tận tình và chu đáo.\""
+            - generic [ref=e160]:
+              - img "Lê Thị Hương" [ref=e161]
+              - generic [ref=e162]:
+                - paragraph [ref=e163]: Lê Thị Hương
+                - paragraph [ref=e164]: Nhuộm tóc
+          - generic [ref=e166]:
+            - generic [ref=e167]:
+              - img [ref=e168]
+              - img [ref=e170]
+              - img [ref=e172]
+              - img [ref=e174]
+              - img [ref=e176]
+            - paragraph [ref=e178]: "\"Lần đầu đến nhưng rất hài lòng. Thợ cắt tóc có tay nghề cao, hiểu được style mình muốn.\""
+            - generic [ref=e179]:
+              - img "Phạm Đức Anh" [ref=e180]
+              - generic [ref=e181]:
+                - paragraph [ref=e182]: Phạm Đức Anh
+                - paragraph [ref=e183]: Cắt tóc nam
+      - generic [ref=e186]:
+        - heading "Đội ngũ chuyên nghiệp" [level=2] [ref=e187]
+        - paragraph [ref=e188]: Gặp gỡ những chuyên gia giàu kinh nghiệm, tận tâm mang đến dịch vụ tốt nhất cho bạn
+    - contentinfo [ref=e214]:
+      - generic [ref=e215]:
+        - generic [ref=e216]:
+          - generic [ref=e217]:
+            - link "KTs K.Tay Nails" [ref=e218]:
+              - /url: /
+              - generic [ref=e220]: KTs
+              - generic [ref=e221]: K.Tay Nails
+            - paragraph [ref=e222]: Trung tâm làm đẹp cao cấp với dịch vụ chuyên nghiệp và đội ngũ giàu kinh nghiệm.
+            - generic [ref=e223]:
+              - link [ref=e224]:
+                - /url: "#"
+                - img [ref=e225]
+              - link [ref=e227]:
+                - /url: "#"
+                - img [ref=e228]
+              - link [ref=e231]:
+                - /url: "#"
+                - img [ref=e232]
+          - generic [ref=e235]:
+            - heading "Liên kết nhanh" [level=3] [ref=e236]
+            - navigation [ref=e237]:
+              - link "Trang chủ" [ref=e238]:
+                - /url: /
+              - link "Dịch vụ" [ref=e239]:
+                - /url: /services
+              - link "Tra cứu lịch hẹn" [ref=e240]:
+                - /url: /booking-search
+          - generic [ref=e241]:
+            - heading "Thông tin liên hệ" [level=3] [ref=e242]
+            - generic [ref=e243]:
+              - generic [ref=e244]:
+                - img [ref=e245]
+                - generic [ref=e247]: 0123 456 789
+              - generic [ref=e248]:
+                - img [ref=e249]
+                - generic [ref=e252]: info@serenitybeauty.vn
+              - generic [ref=e253]:
+                - img [ref=e254]
+                - generic [ref=e257]: 123 Đường ABC, Quận 1, TP.HCM
+          - generic [ref=e258]:
+            - heading "Giờ mở cửa" [level=3] [ref=e259]
+            - generic [ref=e261]:
+              - img [ref=e262]
+              - generic [ref=e265]:
+                - paragraph [ref=e266]: "Thứ 2 - Thứ 6: 8:00 - 20:00"
+                - paragraph [ref=e267]: "Thứ 7 - CN: 9:00 - 18:00"
+        - paragraph [ref=e269]: © 2024 Serenity Beauty. Tất cả quyền được bảo lưu.
+  - region "Notifications alt+T"
+  - button "Open Next.js Dev Tools" [ref=e275] [cursor=pointer]:
+    - img [ref=e276]
+  - alert [ref=e281]
+```

@@ -1,21 +1,32 @@
-import type { Config } from 'drizzle-kit';
-import * as dotenv from 'dotenv';
-dotenv.config({ path: '.env' });
+import type { Config } from 'drizzle-kit'
+import * as dotenv from 'dotenv'
+
+dotenv.config({ path: '.env.local' })
+dotenv.config({ path: '.env' })
+
+const fallbackUrl = (() => {
+  const host = process.env.DATABASE_HOST
+  const port = process.env.DATABASE_PORT || '5432'
+  const user = process.env.DATABASE_USER
+  const password = process.env.DATABASE_PASSWORD
+  const database = process.env.DATABASE_NAME
+
+  if (!host || !user || !password || !database) return undefined
+
+  return `postgresql://${encodeURIComponent(user)}:${encodeURIComponent(password)}@${host}:${port}/${database}`
+})()
+
+// For migrations, use DIRECT_URL (port 5432) to bypass connection pooler
+// For runtime queries, use DATABASE_URL (port 6543 with pgbouncer)
+const migrationUrl = process.env.DIRECT_URL || process.env.DATABASE_URL || fallbackUrl
 
 export default {
   schema: './db/*.js',
   out: './drizzle',
-  dialect: 'mysql', // <<-- SỬA Ở ĐÂY: Đổi 'driver' thành 'dialect'
-                      // <<-- SỬA Ở ĐÂY: Đổi giá trị từ "mysql2" thành "mysql"
+  dialect: 'postgresql',
   dbCredentials: {
-    host: process.env.DATABASE_HOST!,
-    port: parseInt(process.env.DATABASE_PORT!),
-    user: process.env.DATABASE_USER!,
-    password: process.env.DATABASE_PASSWORD!,
-    database: process.env.DATABASE_NAME!,
+    url: migrationUrl || '',
   },
-  // Thêm dòng này để drizzle-kit biết cần tìm file schema ở đâu khi chạy
-  // các lệnh khác ngoài generate.
   verbose: true,
   strict: true,
-} satisfies Config;
+} satisfies Config

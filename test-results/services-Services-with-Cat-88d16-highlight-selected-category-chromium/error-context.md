@@ -1,0 +1,318 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - banner [ref=e3]:
+      - generic [ref=e5]:
+        - link "KTs K.Tay Nails" [ref=e6] [cursor=pointer]:
+          - /url: /
+          - generic [ref=e8]: KTs
+          - generic [ref=e9]: K.Tay Nails
+        - navigation [ref=e10]:
+          - link "Trang chủ" [ref=e11] [cursor=pointer]:
+            - /url: /
+          - link "Dịch vụ" [ref=e12] [cursor=pointer]:
+            - /url: /services
+          - link "Tra cứu lịch hẹn" [ref=e13] [cursor=pointer]:
+            - /url: /lookup
+        - generic [ref=e14]:
+          - generic [ref=e15]:
+            - img [ref=e16]
+            - generic [ref=e18]: 0123 456 789
+          - link "Đặt lịch ngay" [ref=e19] [cursor=pointer]:
+            - /url: /book
+    - main [ref=e20]:
+      - generic [ref=e21]:
+        - generic [ref=e22]:
+          - heading "Dịch vụ làm đẹp" [level=1] [ref=e23]
+          - paragraph [ref=e24]: Khám phá đầy đủ các dịch vụ chăm sóc sức khỏe và làm đẹp chuyên nghiệp
+        - generic [ref=e26]:
+          - generic [ref=e28]:
+            - generic [ref=e29]:
+              - generic [ref=e31]: Tìm kiếm
+              - generic [ref=e33]:
+                - img [ref=e34]
+                - textbox "Tìm dịch vụ..." [ref=e37]
+            - generic [ref=e38]:
+              - generic [ref=e40]: Loại dịch vụ
+              - generic [ref=e41]:
+                - generic [ref=e42]:
+                  - generic [ref=e43]:
+                    - checkbox "Chăm Sóc Da Mặt" [ref=e44]
+                    - generic [ref=e45] [cursor=pointer]: Chăm Sóc Da Mặt
+                  - generic [ref=e46]: (6)
+                - generic [ref=e47]:
+                  - generic [ref=e48]:
+                    - checkbox "Làm Móng Tay" [ref=e49]
+                    - generic [ref=e50] [cursor=pointer]: Làm Móng Tay
+                  - generic [ref=e51]: (6)
+                - generic [ref=e52]:
+                  - generic [ref=e53]:
+                    - checkbox "Massage Thư Giãn" [ref=e54]
+                    - generic [ref=e55] [cursor=pointer]: Massage Thư Giãn
+                  - generic [ref=e56]: (5)
+                - generic [ref=e57]:
+                  - generic [ref=e58]:
+                    - checkbox "Nhuộm Tóc" [ref=e59]
+                    - generic [ref=e60] [cursor=pointer]: Nhuộm Tóc
+                  - generic [ref=e61]: (4)
+                - generic [ref=e62]:
+                  - generic [ref=e63]:
+                    - checkbox "Uốn Tóc" [ref=e64]
+                    - generic [ref=e65] [cursor=pointer]: Uốn Tóc
+                  - generic [ref=e66]: (4)
+                - generic [ref=e67]:
+                  - generic [ref=e68]:
+                    - checkbox "Làm Móng Chân" [ref=e69]
+                    - generic [ref=e70] [cursor=pointer]: Làm Móng Chân
+                  - generic [ref=e71]: (4)
+                - generic [ref=e72]:
+                  - generic [ref=e73]:
+                    - checkbox "Waxing & Tẩy Lông" [ref=e74]
+                    - generic [ref=e75] [cursor=pointer]: Waxing & Tẩy Lông
+                  - generic [ref=e76]: (4)
+                - generic [ref=e77]:
+                  - generic [ref=e78]:
+                    - checkbox "Trang Điểm" [ref=e79]
+                    - generic [ref=e80] [cursor=pointer]: Trang Điểm
+                  - generic [ref=e81]: (4)
+                - generic [ref=e82]:
+                  - generic [ref=e83]:
+                    - checkbox "Cắt Tóc Nam" [ref=e84]
+                    - generic [ref=e85] [cursor=pointer]: Cắt Tóc Nam
+                  - generic [ref=e86]: (3)
+                - generic [ref=e87]:
+                  - generic [ref=e88]:
+                    - checkbox "Cắt Tóc Nữ" [ref=e89]
+                    - generic [ref=e90] [cursor=pointer]: Cắt Tóc Nữ
+                  - generic [ref=e91]: (3)
+                - generic [ref=e92]:
+                  - generic [ref=e93]:
+                    - checkbox "Chăm Sóc Tóc" [ref=e94]
+                    - generic [ref=e95] [cursor=pointer]: Chăm Sóc Tóc
+                  - generic [ref=e96]: (3)
+            - generic [ref=e97]:
+              - generic [ref=e99]: Thời gian
+              - generic [ref=e100]:
+                - generic [ref=e101]:
+                  - generic [ref=e102]:
+                    - checkbox "Dưới 30 phút" [ref=e103]
+                    - generic [ref=e104] [cursor=pointer]: Dưới 30 phút
+                  - generic [ref=e105]: (2)
+                - generic [ref=e106]:
+                  - generic [ref=e107]:
+                    - checkbox "30 - 60 phút" [ref=e108]
+                    - generic [ref=e109] [cursor=pointer]: 30 - 60 phút
+                  - generic [ref=e110]: (19)
+                - generic [ref=e111]:
+                  - generic [ref=e112]:
+                    - checkbox "60 - 90 phút" [ref=e113]
+                    - generic [ref=e114] [cursor=pointer]: 60 - 90 phút
+                  - generic [ref=e115]: (14)
+                - generic [ref=e116]:
+                  - generic [ref=e117]:
+                    - checkbox "Trên 90 phút" [ref=e118]
+                    - generic [ref=e119] [cursor=pointer]: Trên 90 phút
+                  - generic [ref=e120]: (11)
+            - generic [ref=e121]:
+              - generic [ref=e123]: Khoảng giá
+              - generic [ref=e124]:
+                - generic [ref=e125]:
+                  - slider "Minimum" [ref=e129]
+                  - slider "Maximum" [ref=e131]
+                - generic [ref=e132]:
+                  - generic [ref=e133]: 100.000đ
+                  - generic [ref=e134]: 500.000đ
+          - generic [ref=e136]:
+            - generic [ref=e137]:
+              - paragraph [ref=e139]: Hiển thị 1-6 trong 46 dịch vụ
+              - generic [ref=e140]:
+                - button "Lưới" [ref=e141]
+                - button "Danh sách" [ref=e142]
+            - generic [ref=e143]:
+              - generic [ref=e145]:
+                - img "Nhuộm Lông Mày" [ref=e147]
+                - generic [ref=e148]:
+                  - generic [ref=e150]:
+                    - generic [ref=e151]:
+                      - generic [ref=e152]: Nhuộm Lông Mày
+                      - generic [ref=e153]: Phổ biến
+                    - paragraph [ref=e154]: 200.000đ
+                  - generic [ref=e155]:
+                    - generic [ref=e156]: Nhuộm và định hình lông mày
+                    - generic [ref=e158]:
+                      - img [ref=e159]
+                      - generic [ref=e162]: 45 phút
+                    - button "Đặt lịch ngay" [ref=e163]:
+                      - img
+                      - text: Đặt lịch ngay
+              - generic [ref=e165]:
+                - img "Trang Điểm Cô Dâu" [ref=e167]
+                - generic [ref=e168]:
+                  - generic [ref=e170]:
+                    - generic [ref=e171]:
+                      - generic [ref=e172]: Trang Điểm Cô Dâu
+                      - generic [ref=e173]: Phổ biến
+                    - paragraph [ref=e174]: 500.000đ
+                  - generic [ref=e175]:
+                    - generic [ref=e176]: Trang điểm cô dâu hoàn hảo
+                    - generic [ref=e178]:
+                      - img [ref=e179]
+                      - generic [ref=e182]: 90 phút
+                    - button "Đặt lịch ngay" [ref=e183]:
+                      - img
+                      - text: Đặt lịch ngay
+              - generic [ref=e185]:
+                - img "Trang Điểm Cá Nhân" [ref=e187]
+                - generic [ref=e188]:
+                  - generic [ref=e190]:
+                    - generic [ref=e191]:
+                      - generic [ref=e192]: Trang Điểm Cá Nhân
+                      - generic [ref=e193]: Phổ biến
+                    - paragraph [ref=e194]: 350.000đ
+                  - generic [ref=e195]:
+                    - generic [ref=e196]: Trang điểm theo yêu cầu
+                    - generic [ref=e198]:
+                      - img [ref=e199]
+                      - generic [ref=e202]: 60 phút
+                    - button "Đặt lịch ngay" [ref=e203]:
+                      - img
+                      - text: Đặt lịch ngay
+              - generic [ref=e205]:
+                - img "Tẩy Lông Toàn Thân" [ref=e207]
+                - generic [ref=e208]:
+                  - generic [ref=e210]:
+                    - generic [ref=e211]:
+                      - generic [ref=e212]: Tẩy Lông Toàn Thân
+                      - generic [ref=e213]: Phổ biến
+                    - paragraph [ref=e214]: 500.000đ
+                  - generic [ref=e215]:
+                    - generic [ref=e216]: Tẩy lông toàn bộ cơ thể
+                    - generic [ref=e218]:
+                      - img [ref=e219]
+                      - generic [ref=e222]: 120 phút
+                    - button "Đặt lịch ngay" [ref=e223]:
+                      - img
+                      - text: Đặt lịch ngay
+              - generic [ref=e225]:
+                - img "Tẩy Lông Chân" [ref=e227]
+                - generic [ref=e228]:
+                  - generic [ref=e230]:
+                    - generic [ref=e231]:
+                      - generic [ref=e232]: Tẩy Lông Chân
+                      - generic [ref=e233]: Phổ biến
+                    - paragraph [ref=e234]: 250.000đ
+                  - generic [ref=e235]:
+                    - generic [ref=e236]: Tẩy lông chân hoàn toàn
+                    - generic [ref=e238]:
+                      - img [ref=e239]
+                      - generic [ref=e242]: 60 phút
+                    - button "Đặt lịch ngay" [ref=e243]:
+                      - img
+                      - text: Đặt lịch ngay
+              - generic [ref=e245]:
+                - img "Tẩy Lông Tay" [ref=e247]
+                - generic [ref=e248]:
+                  - generic [ref=e250]:
+                    - generic [ref=e251]:
+                      - generic [ref=e252]: Tẩy Lông Tay
+                      - generic [ref=e253]: Phổ biến
+                    - paragraph [ref=e254]: 150.000đ
+                  - generic [ref=e255]:
+                    - generic [ref=e256]: Tẩy lông tay hoàn toàn
+                    - generic [ref=e258]:
+                      - img [ref=e259]
+                      - generic [ref=e262]: 45 phút
+                    - button "Đặt lịch ngay" [ref=e263]:
+                      - img
+                      - text: Đặt lịch ngay
+            - navigation "pagination" [ref=e265]:
+              - list [ref=e266]:
+                - listitem [ref=e267]:
+                  - link "Go to previous page":
+                    - /url: "#"
+                    - img
+                    - generic: Previous
+                - listitem [ref=e268]:
+                  - link "1" [ref=e269] [cursor=pointer]:
+                    - /url: "#"
+                - listitem [ref=e270]:
+                  - link "2" [ref=e271] [cursor=pointer]:
+                    - /url: "#"
+                - listitem [ref=e272]:
+                  - link "3" [ref=e273] [cursor=pointer]:
+                    - /url: "#"
+                - listitem [ref=e274]:
+                  - link "4" [ref=e275] [cursor=pointer]:
+                    - /url: "#"
+                - listitem [ref=e276]:
+                  - link "5" [ref=e277] [cursor=pointer]:
+                    - /url: "#"
+                - listitem [ref=e278]:
+                  - link "6" [ref=e279] [cursor=pointer]:
+                    - /url: "#"
+                - listitem [ref=e280]:
+                  - link "7" [ref=e281] [cursor=pointer]:
+                    - /url: "#"
+                - listitem [ref=e282]:
+                  - link "8" [ref=e283] [cursor=pointer]:
+                    - /url: "#"
+                - listitem [ref=e284]:
+                  - link "Go to next page" [ref=e285] [cursor=pointer]:
+                    - /url: "#"
+                    - generic [ref=e286]: Next
+                    - img
+    - contentinfo [ref=e287]:
+      - generic [ref=e288]:
+        - generic [ref=e289]:
+          - generic [ref=e290]:
+            - link "KTs K.Tay Nails" [ref=e291] [cursor=pointer]:
+              - /url: /
+              - generic [ref=e293]: KTs
+              - generic [ref=e294]: K.Tay Nails
+            - paragraph [ref=e295]: Trung tâm làm đẹp cao cấp với dịch vụ chuyên nghiệp và đội ngũ giàu kinh nghiệm.
+            - generic [ref=e296]:
+              - link [ref=e297] [cursor=pointer]:
+                - /url: "#"
+                - img [ref=e298]
+              - link [ref=e300] [cursor=pointer]:
+                - /url: "#"
+                - img [ref=e301]
+              - link [ref=e304] [cursor=pointer]:
+                - /url: "#"
+                - img [ref=e305]
+          - generic [ref=e308]:
+            - heading "Liên kết nhanh" [level=3] [ref=e309]
+            - navigation [ref=e310]:
+              - link "Trang chủ" [ref=e311] [cursor=pointer]:
+                - /url: /
+              - link "Dịch vụ" [ref=e312] [cursor=pointer]:
+                - /url: /services
+              - link "Tra cứu lịch hẹn" [ref=e313] [cursor=pointer]:
+                - /url: /booking-search
+          - generic [ref=e314]:
+            - heading "Thông tin liên hệ" [level=3] [ref=e315]
+            - generic [ref=e316]:
+              - generic [ref=e317]:
+                - img [ref=e318]
+                - generic [ref=e320]: 0123 456 789
+              - generic [ref=e321]:
+                - img [ref=e322]
+                - generic [ref=e325]: info@serenitybeauty.vn
+              - generic [ref=e326]:
+                - img [ref=e327]
+                - generic [ref=e330]: 123 Đường ABC, Quận 1, TP.HCM
+          - generic [ref=e331]:
+            - heading "Giờ mở cửa" [level=3] [ref=e332]
+            - generic [ref=e334]:
+              - img [ref=e335]
+              - generic [ref=e338]:
+                - paragraph [ref=e339]: "Thứ 2 - Thứ 6: 8:00 - 20:00"
+                - paragraph [ref=e340]: "Thứ 7 - CN: 9:00 - 18:00"
+        - paragraph [ref=e342]: © 2024 Serenity Beauty. Tất cả quyền được bảo lưu.
+  - region "Notifications alt+T"
+  - button "Open Next.js Dev Tools" [ref=e348] [cursor=pointer]:
+    - img [ref=e349]
+  - alert [ref=e352]
+```

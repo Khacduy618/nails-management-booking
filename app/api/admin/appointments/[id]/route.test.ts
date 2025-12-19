@@ -70,15 +70,14 @@ describe("/api/admin/appointments/[id]", () => {
   })
 
   it("returns 404 when updating missing appointment", async () => {
-    updateWhereMock.mockResolvedValueOnce([{ affectedRows: 0 }])
+    updateWhereMock.mockResolvedValueOnce([])
     const res = await PUT(createRequest("PUT", { status: "confirmed" }), { params: { id: "1" } })
     expect(res.status).toBe(404)
   })
 
   it("updates appointment and returns refreshed data", async () => {
-    updateWhereMock.mockResolvedValueOnce([{ affectedRows: 1 }])
     const updatedAppointment = { id: 1, status: "confirmed" }
-    findFirstMock.mockResolvedValueOnce(updatedAppointment)
+    updateWhereMock.mockResolvedValueOnce([updatedAppointment])
     const res = await PUT(createRequest("PUT", { status: "confirmed" }), { params: { id: "1" } })
     expect(res.status).toBe(200)
     const body = await res.json()
@@ -91,13 +90,13 @@ describe("/api/admin/appointments/[id]", () => {
   })
 
   it("returns 404 when cancelling missing appointment", async () => {
-    updateWhereMock.mockResolvedValueOnce([{ affectedRows: 0 }])
+    updateWhereMock.mockResolvedValueOnce([])
     const res = await DELETE(createRequest("DELETE"), { params: { id: "1" } })
     expect(res.status).toBe(404)
   })
 
   it("cancels appointment successfully", async () => {
-    updateWhereMock.mockResolvedValueOnce([{ affectedRows: 1 }])
+    updateWhereMock.mockResolvedValueOnce([{ id: 1, status: 'cancelled' }])
     const res = await DELETE(createRequest("DELETE"), { params: { id: "1" } })
     expect(res.status).toBe(200)
     const body = await res.json()

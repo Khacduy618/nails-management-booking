@@ -1,0 +1,112 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - banner [ref=e3]:
+      - generic [ref=e5]:
+        - link "KTs K.Tay Nails" [ref=e6] [cursor=pointer]:
+          - /url: /
+          - generic [ref=e8]: KTs
+          - generic [ref=e9]: K.Tay Nails
+        - navigation [ref=e10]:
+          - link "Trang chủ" [ref=e11] [cursor=pointer]:
+            - /url: /
+          - link "Dịch vụ" [ref=e12] [cursor=pointer]:
+            - /url: /services
+          - link "Tra cứu lịch hẹn" [ref=e13] [cursor=pointer]:
+            - /url: /lookup
+        - generic [ref=e14]:
+          - generic [ref=e15]:
+            - img [ref=e16]
+            - generic [ref=e18]: 0123 456 789
+          - link "Đặt lịch ngay" [ref=e19] [cursor=pointer]:
+            - /url: /book
+    - main [ref=e20]:
+      - generic [ref=e21]:
+        - generic [ref=e22]:
+          - heading "Tra cứu lịch hẹn" [level=1] [ref=e23]
+          - paragraph [ref=e24]: Nhập số điện thoại để xem và quản lý các lịch hẹn đã đặt của bạn
+        - generic [ref=e26]:
+          - generic [ref=e27]:
+            - generic [ref=e28]:
+              - generic [ref=e29]:
+                - img [ref=e30]
+                - generic [ref=e33]: Tra cứu lịch hẹn
+              - generic [ref=e34]: Nhập số điện thoại để kiểm tra lịch hẹn của bạn
+            - generic [ref=e36]:
+              - generic [ref=e37]: Số điện thoại
+              - generic [ref=e38]:
+                - textbox "Số điện thoại" [ref=e39]:
+                  - /placeholder: Nhập số điện thoại
+                  - text: "9999999999"
+                - button "Đang tìm..." [disabled]:
+                  - img
+                  - generic: Đang tìm...
+          - generic [ref=e42]:
+            - img [ref=e43]
+            - generic [ref=e45]:
+              - paragraph [ref=e46]: Lưu ý quan trọng
+              - list [ref=e47]:
+                - listitem [ref=e48]: • Chỉ có thể hủy lịch hẹn trước 2 giờ so với thời gian đặt
+                - listitem [ref=e49]: • Hủy lịch hẹn cần xác thực bằng mã OTP được gửi tới số điện thoại
+                - listitem [ref=e50]: • Liên hệ trực tiếp với cửa hàng nếu cần thay đổi lịch hẹn
+                - listitem [ref=e51]: • Vui lòng đến đúng giờ để đảm bảo chất lượng dịch vụ
+    - contentinfo [ref=e52]:
+      - generic [ref=e53]:
+        - generic [ref=e54]:
+          - generic [ref=e55]:
+            - link "KTs K.Tay Nails" [ref=e56] [cursor=pointer]:
+              - /url: /
+              - generic [ref=e58]: KTs
+              - generic [ref=e59]: K.Tay Nails
+            - paragraph [ref=e60]: Trung tâm làm đẹp cao cấp với dịch vụ chuyên nghiệp và đội ngũ giàu kinh nghiệm.
+            - generic [ref=e61]:
+              - link [ref=e62] [cursor=pointer]:
+                - /url: "#"
+                - img [ref=e63]
+              - link [ref=e65] [cursor=pointer]:
+                - /url: "#"
+                - img [ref=e66]
+              - link [ref=e69] [cursor=pointer]:
+                - /url: "#"
+                - img [ref=e70]
+          - generic [ref=e73]:
+            - heading "Liên kết nhanh" [level=3] [ref=e74]
+            - navigation [ref=e75]:
+              - link "Trang chủ" [ref=e76] [cursor=pointer]:
+                - /url: /
+              - link "Dịch vụ" [ref=e77] [cursor=pointer]:
+                - /url: /services
+              - link "Tra cứu lịch hẹn" [ref=e78] [cursor=pointer]:
+                - /url: /booking-search
+          - generic [ref=e79]:
+            - heading "Thông tin liên hệ" [level=3] [ref=e80]
+            - generic [ref=e81]:
+              - generic [ref=e82]:
+                - img [ref=e83]
+                - generic [ref=e85]: 0123 456 789
+              - generic [ref=e86]:
+                - img [ref=e87]
+                - generic [ref=e90]: info@serenitybeauty.vn
+              - generic [ref=e91]:
+                - img [ref=e92]
+                - generic [ref=e95]: 123 Đường ABC, Quận 1, TP.HCM
+          - generic [ref=e96]:
+            - heading "Giờ mở cửa" [level=3] [ref=e97]
+            - generic [ref=e99]:
+              - img [ref=e100]
+              - generic [ref=e103]:
+                - paragraph [ref=e104]: "Thứ 2 - Thứ 6: 8:00 - 20:00"
+                - paragraph [ref=e105]: "Thứ 7 - CN: 9:00 - 18:00"
+        - paragraph [ref=e107]: © 2024 Serenity Beauty. Tất cả quyền được bảo lưu.
+  - region "Notifications alt+T"
+  - button "Open Next.js Dev Tools" [ref=e113] [cursor=pointer]:
+    - generic [ref=e116]:
+      - text: Compiling
+      - generic [ref=e117]:
+        - generic [ref=e118]: .
+        - generic [ref=e119]: .
+        - generic [ref=e120]: .
+  - alert [ref=e121]
+```

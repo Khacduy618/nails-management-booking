@@ -352,7 +352,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
     }
 
     const updatedStaff = await db.transaction(async (tx) => {
-      const [result] = (await tx
+      const result = await tx
         .update(staff)
         .set({
           name: body.name,
@@ -363,9 +363,10 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
           experience: body.experience || null,
           avatarUrl: body.avatarUrl || null,
         })
-        .where(eq(staff.id, id))) as unknown as [{ affectedRows: number }];
+        .where(eq(staff.id, id))
+        .returning();
 
-      if (result.affectedRows === 0) {
+      if (result.length === 0) {
         return null;
       }
 
@@ -440,15 +441,16 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
     }
 
     const updatedStaff = await db.transaction(async (tx) => {
-      const [result] = (await tx
+      const result = await tx
         .update(staff)
         .set({ status: body.status })
-        .where(eq(staff.id, id))) as unknown as [{ affectedRows: number }];
+        .where(eq(staff.id, id))
+        .returning();
 
-      if (result.affectedRows === 0) {
+      if (result.length === 0) {
         return null;
       }
-      return await tx.query.staff.findFirst({ where: eq(staff.id, id) });
+      return result[0];
     });
 
     if (!updatedStaff) {

@@ -1,34 +1,43 @@
-// import { drizzle } from 'drizzle-orm/mysql2';
-// import mysql from 'mysql2/promise';
-// import * as schema from './schema.js';
+import { drizzle } from 'drizzle-orm/node-postgres'
+import { Pool } from 'pg'
+import * as dotenv from 'dotenv'
+import path from 'path'
+import { fileURLToPath } from 'url'
+import * as schema from './schema.js'
 
-// const pool = mysql.createPool({
-//   host: process.env.DATABASE_HOST,
-//   port: parseInt(process.env.DATABASE_PORT || '3306'),
-//   user: process.env.DATABASE_USER,
-//   password: process.env.DATABASE_PASSWORD,
-//   database: process.env.DATABASE_NAME,
-//   waitForConnections: true,
-//   connectionLimit: 10,
-//   queueLimit: 0,
-// });
+// Load .env files (check .env.local first, then .env)
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
+const projectRoot = path.join(__dirname, '..')
 
-// export const db = drizzle(pool, { schema, mode: 'default' });
-import { drizzle } from 'drizzle-orm/mysql2';
-import mysql from 'mysql2/promise';
-import * as schema from './schema.js';
+dotenv.config({ path: path.join(projectRoot, '.env.local') })
+dotenv.config({ path: path.join(projectRoot, '.env') })
 
-// Xây dựng chuỗi kết nối từ biến môi trường
-const connectionString = `mysql://${process.env.DATABASE_USER}:${process.env.DATABASE_PASSWORD}@${process.env.DATABASE_HOST}:${process.env.DATABASE_PORT}/${process.env.DATABASE_NAME}`;
+const fallbackUrl = (() => {
+  const host = process.env.DATABASE_HOST
+  const port = process.env.DATABASE_PORT || '5432'
+  const user = process.env.DATABASE_USER
+  const password = process.env.DATABASE_PASSWORD
+  const database = process.env.DATABASE_NAME
 
-// Tạo một kết nối duy nhất thay vì pool
-const connection = mysql.createPool({
-  uri: connectionString,
-  waitForConnections: true,
-  connectionLimit: 10, // Giữ nguyên giới hạn này
-  queueLimit: 0,
-  timezone: '+07:00', // Timezone cho Việt Nam (HCM)
-});
+  if (!host || !user || !password || !database) return undefined
 
-// Truyền pool vào Drizzle
-export const db = drizzle(connection, { schema, mode: 'default' });
+  return `postgresql://${encodeURIComponent(user)}:${encodeURIComponent(password)}@${host}:${port}/${database}`
+})()
+
+const connectionString = process.env.DATABASE_URL || fallbackUrl
+
+if (!connectionString) {
+  throw new Error('DATABASE_URL hoặc thông tin host/port/user/password/database chưa được cấu hình')
+}
+
+const pool = new Pool({
+  connectionString,
+  ssl: process.env.PGSSL_DISABLE === 'true' ? false : { rejectUnauthorized: false },
+})
+
+// Set timezone to Vietnam (UTC+7) for all connections
+pool.on('connect', (client) => {
+  client.query('SET timezone = "Asia/Ho_Chi_Minh"')
+})
+
+export const db = drizzle(pool, { schema })

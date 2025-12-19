@@ -270,8 +270,8 @@ export async function POST(request: NextRequest) {
 
       // Get the staff ID from the insert result
       const staffId = Array.isArray(staffResult) && staffResult.length > 0
-        ? (staffResult as any[])[0].id
-        : (staffResult as any).insertId
+        ? staffResult[0].id
+        : undefined
 
       console.log('[API] Staff insert result:', { staffResult, staffId })
 

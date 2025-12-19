@@ -2,7 +2,6 @@ import { type NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { services, staffServices } from "@/db/schema";
 import { eq } from "drizzle-orm";
-import { OkPacket } from "mysql2";
 
 // --- GET: Lấy chi tiết một dịch vụ ---
 export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
@@ -45,22 +44,14 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
 export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const id = Number.parseInt(params.id);
-     if (isNaN(id)) {
+    if (isNaN(id)) {
       return NextResponse.json({ error: "Invalid service ID" }, { status: 400 });
     }
-    
+
     const body = await request.json();
     const { staffIds, ...serviceData } = body;
 
     const updatedService = await db.transaction(async (tx) => {
-      // const [result] = (await tx
-      //   .update(services)
-      //   .set(body)
-      //   .where(eq(services.id, id))) as unknown as [{ affectedRows: number }];
-
-      // if (result.affectedRows === 0) {
-      //   return null;
-      // }
       await tx.update(services).set(serviceData).where(eq(services.id, id));
 
       // 2. Cập nhật bảng staff_services: Xóa liên kết cũ, thêm liên kết mới
@@ -75,7 +66,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
       }
       return await tx.query.services.findFirst({ where: eq(services.id, id) });
     });
-    
+
     if (!updatedService) {
       return NextResponse.json({ error: "Service not found" }, { status: 404 });
     }
@@ -96,12 +87,13 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
     }
 
     // Thay vì db.delete, chúng ta dùng db.update
-    const [result] = (await db
+    const result = await db
       .update(services)
       .set({ status: 'archived' }) // Chuyển trạng thái thành 'archived'
-      .where(eq(services.id, id))) as unknown as [{ affectedRows: number }];
+      .where(eq(services.id, id))
+      .returning();
 
-    if (result.affectedRows === 0) {
+    if (result.length === 0) {
       return NextResponse.json({ success: false, error: "Service not found" }, { status: 404 });
     }
 

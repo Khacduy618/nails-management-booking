@@ -1,0 +1,269 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - banner [ref=e3]:
+      - generic [ref=e5]:
+        - link "KTs K.Tay Nails" [ref=e6] [cursor=pointer]:
+          - /url: /
+          - generic [ref=e8]: KTs
+          - generic [ref=e9]: K.Tay Nails
+        - navigation [ref=e10]:
+          - link "Trang chủ" [ref=e11] [cursor=pointer]:
+            - /url: /
+          - link "Dịch vụ" [ref=e12] [cursor=pointer]:
+            - /url: /services
+          - link "Tra cứu lịch hẹn" [ref=e13] [cursor=pointer]:
+            - /url: /lookup
+        - generic [ref=e14]:
+          - generic [ref=e15]:
+            - img [ref=e16]
+            - generic [ref=e18]: 0123 456 789
+          - link "Đặt lịch ngay" [ref=e19] [cursor=pointer]:
+            - /url: /book
+    - main [ref=e20]:
+      - generic [ref=e23]:
+        - generic [ref=e24]:
+          - generic [ref=e25]:
+            - heading "Làm đẹp tự nhiên, chăm sóc chuyên nghiệp" [level=1] [ref=e26]
+            - paragraph [ref=e27]: Trải nghiệm dịch vụ làm đẹp cao cấp với đội ngũ chuyên gia giàu kinh nghiệm. Đặt lịch dễ dàng, không cần tài khoản.
+          - generic [ref=e28]:
+            - generic [ref=e29]:
+              - img [ref=e31]
+              - generic [ref=e34]:
+                - paragraph [ref=e35]: Dịch vụ cao cấp
+                - paragraph [ref=e36]: Chất lượng hàng đầu
+            - generic [ref=e37]:
+              - img [ref=e39]
+              - generic [ref=e42]:
+                - paragraph [ref=e43]: Đặt lịch nhanh
+                - paragraph [ref=e44]: Chỉ cần số điện thoại
+            - generic [ref=e45]:
+              - img [ref=e47]
+              - generic [ref=e52]:
+                - paragraph [ref=e53]: Đội ngũ chuyên nghiệp
+                - paragraph [ref=e54]: Kinh nghiệm 10+ năm
+          - generic [ref=e55]:
+            - link "Đặt lịch ngay" [ref=e56] [cursor=pointer]:
+              - /url: /services
+            - link "Tra cứu lịch hẹn" [ref=e57] [cursor=pointer]:
+              - /url: /lookup
+        - generic [ref=e58]:
+          - img "K.Tay Nails" [ref=e60]
+          - generic [ref=e62]:
+            - img [ref=e64]
+            - generic [ref=e67]:
+              - paragraph [ref=e68]: 1000+ khách hàng
+              - paragraph [ref=e69]: Tin tưởng & hài lòng
+      - generic [ref=e71]:
+        - generic [ref=e72]:
+          - heading "Dịch vụ nổi bật" [level=2] [ref=e73]
+          - paragraph [ref=e74]: Khám phá các dịch vụ được yêu thích nhất tại salon của chúng tôi
+        - generic [ref=e75]:
+          - generic [ref=e76]:
+            - generic [ref=e77]: Nổi bật
+            - generic [ref=e78]:
+              - img [ref=e80]
+              - generic [ref=e83]: Nhuộm Lông Mày
+            - generic [ref=e84]:
+              - generic [ref=e85]: Nhuộm và định hình lông mày
+              - generic [ref=e86]:
+                - generic [ref=e87]:
+                  - img [ref=e88]
+                  - generic [ref=e91]: 45 phút
+                - paragraph [ref=e92]: Từ 200.000đ
+          - generic [ref=e93]:
+            - generic [ref=e94]: Nổi bật
+            - generic [ref=e95]:
+              - img [ref=e97]
+              - generic [ref=e100]: Trang Điểm Cô Dâu
+            - generic [ref=e101]:
+              - generic [ref=e102]: Trang điểm cô dâu hoàn hảo
+              - generic [ref=e103]:
+                - generic [ref=e104]:
+                  - img [ref=e105]
+                  - generic [ref=e108]: 90 phút
+                - paragraph [ref=e109]: Từ 500.000đ
+          - generic [ref=e110]:
+            - generic [ref=e111]: Nổi bật
+            - generic [ref=e112]:
+              - img [ref=e114]
+              - generic [ref=e117]: Trang Điểm Cá Nhân
+            - generic [ref=e118]:
+              - generic [ref=e119]: Trang điểm theo yêu cầu
+              - generic [ref=e120]:
+                - generic [ref=e121]:
+                  - img [ref=e122]
+                  - generic [ref=e125]: 60 phút
+                - paragraph [ref=e126]: Từ 350.000đ
+          - generic [ref=e127]:
+            - generic [ref=e128]: Nổi bật
+            - generic [ref=e129]:
+              - img [ref=e131]
+              - generic [ref=e134]: Tẩy Lông Toàn Thân
+            - generic [ref=e135]:
+              - generic [ref=e136]: Tẩy lông toàn bộ cơ thể
+              - generic [ref=e137]:
+                - generic [ref=e138]:
+                  - img [ref=e139]
+                  - generic [ref=e142]: 120 phút
+                - paragraph [ref=e143]: Từ 500.000đ
+        - link "Xem tất cả dịch vụ" [ref=e145] [cursor=pointer]:
+          - /url: /services
+      - generic [ref=e147]:
+        - generic [ref=e148]:
+          - heading "Khách hàng nói gì về chúng tôi" [level=2] [ref=e149]
+          - paragraph [ref=e150]: Hàng nghìn khách hàng đã tin tưởng và hài lòng với dịch vụ của chúng tôi
+        - generic [ref=e151]:
+          - generic [ref=e153]:
+            - generic [ref=e154]:
+              - img [ref=e155]
+              - img [ref=e157]
+              - img [ref=e159]
+              - img [ref=e161]
+              - img [ref=e163]
+            - paragraph [ref=e165]: "\"Dịch vụ tuyệt vời! Tóc được cắt rất đẹp và phù hợp với khuôn mặt. Nhân viên thân thiện, chuyên nghiệp.\""
+            - generic [ref=e166]:
+              - img "Nguyễn Thị Lan" [ref=e167]
+              - generic [ref=e168]:
+                - paragraph [ref=e169]: Nguyễn Thị Lan
+                - paragraph [ref=e170]: Cắt tóc & Chăm sóc da
+          - generic [ref=e172]:
+            - generic [ref=e173]:
+              - img [ref=e174]
+              - img [ref=e176]
+              - img [ref=e178]
+              - img [ref=e180]
+              - img [ref=e182]
+            - paragraph [ref=e184]: "\"Không gian thư giãn, massage rất chuyên nghiệp. Sau buổi massage cảm thấy rất thoải mái và tràn đầy năng lượng.\""
+            - generic [ref=e185]:
+              - img "Trần Văn Minh" [ref=e186]
+              - generic [ref=e187]:
+                - paragraph [ref=e188]: Trần Văn Minh
+                - paragraph [ref=e189]: Massage thư giãn
+          - generic [ref=e191]:
+            - generic [ref=e192]:
+              - img [ref=e193]
+              - img [ref=e195]
+              - img [ref=e197]
+              - img [ref=e199]
+              - img [ref=e201]
+            - paragraph [ref=e203]: "\"Màu tóc đẹp đúng như mong muốn, không hề hư tổn tóc. Tư vấn rất tận tình và chu đáo.\""
+            - generic [ref=e204]:
+              - img "Lê Thị Hương" [ref=e205]
+              - generic [ref=e206]:
+                - paragraph [ref=e207]: Lê Thị Hương
+                - paragraph [ref=e208]: Nhuộm tóc
+          - generic [ref=e210]:
+            - generic [ref=e211]:
+              - img [ref=e212]
+              - img [ref=e214]
+              - img [ref=e216]
+              - img [ref=e218]
+              - img [ref=e220]
+            - paragraph [ref=e222]: "\"Lần đầu đến nhưng rất hài lòng. Thợ cắt tóc có tay nghề cao, hiểu được style mình muốn.\""
+            - generic [ref=e223]:
+              - img "Phạm Đức Anh" [ref=e224]
+              - generic [ref=e225]:
+                - paragraph [ref=e226]: Phạm Đức Anh
+                - paragraph [ref=e227]: Cắt tóc nam
+      - generic [ref=e229]:
+        - generic [ref=e230]:
+          - heading "Đội ngũ chuyên nghiệp" [level=2] [ref=e231]
+          - paragraph [ref=e232]: Gặp gỡ những chuyên gia giàu kinh nghiệm, tận tâm mang đến dịch vụ tốt nhất cho bạn
+        - generic [ref=e233]:
+          - generic [ref=e234]:
+            - img "sa" [ref=e236]
+            - generic [ref=e237]:
+              - generic [ref=e238]:
+                - heading "sa" [level=3] [ref=e239]
+                - paragraph [ref=e240]: a
+              - paragraph [ref=e241]: a
+              - generic [ref=e243]: a
+          - generic [ref=e244]:
+            - img "Nguyễn Thị Mai" [ref=e246]
+            - generic [ref=e247]:
+              - generic [ref=e248]:
+                - heading "Nguyễn Thị Mai" [level=3] [ref=e249]
+                - paragraph [ref=e250]: Chuyên viên tóc
+              - paragraph [ref=e251]: 5 năm
+              - generic [ref=e252]:
+                - generic [ref=e253]: Chuyên viên tóc
+                - generic [ref=e254]: Cắt tóc
+                - generic [ref=e255]: Tạo kiểu
+          - generic [ref=e256]:
+            - img "Trần Văn Đức" [ref=e258]
+            - generic [ref=e259]:
+              - generic [ref=e260]:
+                - heading "Trần Văn Đức" [level=3] [ref=e261]
+                - paragraph [ref=e262]: Chuyên viên massage
+              - paragraph [ref=e263]: 6 năm
+              - generic [ref=e264]:
+                - generic [ref=e265]: Chuyên viên massage
+                - generic [ref=e266]: Massage
+                - generic [ref=e267]: Trị liệu
+          - generic [ref=e268]:
+            - img "Lê Thị Hoa" [ref=e270]
+            - generic [ref=e271]:
+              - generic [ref=e272]:
+                - heading "Lê Thị Hoa" [level=3] [ref=e273]
+                - paragraph [ref=e274]: Chuyên viên da liễu
+              - paragraph [ref=e275]: 4 năm
+              - generic [ref=e276]:
+                - generic [ref=e277]: Chuyên viên da liễu
+                - generic [ref=e278]: Chăm sóc da
+                - generic [ref=e279]: Điều trị
+    - contentinfo [ref=e280]:
+      - generic [ref=e281]:
+        - generic [ref=e282]:
+          - generic [ref=e283]:
+            - link "KTs K.Tay Nails" [ref=e284] [cursor=pointer]:
+              - /url: /
+              - generic [ref=e286]: KTs
+              - generic [ref=e287]: K.Tay Nails
+            - paragraph [ref=e288]: Trung tâm làm đẹp cao cấp với dịch vụ chuyên nghiệp và đội ngũ giàu kinh nghiệm.
+            - generic [ref=e289]:
+              - link [ref=e290] [cursor=pointer]:
+                - /url: "#"
+                - img [ref=e291]
+              - link [ref=e293] [cursor=pointer]:
+                - /url: "#"
+                - img [ref=e294]
+              - link [ref=e297] [cursor=pointer]:
+                - /url: "#"
+                - img [ref=e298]
+          - generic [ref=e301]:
+            - heading "Liên kết nhanh" [level=3] [ref=e302]
+            - navigation [ref=e303]:
+              - link "Trang chủ" [ref=e304] [cursor=pointer]:
+                - /url: /
+              - link "Dịch vụ" [ref=e305] [cursor=pointer]:
+                - /url: /services
+              - link "Tra cứu lịch hẹn" [ref=e306] [cursor=pointer]:
+                - /url: /booking-search
+          - generic [ref=e307]:
+            - heading "Thông tin liên hệ" [level=3] [ref=e308]
+            - generic [ref=e309]:
+              - generic [ref=e310]:
+                - img [ref=e311]
+                - generic [ref=e313]: 0123 456 789
+              - generic [ref=e314]:
+                - img [ref=e315]
+                - generic [ref=e318]: info@serenitybeauty.vn
+              - generic [ref=e319]:
+                - img [ref=e320]
+                - generic [ref=e323]: 123 Đường ABC, Quận 1, TP.HCM
+          - generic [ref=e324]:
+            - heading "Giờ mở cửa" [level=3] [ref=e325]
+            - generic [ref=e327]:
+              - img [ref=e328]
+              - generic [ref=e331]:
+                - paragraph [ref=e332]: "Thứ 2 - Thứ 6: 8:00 - 20:00"
+                - paragraph [ref=e333]: "Thứ 7 - CN: 9:00 - 18:00"
+        - paragraph [ref=e335]: © 2024 Serenity Beauty. Tất cả quyền được bảo lưu.
+  - region "Notifications alt+T"
+  - button "Open Next.js Dev Tools" [ref=e341] [cursor=pointer]:
+    - img [ref=e342]
+  - alert [ref=e345]
+```

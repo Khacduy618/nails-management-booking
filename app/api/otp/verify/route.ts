@@ -62,12 +62,13 @@ export async function POST(request: NextRequest) {
 
         // Cancel the appointment
         try {
-            const [result] = (await db
+            const result = await db
                 .update(appointments)
                 .set({ status: "cancelled" })
-                .where(eq(appointments.id, appointmentId))) as unknown as [{ affectedRows: number }]
+                .where(eq(appointments.id, appointmentId))
+                .returning()
 
-            if (result.affectedRows === 0) {
+            if (result.length === 0) {
                 return fail("NOT_FOUND", "Appointment not found", 404)
             }
 

@@ -98,14 +98,15 @@ export async function POST(request: NextRequest) {
 
     // Validate
     if (!body.name || !body.price || !body.duration || !body.categoryId) {
-        return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+      return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
     const newService = await db.transaction(async (tx) => {
-        const [result] = await tx
+      const result = await tx
         .insert(services)
-        .values(body) as unknown as [{ insertId: number }];
-      const newId = result.insertId;
+        .values(body)
+        .returning();
+      const newId = result[0].id;
       if (staffIds && staffIds.length > 0) {
         const staffServiceValues = staffIds.map((staffId: number) => ({
           serviceId: newId,
@@ -113,9 +114,9 @@ export async function POST(request: NextRequest) {
         }));
         await tx.insert(staffServices).values(staffServiceValues);
       }
-        return await tx.query.services.findFirst({
-            where: eq(services.id, newId),
-        });
+      return await tx.query.services.findFirst({
+        where: eq(services.id, newId),
+      });
     });
 
 

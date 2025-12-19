@@ -153,7 +153,7 @@ export async function POST(request: NextRequest) {
       customerName,
       customerPhone: sanitizedPhone,
       notes,
-      appointmentDate: appointmentStart,
+      appointmentDate: format(appointmentStart, 'yyyy-MM-dd'),
       appointmentTime: time,
       status: 'pending' as const,
       priceAtBooking: totalPrice.toString(),
@@ -190,14 +190,14 @@ export async function POST(request: NextRequest) {
               totalAmount: (
                 Number(existingCustomer.totalAmount) + totalPrice
               ).toString(),
-              lastAppointmentDate: appointmentStart,
+              lastAppointmentDate: format(appointmentStart, 'yyyy-MM-dd'),
               email: customerEmail || existingCustomer.email,
               updatedAt: new Date(),
             })
             .where(eq(customers.id, existingCustomer.id))
         } else {
           // Create new customer
-          const [insertResult] = (await tx
+          const insertResult = await tx
             .insert(customers)
             .values({
               phone: sanitizedPhone,
@@ -205,26 +205,28 @@ export async function POST(request: NextRequest) {
               email: customerEmail || undefined,
               serviceCount: servicesSelected.length,
               totalAmount: totalPrice.toString(),
-              lastAppointmentDate: appointmentStart,
+              lastAppointmentDate: format(appointmentStart, 'yyyy-MM-dd'),
               createdAt: new Date(),
               updatedAt: new Date(),
-            })) as unknown as [{ insertId: number }]
+            })
+            .returning()
 
-          customerId = insertResult.insertId
+          customerId = insertResult[0]?.id
         }
       } catch (customerError) {
         logError(customerError, { context: 'customer_upsert', phone: sanitizedPhone })
         // Continue even if customer creation fails, to not block appointment
       }
 
-      const [insertResult] = (await tx
+      const insertResult = await tx
         .insert(appointments)
         .values({
           ...appointmentInsertPayload,
           customerId: customerId || undefined,
-        })) as unknown as [{ insertId: number }]
+        })
+        .returning()
 
-      const appointmentId = insertResult.insertId
+      const appointmentId = insertResult[0].id
 
       if (servicesSelected.length) {
         await tx.insert(appointmentServices).values(

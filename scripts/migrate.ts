@@ -1,6 +1,6 @@
-import { migrate } from 'drizzle-orm/mysql2/migrator';
-import { db } from '../db/index.js'; // Đảm bảo có .js
-import path from 'path';
+import { migrate } from 'drizzle-orm/node-postgres/migrator'
+import { db } from '../db/index.js'
+import path from 'path'
 
 async function main() {
   console.log('Running migrations...');

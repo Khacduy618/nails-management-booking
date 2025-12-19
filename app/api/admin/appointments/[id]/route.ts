@@ -49,17 +49,17 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
     if (status) updateData.status = status;
     if (notes !== undefined) updateData.notes = notes;
 
-    const [result] = (await db
+    const result = await db
       .update(appointments)
       .set(updateData)
-      .where(eq(appointments.id, id))) as unknown as [{ affectedRows: number }];
+      .where(eq(appointments.id, id))
+      .returning();
 
-    if (result.affectedRows === 0) {
+    if (result.length === 0) {
       return NextResponse.json({ success: false, error: "Appointment not found or no changes made" }, { status: 404 });
     }
 
-    // Lấy lại dữ liệu đã cập nhật để trả về
-    const updatedAppointment = await db.query.appointments.findFirst({ where: eq(appointments.id, id) });
+    const updatedAppointment = result[0];
 
     return NextResponse.json({ success: true, appointment: updatedAppointment });
   } catch (error) {
@@ -77,12 +77,13 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
     }
 
     // Thay vì db.delete, chúng ta dùng db.update để xóa mềm
-    const [result] = (await db
+    const result = await db
       .update(appointments)
       .set({ status: 'cancelled' })
-      .where(eq(appointments.id, id))) as unknown as [{ affectedRows: number }];
+      .where(eq(appointments.id, id))
+      .returning();
 
-    if (result.affectedRows === 0) {
+    if (result.length === 0) {
       return NextResponse.json({ success: false, error: "Appointment not found" }, { status: 404 });
     }
 

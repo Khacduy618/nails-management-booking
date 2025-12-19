@@ -2,7 +2,6 @@ import { type NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { appointments } from "@/db/schema";
 import { eq } from "drizzle-orm";
-import { OkPacket } from "mysql2";
 
 const sanitizePhone = (phone: string) => phone.replace(/\D/g, "");
 // --- PUT: Cập nhật lịch hẹn (chủ yếu là status) ---
@@ -21,18 +20,17 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
     }
 
     const updatedAppointment = await db.transaction(async (tx) => {
-      const [result] = (await tx
+      const result = await tx
         .update(appointments)
         .set({ status: status })
-        .where(eq(appointments.id, id))) as unknown as [{ affectedRows: number }];
+        .where(eq(appointments.id, id))
+        .returning();
 
-      if (result.affectedRows === 0) {
+      if (result.length === 0) {
         return null;
       }
 
-      return await tx.query.appointments.findFirst({
-        where: eq(appointments.id, id),
-      });
+      return result[0];
     });
 
 
@@ -79,13 +77,13 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
     }
 
     // Thay vì xóa, chúng ta cập nhật trạng thái thành 'cancelled'
-    const [result] = (await db
+    const result = await db
       .update(appointments)
       .set({ status: 'cancelled' })
-      .where(eq(appointments.id, id))) as unknown as [{ affectedRows: number }];
+      .where(eq(appointments.id, id))
+      .returning();
 
-
-    if (result.affectedRows === 0) {
+    if (result.length === 0) {
       return NextResponse.json({ success: false, error: "Appointment not found" }, { status: 404 });
     }
 

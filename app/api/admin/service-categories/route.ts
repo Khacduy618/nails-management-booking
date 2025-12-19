@@ -130,24 +130,20 @@ export async function POST(request: NextRequest) {
             return fail("INVALID_INPUT", "Category name already exists", 409)
         }
 
-        const [result] = await db.insert(serviceCategories).values({
+        const result = await db.insert(serviceCategories).values({
             name: name.trim(),
             description: description?.trim() || null,
             status: "active",
-        })
+        }).returning()
 
-        const newCategory = await db
-            .select()
-            .from(serviceCategories)
-            .where(eq(serviceCategories.id, result.insertId))
-            .limit(1)
+        const newCategory = result[0]
 
-        logInfo(`POST /api/admin/service-categories: Category created successfully (ID: ${result.insertId}, Name: ${name})`, {
-            categoryId: result.insertId,
+        logInfo(`POST /api/admin/service-categories: Category created successfully (ID: ${newCategory.id}, Name: ${name})`, {
+            categoryId: newCategory.id,
             name: name.trim(),
         })
 
-        return ok({ data: newCategory[0], message: "Category created successfully" }, 201)
+        return ok({ data: newCategory, message: "Category created successfully" }, 201)
     } catch (error) {
         logError(error, { route: "/api/admin/service-categories", method: "POST" })
         return fail("SERVER_ERROR", "Unable to create category", 500)

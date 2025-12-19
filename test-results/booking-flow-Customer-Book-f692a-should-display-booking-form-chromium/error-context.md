@@ -1,0 +1,387 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - banner [ref=e3]:
+      - generic [ref=e5]:
+        - link "KTs K.Tay Nails" [ref=e6] [cursor=pointer]:
+          - /url: /
+          - generic [ref=e8]: KTs
+          - generic [ref=e9]: K.Tay Nails
+        - navigation [ref=e10]:
+          - link "Trang chủ" [ref=e11] [cursor=pointer]:
+            - /url: /
+          - link "Dịch vụ" [ref=e12] [cursor=pointer]:
+            - /url: /services
+          - link "Tra cứu lịch hẹn" [ref=e13] [cursor=pointer]:
+            - /url: /lookup
+        - generic [ref=e14]:
+          - generic [ref=e15]:
+            - img [ref=e16]
+            - generic [ref=e18]: 0123 456 789
+          - link "Đặt lịch ngay" [ref=e19] [cursor=pointer]:
+            - /url: /book
+    - main [ref=e20]:
+      - generic [ref=e21]:
+        - generic [ref=e22]:
+          - heading "Đặt lịch hẹn" [level=1] [ref=e23]
+          - paragraph [ref=e24]: Chọn dịch vụ và thời gian phù hợp để đặt lịch hẹn của bạn
+        - generic [ref=e26]:
+          - generic [ref=e28]:
+            - generic [ref=e29]:
+              - generic [ref=e31]: "1"
+              - generic [ref=e34]: "2"
+              - generic [ref=e37]: "3"
+              - generic [ref=e40]: "4"
+            - generic [ref=e41]:
+              - generic [ref=e42]: Dịch vụ
+              - generic [ref=e43]: Ngày & Giờ
+              - generic [ref=e44]: Nhân viên
+              - generic [ref=e45]: Thông tin
+          - generic [ref=e46]:
+            - generic [ref=e47]:
+              - generic [ref=e48]: "Bước 1: Chọn Dịch vụ"
+              - generic [ref=e49]: Bạn có thể chọn một hoặc nhiều dịch vụ.
+            - generic [ref=e50]:
+              - generic [ref=e51]:
+                - img [ref=e52]
+                - textbox "Tìm dịch vụ..." [ref=e55]
+              - generic [ref=e56]:
+                - generic [ref=e58] [cursor=pointer]:
+                  - checkbox "Nhuộm Lông Mày 45 phút 200.000đ" [ref=e59]
+                  - generic [ref=e60]:
+                    - paragraph [ref=e61]: Nhuộm Lông Mày
+                    - paragraph [ref=e62]: 45 phút
+                  - paragraph [ref=e63]: 200.000đ
+                - generic [ref=e65] [cursor=pointer]:
+                  - checkbox "Trang Điểm Cô Dâu 90 phút 500.000đ" [ref=e66]
+                  - generic [ref=e67]:
+                    - paragraph [ref=e68]: Trang Điểm Cô Dâu
+                    - paragraph [ref=e69]: 90 phút
+                  - paragraph [ref=e70]: 500.000đ
+                - generic [ref=e72] [cursor=pointer]:
+                  - checkbox "Trang Điểm Cá Nhân 60 phút 350.000đ" [ref=e73]
+                  - generic [ref=e74]:
+                    - paragraph [ref=e75]: Trang Điểm Cá Nhân
+                    - paragraph [ref=e76]: 60 phút
+                  - paragraph [ref=e77]: 350.000đ
+                - generic [ref=e79] [cursor=pointer]:
+                  - checkbox "Tẩy Lông Toàn Thân 120 phút 500.000đ" [ref=e80]
+                  - generic [ref=e81]:
+                    - paragraph [ref=e82]: Tẩy Lông Toàn Thân
+                    - paragraph [ref=e83]: 120 phút
+                  - paragraph [ref=e84]: 500.000đ
+                - generic [ref=e86] [cursor=pointer]:
+                  - checkbox "Tẩy Lông Chân 60 phút 250.000đ" [ref=e87]
+                  - generic [ref=e88]:
+                    - paragraph [ref=e89]: Tẩy Lông Chân
+                    - paragraph [ref=e90]: 60 phút
+                  - paragraph [ref=e91]: 250.000đ
+                - generic [ref=e93] [cursor=pointer]:
+                  - checkbox "Tẩy Lông Tay 45 phút 150.000đ" [ref=e94]
+                  - generic [ref=e95]:
+                    - paragraph [ref=e96]: Tẩy Lông Tay
+                    - paragraph [ref=e97]: 45 phút
+                  - paragraph [ref=e98]: 150.000đ
+                - generic [ref=e100] [cursor=pointer]:
+                  - checkbox "Spa Chân Chuyên Sâu 90 phút 400.000đ" [ref=e101]
+                  - generic [ref=e102]:
+                    - paragraph [ref=e103]: Spa Chân Chuyên Sâu
+                    - paragraph [ref=e104]: 90 phút
+                  - paragraph [ref=e105]: 400.000đ
+                - generic [ref=e107] [cursor=pointer]:
+                  - checkbox "Pedicure Art 90 phút 350.000đ" [ref=e108]
+                  - generic [ref=e109]:
+                    - paragraph [ref=e110]: Pedicure Art
+                    - paragraph [ref=e111]: 90 phút
+                  - paragraph [ref=e112]: 350.000đ
+                - generic [ref=e114] [cursor=pointer]:
+                  - checkbox "Pedicure Gel 75 phút 300.000đ" [ref=e115]
+                  - generic [ref=e116]:
+                    - paragraph [ref=e117]: Pedicure Gel
+                    - paragraph [ref=e118]: 75 phút
+                  - paragraph [ref=e119]: 300.000đ
+                - generic [ref=e121] [cursor=pointer]:
+                  - checkbox "Pedicure Cơ Bản 60 phút 200.000đ" [ref=e122]
+                  - generic [ref=e123]:
+                    - paragraph [ref=e124]: Pedicure Cơ Bản
+                    - paragraph [ref=e125]: 60 phút
+                  - paragraph [ref=e126]: 200.000đ
+                - generic [ref=e128] [cursor=pointer]:
+                  - checkbox "Đắp Móng Acryl 90 phút 350.000đ" [ref=e129]
+                  - generic [ref=e130]:
+                    - paragraph [ref=e131]: Đắp Móng Acryl
+                    - paragraph [ref=e132]: 90 phút
+                  - paragraph [ref=e133]: 350.000đ
+                - generic [ref=e135] [cursor=pointer]:
+                  - checkbox "Nail Art 3D 120 phút 450.000đ" [ref=e136]
+                  - generic [ref=e137]:
+                    - paragraph [ref=e138]: Nail Art 3D
+                    - paragraph [ref=e139]: 120 phút
+                  - paragraph [ref=e140]: 450.000đ
+                - generic [ref=e142] [cursor=pointer]:
+                  - checkbox "Nail Art Sáng Tạo 90 phút 350.000đ" [ref=e143]
+                  - generic [ref=e144]:
+                    - paragraph [ref=e145]: Nail Art Sáng Tạo
+                    - paragraph [ref=e146]: 90 phút
+                  - paragraph [ref=e147]: 350.000đ
+                - generic [ref=e149] [cursor=pointer]:
+                  - checkbox "Sơn Gel Shellac 60 phút 280.000đ" [ref=e150]
+                  - generic [ref=e151]:
+                    - paragraph [ref=e152]: Sơn Gel Shellac
+                    - paragraph [ref=e153]: 60 phút
+                  - paragraph [ref=e154]: 280.000đ
+                - generic [ref=e156] [cursor=pointer]:
+                  - checkbox "Sơn Gel OPI 60 phút 250.000đ" [ref=e157]
+                  - generic [ref=e158]:
+                    - paragraph [ref=e159]: Sơn Gel OPI
+                    - paragraph [ref=e160]: 60 phút
+                  - paragraph [ref=e161]: 250.000đ
+                - generic [ref=e163] [cursor=pointer]:
+                  - checkbox "Massage Đá Nóng 75 phút 400.000đ" [ref=e164]
+                  - generic [ref=e165]:
+                    - paragraph [ref=e166]: Massage Đá Nóng
+                    - paragraph [ref=e167]: 75 phút
+                  - paragraph [ref=e168]: 400.000đ
+                - generic [ref=e170] [cursor=pointer]:
+                  - checkbox "Massage Đầu Relaxation 30 phút 200.000đ" [ref=e171]
+                  - generic [ref=e172]:
+                    - paragraph [ref=e173]: Massage Đầu Relaxation
+                    - paragraph [ref=e174]: 30 phút
+                  - paragraph [ref=e175]: 200.000đ
+                - generic [ref=e177] [cursor=pointer]:
+                  - checkbox "Massage Vai Gáy 45 phút 250.000đ" [ref=e178]
+                  - generic [ref=e179]:
+                    - paragraph [ref=e180]: Massage Vai Gáy
+                    - paragraph [ref=e181]: 45 phút
+                  - paragraph [ref=e182]: 250.000đ
+                - generic [ref=e184] [cursor=pointer]:
+                  - checkbox "Massage Thái Truyền Thống 90 phút 450.000đ" [ref=e185]
+                  - generic [ref=e186]:
+                    - paragraph [ref=e187]: Massage Thái Truyền Thống
+                    - paragraph [ref=e188]: 90 phút
+                  - paragraph [ref=e189]: 450.000đ
+                - generic [ref=e191] [cursor=pointer]:
+                  - checkbox "Massage Toàn Thân 60 phút 350.000đ" [ref=e192]
+                  - generic [ref=e193]:
+                    - paragraph [ref=e194]: Massage Toàn Thân
+                    - paragraph [ref=e195]: 60 phút
+                  - paragraph [ref=e196]: 350.000đ
+                - generic [ref=e198] [cursor=pointer]:
+                  - checkbox "Làm Trắng Da Mặt 90 phút 500.000đ" [ref=e199]
+                  - generic [ref=e200]:
+                    - paragraph [ref=e201]: Làm Trắng Da Mặt
+                    - paragraph [ref=e202]: 90 phút
+                  - paragraph [ref=e203]: 500.000đ
+                - generic [ref=e205] [cursor=pointer]:
+                  - checkbox "Trị Mụn Chuyên Sâu 90 phút 350.000đ" [ref=e206]
+                  - generic [ref=e207]:
+                    - paragraph [ref=e208]: Trị Mụn Chuyên Sâu
+                    - paragraph [ref=e209]: 90 phút
+                  - paragraph [ref=e210]: 350.000đ
+                - generic [ref=e212] [cursor=pointer]:
+                  - checkbox "Spa Mặt Chuyên Sâu 120 phút 450.000đ" [ref=e213]
+                  - generic [ref=e214]:
+                    - paragraph [ref=e215]: Spa Mặt Chuyên Sâu
+                    - paragraph [ref=e216]: 120 phút
+                  - paragraph [ref=e217]: 450.000đ
+                - generic [ref=e219] [cursor=pointer]:
+                  - checkbox "Spa Mặt Cơ Bản 60 phút 250.000đ" [ref=e220]
+                  - generic [ref=e221]:
+                    - paragraph [ref=e222]: Spa Mặt Cơ Bản
+                    - paragraph [ref=e223]: 60 phút
+                  - paragraph [ref=e224]: 250.000đ
+                - generic [ref=e226] [cursor=pointer]:
+                  - checkbox "Hấp Tóc Keratin 75 phút 350.000đ" [ref=e227]
+                  - generic [ref=e228]:
+                    - paragraph [ref=e229]: Hấp Tóc Keratin
+                    - paragraph [ref=e230]: 75 phút
+                  - paragraph [ref=e231]: 350.000đ
+                - generic [ref=e233] [cursor=pointer]:
+                  - checkbox "Hấp Tóc Dầu Dừa 60 phút 250.000đ" [ref=e234]
+                  - generic [ref=e235]:
+                    - paragraph [ref=e236]: Hấp Tóc Dầu Dừa
+                    - paragraph [ref=e237]: 60 phút
+                  - paragraph [ref=e238]: 250.000đ
+                - generic [ref=e240] [cursor=pointer]:
+                  - checkbox "Duỗi Tóc Thẳng 180 phút 450.000đ" [ref=e241]
+                  - generic [ref=e242]:
+                    - paragraph [ref=e243]: Duỗi Tóc Thẳng
+                    - paragraph [ref=e244]: 180 phút
+                  - paragraph [ref=e245]: 450.000đ
+                - generic [ref=e247] [cursor=pointer]:
+                  - checkbox "Uốn Xoăn Ngoạn Mục 200 phút 500.000đ" [ref=e248]
+                  - generic [ref=e249]:
+                    - paragraph [ref=e250]: Uốn Xoăn Ngoạn Mục
+                    - paragraph [ref=e251]: 200 phút
+                  - paragraph [ref=e252]: 500.000đ
+                - generic [ref=e254] [cursor=pointer]:
+                  - checkbox "Uốn Xoăn Cơ Bản 180 phút 400.000đ" [ref=e255]
+                  - generic [ref=e256]:
+                    - paragraph [ref=e257]: Uốn Xoăn Cơ Bản
+                    - paragraph [ref=e258]: 180 phút
+                  - paragraph [ref=e259]: 400.000đ
+                - generic [ref=e261] [cursor=pointer]:
+                  - checkbox "Nhuộm Tóc Ombre 180 phút 450.000đ" [ref=e262]
+                  - generic [ref=e263]:
+                    - paragraph [ref=e264]: Nhuộm Tóc Ombre
+                    - paragraph [ref=e265]: 180 phút
+                  - paragraph [ref=e266]: 450.000đ
+                - generic [ref=e268] [cursor=pointer]:
+                  - checkbox "Nhuộm Tóc Highlight 150 phút 400.000đ" [ref=e269]
+                  - generic [ref=e270]:
+                    - paragraph [ref=e271]: Nhuộm Tóc Highlight
+                    - paragraph [ref=e272]: 150 phút
+                  - paragraph [ref=e273]: 400.000đ
+                - generic [ref=e275] [cursor=pointer]:
+                  - checkbox "Nhuộm Tóc Toàn Đầu 120 phút 350.000đ" [ref=e276]
+                  - generic [ref=e277]:
+                    - paragraph [ref=e278]: Nhuộm Tóc Toàn Đầu
+                    - paragraph [ref=e279]: 120 phút
+                  - paragraph [ref=e280]: 350.000đ
+                - generic [ref=e282] [cursor=pointer]:
+                  - checkbox "Cắt Tóc Nữ Kiểu Mới 75 phút 250.000đ" [ref=e283]
+                  - generic [ref=e284]:
+                    - paragraph [ref=e285]: Cắt Tóc Nữ Kiểu Mới
+                    - paragraph [ref=e286]: 75 phút
+                  - paragraph [ref=e287]: 250.000đ
+                - generic [ref=e289] [cursor=pointer]:
+                  - checkbox "Cắt Tóc Nữ Cơ Bản 60 phút 200.000đ" [ref=e290]
+                  - generic [ref=e291]:
+                    - paragraph [ref=e292]: Cắt Tóc Nữ Cơ Bản
+                    - paragraph [ref=e293]: 60 phút
+                  - paragraph [ref=e294]: 200.000đ
+                - generic [ref=e296] [cursor=pointer]:
+                  - checkbox "Cắt Tóc Nam Kiểu 60 phút 200.000đ" [ref=e297]
+                  - generic [ref=e298]:
+                    - paragraph [ref=e299]: Cắt Tóc Nam Kiểu
+                    - paragraph [ref=e300]: 60 phút
+                  - paragraph [ref=e301]: 200.000đ
+                - generic [ref=e303] [cursor=pointer]:
+                  - checkbox "Cắt Tóc Nam Cơ Bản 45 phút 150.000đ" [ref=e304]
+                  - generic [ref=e305]:
+                    - paragraph [ref=e306]: Cắt Tóc Nam Cơ Bản
+                    - paragraph [ref=e307]: 45 phút
+                  - paragraph [ref=e308]: 150.000đ
+                - generic [ref=e310] [cursor=pointer]:
+                  - checkbox "Dệt Lông Mày 50 phút 250.000đ" [ref=e311]
+                  - generic [ref=e312]:
+                    - paragraph [ref=e313]: Dệt Lông Mày
+                    - paragraph [ref=e314]: 50 phút
+                  - paragraph [ref=e315]: 250.000đ
+                - generic [ref=e317] [cursor=pointer]:
+                  - checkbox "Tẩy Lông Mặt 30 phút 100.000đ" [ref=e318]
+                  - generic [ref=e319]:
+                    - paragraph [ref=e320]: Tẩy Lông Mặt
+                    - paragraph [ref=e321]: 30 phút
+                  - paragraph [ref=e322]: 100.000đ
+                - generic [ref=e324] [cursor=pointer]:
+                  - checkbox "Chăm Sóc Móng Tay 45 phút 150.000đ" [ref=e325]
+                  - generic [ref=e326]:
+                    - paragraph [ref=e327]: Chăm Sóc Móng Tay
+                    - paragraph [ref=e328]: 45 phút
+                  - paragraph [ref=e329]: 150.000đ
+                - generic [ref=e331] [cursor=pointer]:
+                  - checkbox "Chăm Sóc Da Nhạy Cảm 60 phút 300.000đ" [ref=e332]
+                  - generic [ref=e333]:
+                    - paragraph [ref=e334]: Chăm Sóc Da Nhạy Cảm
+                    - paragraph [ref=e335]: 60 phút
+                  - paragraph [ref=e336]: 300.000đ
+                - generic [ref=e338] [cursor=pointer]:
+                  - checkbox "Điều Trị Nếp Nhăn 75 phút 450.000đ" [ref=e339]
+                  - generic [ref=e340]:
+                    - paragraph [ref=e341]: Điều Trị Nếp Nhăn
+                    - paragraph [ref=e342]: 75 phút
+                  - paragraph [ref=e343]: 450.000đ
+                - generic [ref=e345] [cursor=pointer]:
+                  - checkbox "Gội Đầu + Massage 45 phút 150.000đ" [ref=e346]
+                  - generic [ref=e347]:
+                    - paragraph [ref=e348]: Gội Đầu + Massage
+                    - paragraph [ref=e349]: 45 phút
+                  - paragraph [ref=e350]: 150.000đ
+                - generic [ref=e352] [cursor=pointer]:
+                  - checkbox "Duỗi Tóc Bấm 200 phút 480.000đ" [ref=e353]
+                  - generic [ref=e354]:
+                    - paragraph [ref=e355]: Duỗi Tóc Bấm
+                    - paragraph [ref=e356]: 200 phút
+                  - paragraph [ref=e357]: 480.000đ
+                - generic [ref=e359] [cursor=pointer]:
+                  - checkbox "Nhuộm Tóc Tẩy Màu 120 phút 500.000đ" [ref=e360]
+                  - generic [ref=e361]:
+                    - paragraph [ref=e362]: Nhuộm Tóc Tẩy Màu
+                    - paragraph [ref=e363]: 120 phút
+                  - paragraph [ref=e364]: 500.000đ
+                - generic [ref=e366] [cursor=pointer]:
+                  - checkbox "Cắt Tóc Nữ Uốn Sóng 90 phút 300.000đ" [ref=e367]
+                  - generic [ref=e368]:
+                    - paragraph [ref=e369]: Cắt Tóc Nữ Uốn Sóng
+                    - paragraph [ref=e370]: 90 phút
+                  - paragraph [ref=e371]: 300.000đ
+                - generic [ref=e373] [cursor=pointer]:
+                  - checkbox "Cắt Tóc Nam Sạch Mặt 50 phút 180.000đ" [ref=e374]
+                  - generic [ref=e375]:
+                    - paragraph [ref=e376]: Cắt Tóc Nam Sạch Mặt
+                    - paragraph [ref=e377]: 50 phút
+                  - paragraph [ref=e378]: 180.000đ
+              - generic [ref=e379]:
+                - paragraph [ref=e380]:
+                  - text: "Tổng cộng:"
+                  - generic [ref=e381]: 0 dịch vụ
+                - generic [ref=e382]:
+                  - text: "Thành tiền:"
+                  - paragraph [ref=e383]: 0đ
+              - button "Chọn Ngày & Giờ" [disabled]
+    - contentinfo [ref=e384]:
+      - generic [ref=e385]:
+        - generic [ref=e386]:
+          - generic [ref=e387]:
+            - link "KTs K.Tay Nails" [ref=e388] [cursor=pointer]:
+              - /url: /
+              - generic [ref=e390]: KTs
+              - generic [ref=e391]: K.Tay Nails
+            - paragraph [ref=e392]: Trung tâm làm đẹp cao cấp với dịch vụ chuyên nghiệp và đội ngũ giàu kinh nghiệm.
+            - generic [ref=e393]:
+              - link [ref=e394] [cursor=pointer]:
+                - /url: "#"
+                - img [ref=e395]
+              - link [ref=e397] [cursor=pointer]:
+                - /url: "#"
+                - img [ref=e398]
+              - link [ref=e401] [cursor=pointer]:
+                - /url: "#"
+                - img [ref=e402]
+          - generic [ref=e405]:
+            - heading "Liên kết nhanh" [level=3] [ref=e406]
+            - navigation [ref=e407]:
+              - link "Trang chủ" [ref=e408] [cursor=pointer]:
+                - /url: /
+              - link "Dịch vụ" [ref=e409] [cursor=pointer]:
+                - /url: /services
+              - link "Tra cứu lịch hẹn" [ref=e410] [cursor=pointer]:
+                - /url: /booking-search
+          - generic [ref=e411]:
+            - heading "Thông tin liên hệ" [level=3] [ref=e412]
+            - generic [ref=e413]:
+              - generic [ref=e414]:
+                - img [ref=e415]
+                - generic [ref=e417]: 0123 456 789
+              - generic [ref=e418]:
+                - img [ref=e419]
+                - generic [ref=e422]: info@serenitybeauty.vn
+              - generic [ref=e423]:
+                - img [ref=e424]
+                - generic [ref=e427]: 123 Đường ABC, Quận 1, TP.HCM
+          - generic [ref=e428]:
+            - heading "Giờ mở cửa" [level=3] [ref=e429]
+            - generic [ref=e431]:
+              - img [ref=e432]
+              - generic [ref=e435]:
+                - paragraph [ref=e436]: "Thứ 2 - Thứ 6: 8:00 - 20:00"
+                - paragraph [ref=e437]: "Thứ 7 - CN: 9:00 - 18:00"
+        - paragraph [ref=e439]: © 2024 Serenity Beauty. Tất cả quyền được bảo lưu.
+  - region "Notifications alt+T"
+  - button "Open Next.js Dev Tools" [ref=e445] [cursor=pointer]:
+    - img [ref=e446]
+  - alert [ref=e449]
+```
