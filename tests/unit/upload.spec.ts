@@ -279,7 +279,7 @@ describe('File Upload & Security Tests', () => {
     })
 
     describe('Virus/Malware Detection Hooks', () => {
-        it('should allow integration with antivirus service', () => {
+        it('should allow integration with antivirus service', async () => {
             const scanFile = async (filePath: string): Promise<boolean> => {
                 // This would integrate with real antivirus (e.g., ClamAV)
                 // For testing, just return true (clean)
@@ -287,7 +287,7 @@ describe('File Upload & Security Tests', () => {
             }
 
             const result = scanFile('/uploads/photo.jpg')
-            expect(result).resolves.toBe(true)
+            await expect(result).resolves.toBe(true)
         })
 
         it('should reject infected files', () => {
