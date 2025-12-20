@@ -1,130 +1,15 @@
 # Page snapshot
 
 ```yaml
-- generic [active] [ref=e1]:
-  - generic [ref=e2]:
-    - banner [ref=e3]:
-      - generic [ref=e5]:
-        - link "KTs K.Tay Nails" [ref=e6] [cursor=pointer]:
-          - /url: /
-          - generic [ref=e8]: KTs
-          - generic [ref=e9]: K.Tay Nails
-        - navigation [ref=e10]:
-          - link "Trang chủ" [ref=e11] [cursor=pointer]:
-            - /url: /
-          - link "Dịch vụ" [ref=e12] [cursor=pointer]:
-            - /url: /services
-          - link "Tra cứu lịch hẹn" [ref=e13] [cursor=pointer]:
-            - /url: /lookup
-        - generic [ref=e14]:
-          - generic [ref=e15]:
-            - img [ref=e16]
-            - generic [ref=e18]: 0123 456 789
-          - link "Đặt lịch ngay" [ref=e19] [cursor=pointer]:
-            - /url: /book
-    - main [ref=e20]:
-      - generic [ref=e21]:
-        - generic [ref=e22]:
-          - heading "Tra cứu lịch hẹn" [level=1] [ref=e23]
-          - paragraph [ref=e24]: Nhập số điện thoại để xem và quản lý các lịch hẹn đã đặt của bạn
-        - generic [ref=e26]:
-          - generic [ref=e27]:
-            - generic [ref=e28]:
-              - generic [ref=e29]:
-                - img [ref=e30]
-                - generic [ref=e33]: Tra cứu lịch hẹn
-              - generic [ref=e34]: Nhập số điện thoại để kiểm tra lịch hẹn của bạn
-            - generic [ref=e36]:
-              - generic [ref=e37]: Số điện thoại
-              - generic [ref=e38]:
-                - textbox "Số điện thoại" [ref=e39]:
-                  - /placeholder: Nhập số điện thoại
-                  - text: "0932105214"
-                - button "Tra cứu" [ref=e40]:
-                  - img
-                  - generic [ref=e41]: Tra cứu
-          - generic [ref=e42]:
-            - heading "Tìm thấy 1 lịch hẹn" [level=2] [ref=e44]
-            - generic [ref=e47]:
-              - generic [ref=e48]:
-                - heading "Lịch hẹn • 5214" [level=3] [ref=e50]
-                - generic [ref=e51]:
-                  - img
-                  - text: Đã hủy
-              - generic [ref=e52]:
-                - generic [ref=e53]:
-                  - img [ref=e54]
-                  - generic [ref=e59]:
-                    - paragraph [ref=e60]: Ngày
-                    - paragraph [ref=e61]: Thứ Sáu, 19 tháng 12, 2025
-                - generic [ref=e62]:
-                  - img [ref=e63]
-                  - generic [ref=e66]:
-                    - paragraph [ref=e67]: Giờ
-                    - paragraph [ref=e68]: 14:00
-          - generic [ref=e71]:
-            - img [ref=e72]
-            - generic [ref=e76]:
-              - paragraph [ref=e77]: Lưu ý quan trọng
-              - list [ref=e78]:
-                - listitem [ref=e79]: • Chỉ có thể hủy lịch hẹn trước 2 giờ so với thời gian đặt
-                - listitem [ref=e80]: • Hủy lịch hẹn cần xác thực bằng mã OTP được gửi tới số điện thoại
-                - listitem [ref=e81]: • Liên hệ trực tiếp với cửa hàng nếu cần thay đổi lịch hẹn
-                - listitem [ref=e82]: • Vui lòng đến đúng giờ để đảm bảo chất lượng dịch vụ
-    - contentinfo [ref=e83]:
-      - generic [ref=e84]:
-        - generic [ref=e85]:
-          - generic [ref=e86]:
-            - link "KTs K.Tay Nails" [ref=e87] [cursor=pointer]:
-              - /url: /
-              - generic [ref=e89]: KTs
-              - generic [ref=e90]: K.Tay Nails
-            - paragraph [ref=e91]: Trung tâm làm đẹp cao cấp với dịch vụ chuyên nghiệp và đội ngũ giàu kinh nghiệm.
-            - generic [ref=e92]:
-              - link [ref=e93] [cursor=pointer]:
-                - /url: "#"
-                - img [ref=e94]
-              - link [ref=e96] [cursor=pointer]:
-                - /url: "#"
-                - img [ref=e97]
-              - link [ref=e101] [cursor=pointer]:
-                - /url: "#"
-                - img [ref=e102]
-          - generic [ref=e105]:
-            - heading "Liên kết nhanh" [level=3] [ref=e106]
-            - navigation [ref=e107]:
-              - link "Trang chủ" [ref=e108] [cursor=pointer]:
-                - /url: /
-              - link "Dịch vụ" [ref=e109] [cursor=pointer]:
-                - /url: /services
-              - link "Tra cứu lịch hẹn" [ref=e110] [cursor=pointer]:
-                - /url: /booking-search
-          - generic [ref=e111]:
-            - heading "Thông tin liên hệ" [level=3] [ref=e112]
-            - generic [ref=e113]:
-              - generic [ref=e114]:
-                - img [ref=e115]
-                - generic [ref=e117]: 0123 456 789
-              - generic [ref=e118]:
-                - img [ref=e119]
-                - generic [ref=e122]: info@serenitybeauty.vn
-              - generic [ref=e123]:
-                - img [ref=e124]
-                - generic [ref=e127]: 123 Đường ABC, Quận 1, TP.HCM
-          - generic [ref=e128]:
-            - heading "Giờ mở cửa" [level=3] [ref=e129]
-            - generic [ref=e131]:
-              - img [ref=e132]
-              - generic [ref=e135]:
-                - paragraph [ref=e136]: "Thứ 2 - Thứ 6: 8:00 - 20:00"
-                - paragraph [ref=e137]: "Thứ 7 - CN: 9:00 - 18:00"
-        - paragraph [ref=e139]: © 2024 Serenity Beauty. Tất cả quyền được bảo lưu.
-  - region "Notifications alt+T":
-    - list:
-      - listitem [ref=e140]:
-        - img [ref=e142]
-        - generic [ref=e145]: Đã tìm thấy 1 lịch hẹn.
-  - button "Open Next.js Dev Tools" [ref=e151] [cursor=pointer]:
-    - img [ref=e152]
-  - alert [ref=e156]
+- generic [ref=e2]:
+  - generic [ref=e3]:
+    - heading "Unable to connect" [level=1] [ref=e5]
+    - paragraph [ref=e6]: Firefox can’t establish a connection to the server at localhost:3000.
+    - paragraph
+    - list [ref=e8]:
+      - listitem [ref=e9]: The site could be temporarily unavailable or too busy. Try again in a few moments.
+      - listitem [ref=e10]: If you are unable to load any pages, check your computer’s network connection.
+      - listitem [ref=e11]: If your computer or network is protected by a firewall or proxy, make sure that Nightly is permitted to access the web.
+      - listitem [ref=e12]: If you are trying to load a local network page, please check that Nightly has been granted Local Network permissions in the macOS Privacy & Security settings.
+  - button "Try Again" [active] [ref=e14]
 ```

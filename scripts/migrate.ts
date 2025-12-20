@@ -1,5 +1,5 @@
-import { migrate } from 'drizzle-orm/node-postgres/migrator'
-import { db } from '../db/index.js'
+import { migrate } from 'drizzle-orm/neon-serverless/migrator'
+import { db } from '../db'
 import path from 'path'
 
 async function main() {

@@ -21,7 +21,7 @@ const fallbackUrl = (() => {
 const migrationUrl = process.env.DIRECT_URL || process.env.DATABASE_URL || fallbackUrl
 
 export default {
-  schema: './db/*.js',
+  schema: './db/schema.ts',
   out: './drizzle',
   dialect: 'postgresql',
   dbCredentials: {

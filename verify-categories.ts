@@ -1,5 +1,5 @@
-import { db } from './db/index.js';
-import { serviceCategories } from './db/schema.js';
+import { db } from './db';
+import { serviceCategories } from './db/schema';
 
 async function verify() {
     console.log('Verifying seeded categories...\n');

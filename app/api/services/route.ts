@@ -2,7 +2,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { services, serviceCategories } from "@/db/schema";
 // SỬA Ở ĐÂY: Thêm import gte và lte
-import { eq, and, sql, gte, gt, lte } from "drizzle-orm";
+import { eq, and, sql, gte, gt, lte, inArray } from "drizzle-orm";
 import { getClientKey, rateLimit, LIMITS, rateLimitResponse } from "@/lib/rate-limit";
 
 // Validate and parse query parameters
@@ -62,7 +62,7 @@ export async function GET(request: NextRequest) {
       const categoryIds = categoriesRecords.map(c => c.id);
 
       if (categoryIds.length > 0) {
-        conditions.push(sql`${services.categoryId} IN ${categoryIds}`);
+        conditions.push(inArray(services.categoryId, categoryIds));
       } else {
         // Nếu không tìm thấy category nào, trả về mảng rỗng
         return NextResponse.json({

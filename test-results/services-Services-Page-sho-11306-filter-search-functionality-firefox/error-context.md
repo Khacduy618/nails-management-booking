@@ -1,95 +1,15 @@
 # Page snapshot
 
 ```yaml
-- generic [active] [ref=e1]:
-  - generic [ref=e2]:
-    - banner [ref=e3]:
-      - generic [ref=e5]:
-        - link "KTs K.Tay Nails" [ref=e6] [cursor=pointer]:
-          - /url: /
-          - generic [ref=e8]: KTs
-          - generic [ref=e9]: K.Tay Nails
-        - navigation [ref=e10]:
-          - link "Trang chủ" [ref=e11] [cursor=pointer]:
-            - /url: /
-          - link "Dịch vụ" [ref=e12] [cursor=pointer]:
-            - /url: /services
-          - link "Tra cứu lịch hẹn" [ref=e13] [cursor=pointer]:
-            - /url: /lookup
-        - generic [ref=e14]:
-          - generic [ref=e15]:
-            - img [ref=e16]
-            - generic [ref=e18]: 0123 456 789
-          - link "Đặt lịch ngay" [ref=e19] [cursor=pointer]:
-            - /url: /book
-    - main [ref=e20]:
-      - generic [ref=e21]:
-        - generic [ref=e22]:
-          - heading "Dịch vụ làm đẹp" [level=1] [ref=e23]
-          - paragraph [ref=e24]: Khám phá đầy đủ các dịch vụ chăm sóc sức khỏe và làm đẹp chuyên nghiệp
-        - generic [ref=e26]:
-          - generic [ref=e28]:
-            - generic [ref=e29]:
-              - generic [ref=e31]: Tìm kiếm
-              - generic [ref=e33]:
-                - img [ref=e34]
-                - textbox "Tìm dịch vụ..." [ref=e37]
-            - generic [ref=e40]: Loại dịch vụ
-            - generic [ref=e48]: Thời gian
-            - generic [ref=e56]: Khoảng giá
-          - generic [ref=e64]:
-            - button "Lưới" [ref=e65]
-            - button "Danh sách" [ref=e66]
-    - contentinfo [ref=e134]:
-      - generic [ref=e135]:
-        - generic [ref=e136]:
-          - generic [ref=e137]:
-            - link "KTs K.Tay Nails" [ref=e138] [cursor=pointer]:
-              - /url: /
-              - generic [ref=e140]: KTs
-              - generic [ref=e141]: K.Tay Nails
-            - paragraph [ref=e142]: Trung tâm làm đẹp cao cấp với dịch vụ chuyên nghiệp và đội ngũ giàu kinh nghiệm.
-            - generic [ref=e143]:
-              - link [ref=e144] [cursor=pointer]:
-                - /url: "#"
-                - img [ref=e145]
-              - link [ref=e147] [cursor=pointer]:
-                - /url: "#"
-                - img [ref=e148]
-              - link [ref=e152] [cursor=pointer]:
-                - /url: "#"
-                - img [ref=e153]
-          - generic [ref=e156]:
-            - heading "Liên kết nhanh" [level=3] [ref=e157]
-            - navigation [ref=e158]:
-              - link "Trang chủ" [ref=e159] [cursor=pointer]:
-                - /url: /
-              - link "Dịch vụ" [ref=e160] [cursor=pointer]:
-                - /url: /services
-              - link "Tra cứu lịch hẹn" [ref=e161] [cursor=pointer]:
-                - /url: /booking-search
-          - generic [ref=e162]:
-            - heading "Thông tin liên hệ" [level=3] [ref=e163]
-            - generic [ref=e164]:
-              - generic [ref=e165]:
-                - img [ref=e166]
-                - generic [ref=e168]: 0123 456 789
-              - generic [ref=e169]:
-                - img [ref=e170]
-                - generic [ref=e173]: info@serenitybeauty.vn
-              - generic [ref=e174]:
-                - img [ref=e175]
-                - generic [ref=e178]: 123 Đường ABC, Quận 1, TP.HCM
-          - generic [ref=e179]:
-            - heading "Giờ mở cửa" [level=3] [ref=e180]
-            - generic [ref=e182]:
-              - img [ref=e183]
-              - generic [ref=e186]:
-                - paragraph [ref=e187]: "Thứ 2 - Thứ 6: 8:00 - 20:00"
-                - paragraph [ref=e188]: "Thứ 7 - CN: 9:00 - 18:00"
-        - paragraph [ref=e190]: © 2024 Serenity Beauty. Tất cả quyền được bảo lưu.
-  - region "Notifications alt+T"
-  - button "Open Next.js Dev Tools" [ref=e196] [cursor=pointer]:
-    - img [ref=e197]
-  - alert [ref=e201]
+- generic [ref=e2]:
+  - generic [ref=e3]:
+    - heading "Unable to connect" [level=1] [ref=e5]
+    - paragraph [ref=e6]: Firefox can’t establish a connection to the server at localhost:3000.
+    - paragraph
+    - list [ref=e8]:
+      - listitem [ref=e9]: The site could be temporarily unavailable or too busy. Try again in a few moments.
+      - listitem [ref=e10]: If you are unable to load any pages, check your computer’s network connection.
+      - listitem [ref=e11]: If your computer or network is protected by a firewall or proxy, make sure that Nightly is permitted to access the web.
+      - listitem [ref=e12]: If you are trying to load a local network page, please check that Nightly has been granted Local Network permissions in the macOS Privacy & Security settings.
+  - button "Try Again" [active] [ref=e14]
 ```

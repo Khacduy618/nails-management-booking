@@ -21,7 +21,7 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
             staff: {
               with: {
                 user: {
-                  columns: { email: true }
+                  columns: { email: true, name: true }
                 }
               },
               columns: {

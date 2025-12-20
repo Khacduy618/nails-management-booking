@@ -70,7 +70,7 @@ export async function GET(request: NextRequest) {
     const formatted: AppointmentDTO[] = userAppointments.map((apt) => {
       return {
         id: apt.id,
-        date: format(apt.appointmentDate, "yyyy-MM-dd"),
+        date: apt.appointmentDate,
         time: apt.appointmentTime,
         status: apt.status,
       }

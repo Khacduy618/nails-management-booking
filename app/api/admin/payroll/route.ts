@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { db } from '@/db/index.js'
-import { appointments, appointmentServices, staff, payrolls, staffBaseSalaries } from '@/db/schema.js'
+import { db } from '@/db'
+import { appointments, appointmentServices, staff, payrolls, staffBaseSalaries, users } from '@/db/schema'
 import { eq, gte, lte, and } from 'drizzle-orm'
 import { calculateCommissionAmount, calculateCommissionPercentage } from '@/lib/payroll-utils'
 
@@ -23,8 +23,12 @@ export async function GET(request: NextRequest) {
 
         // Lấy thông tin nhân viên
         const staffInfo = await db
-            .select()
+            .select({
+                id: staff.id,
+                name: users.name,
+            })
             .from(staff)
+            .innerJoin(users, eq(staff.userId, users.id))
             .where(eq(staff.id, staffId))
             .limit(1)
 
@@ -68,8 +72,8 @@ export async function GET(request: NextRequest) {
                 and(
                     eq(appointmentServices.staffId, staffId),
                     eq(appointments.status, 'completed'),
-                    gte(appointments.appointmentDate, new Date(startDate)),
-                    lte(appointments.appointmentDate, new Date(endDate))
+                    gte(appointments.appointmentDate, startDate),
+                    lte(appointments.appointmentDate, endDate)
                 )
             )
 
@@ -123,8 +127,8 @@ export async function GET(request: NextRequest) {
             .where(
                 and(
                     eq(payrolls.staffId, staffId),
-                    eq(payrolls.payPeriodStart, new Date(startDate)),
-                    eq(payrolls.payPeriodEnd, new Date(endDate))
+                    eq(payrolls.payPeriodStart, startDate),
+                    eq(payrolls.payPeriodEnd, endDate)
                 )
             )
             .limit(1)
@@ -195,8 +199,8 @@ export async function PUT(request: NextRequest) {
             .where(
                 and(
                     eq(payrolls.staffId, staffId),
-                    eq(payrolls.payPeriodStart, new Date(startDate)),
-                    eq(payrolls.payPeriodEnd, new Date(endDate))
+                    eq(payrolls.payPeriodStart, startDate),
+                    eq(payrolls.payPeriodEnd, endDate)
                 )
             )
             .limit(1)
@@ -209,8 +213,8 @@ export async function PUT(request: NextRequest) {
                 .insert(payrolls)
                 .values({
                     staffId: staffId,
-                    payPeriodStart: new Date(startDate),
-                    payPeriodEnd: new Date(endDate),
+                    payPeriodStart: startDate,
+                    payPeriodEnd: endDate,
                     baseSalary: baseSalaryFromDB.toString(),
                     totalCommission: '0.00',
                     totalBonus: (totalBonus || 0).toString(),
@@ -226,8 +230,8 @@ export async function PUT(request: NextRequest) {
                 .where(
                     and(
                         eq(payrolls.staffId, staffId),
-                        eq(payrolls.payPeriodStart, new Date(startDate)),
-                        eq(payrolls.payPeriodEnd, new Date(endDate))
+                        eq(payrolls.payPeriodStart, startDate),
+                        eq(payrolls.payPeriodEnd, endDate)
                     )
                 )
                 .limit(1)
@@ -251,8 +255,8 @@ export async function PUT(request: NextRequest) {
                     and(
                         eq(appointmentServices.staffId, staffId),
                         eq(appointments.status, 'completed'),
-                        gte(appointments.appointmentDate, new Date(startDate)),
-                        lte(appointments.appointmentDate, new Date(endDate))
+                        gte(appointments.appointmentDate, startDate),
+                        lte(appointments.appointmentDate, endDate)
                     )
                 )
 
@@ -289,8 +293,8 @@ export async function PUT(request: NextRequest) {
                 .where(
                     and(
                         eq(payrolls.staffId, staffId),
-                        eq(payrolls.payPeriodStart, new Date(startDate)),
-                        eq(payrolls.payPeriodEnd, new Date(endDate))
+                        eq(payrolls.payPeriodStart, startDate),
+                        eq(payrolls.payPeriodEnd, endDate)
                     )
                 )
         }

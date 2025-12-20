@@ -1,6 +1,6 @@
 
-import { db } from './db/index.js';
-import { users, serviceCategories, services, staff, staffSchedules } from './db/schema.js';
+import { db } from './db';
+import { users, serviceCategories, services, staff, staffSchedules } from './db/schema';
 import bcrypt from 'bcryptjs';
 
 async function seed() {

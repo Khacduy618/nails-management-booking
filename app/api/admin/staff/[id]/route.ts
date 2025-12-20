@@ -21,6 +21,7 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
         user: {
           columns: {
             id: true,
+            name: true,
             email: true,
             phone: true,
             role: true,
@@ -409,7 +410,17 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 
       return await tx.query.staff.findFirst({
         where: eq(staff.id, id),
-        with: { user: true }
+        with: {
+          user: {
+            columns: {
+              id: true,
+              name: true,
+              email: true,
+              phone: true,
+              role: true,
+            }
+          }
+        }
       });
     });
 
