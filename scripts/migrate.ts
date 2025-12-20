@@ -6,7 +6,8 @@ async function main() {
   console.log('Running migrations...');
   const migrationsFolder = path.join(process.cwd(), 'drizzle');
 
-  await migrate(db, { migrationsFolder });
+  // Cast db to any to avoid type mismatch with the mock object used for build
+  await migrate(db as any, { migrationsFolder });
 
   console.log('Migrations finished!');
   process.exit(0);
