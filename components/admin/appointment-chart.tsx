@@ -16,7 +16,7 @@ export function AppointmentChart() {
   const [data, setData] = useState<AppointmentData[]>([])
   const [loading, setLoading] = useState(true)
 
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api/'
+  const apiBase = (process.env.NEXT_PUBLIC_API_URL || '/api').replace(/\/$/, '')
 
   useEffect(() => {
     const fetchAppointmentData = async () => {
@@ -30,7 +30,7 @@ export function AppointmentChart() {
         startDate.setHours(0, 0, 0, 0)
 
         const response = await fetch(
-          `${apiUrl}admin/revenue?startDate=${format(startDate, 'yyyy-MM-dd')}&endDate=${format(endDate, 'yyyy-MM-dd')}`
+          `${apiBase}/admin/revenue?startDate=${format(startDate, 'yyyy-MM-dd')}&endDate=${format(endDate, 'yyyy-MM-dd')}`
         )
 
         if (!response.ok) {
@@ -76,7 +76,7 @@ export function AppointmentChart() {
     }
 
     fetchAppointmentData()
-  }, [apiUrl])
+  }, [apiBase])
 
   if (loading) {
     return (

@@ -17,7 +17,7 @@ interface StaffFormProps {
   onCancel: () => void
 }
 
-const positions = ["Chuyên viên tóc", "Chuyên viên spa", "Chuyên viên nail", "Thợ cắt tóc nam", "Quản lý", "Lễ tân"]
+const positions = ["Chuyên viên tóc", "Chuyên viên spa", "Chuyên viên nail", "Thợ cắt tóc nam", "Điều hành", "Lễ tân"]
 const specialtyOptions = [
   "Cắt tóc",
   "Nhuộm tóc",
@@ -118,14 +118,14 @@ export function StaffForm({ staff, onSave, onCancel }: StaffFormProps) {
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
       <Card className="w-full max-w-4xl max-h-[90vh] overflow-y-auto">
-        <CardHeader className="flex flex-row items-center justify-between">
+        <CardHeader className="flex flex-row items-center justify-between p-[10px] sm:p-6">
           <CardTitle>{staff ? "Chỉnh sửa nhân viên" : "Thêm nhân viên mới"}</CardTitle>
           <Button variant="ghost" size="icon" onClick={onCancel}>
             <X className="h-4 w-4" />
           </Button>
         </CardHeader>
 
-        <CardContent>
+        <CardContent className="p-[10px] sm:p-6">
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Basic Information */}
             <div className="space-y-4">
@@ -279,7 +279,7 @@ export function StaffForm({ staff, onSave, onCancel }: StaffFormProps) {
                     </div>
                     <div className="text-xs text-muted-foreground">
                       {formData.schedule[day.key as keyof typeof formData.schedule].start &&
-                      formData.schedule[day.key as keyof typeof formData.schedule].end
+                        formData.schedule[day.key as keyof typeof formData.schedule].end
                         ? "Có làm việc"
                         : "Nghỉ"}
                     </div>

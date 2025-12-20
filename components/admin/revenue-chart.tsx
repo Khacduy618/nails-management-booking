@@ -39,7 +39,7 @@ export function RevenueChart({ dateRange }: RevenueChartProps) {
   const [modalOpen, setModalOpen] = useState(false)
   const [modalData, setModalData] = useState<any[]>([])
 
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api/'
+  const apiBase = (process.env.NEXT_PUBLIC_API_URL || '/api').replace(/\/$/, '')
 
   useEffect(() => {
     const fetchRevenueData = async () => {
@@ -64,7 +64,7 @@ export function RevenueChart({ dateRange }: RevenueChartProps) {
         }
 
         const response = await fetch(
-          `${apiUrl}admin/revenue?startDate=${format(startDate, 'yyyy-MM-dd')}&endDate=${format(endDate, 'yyyy-MM-dd')}`
+          `${apiBase}/admin/revenue?startDate=${format(startDate, 'yyyy-MM-dd')}&endDate=${format(endDate, 'yyyy-MM-dd')}`
         )
 
         if (!response.ok) {
@@ -119,7 +119,7 @@ export function RevenueChart({ dateRange }: RevenueChartProps) {
     }
 
     fetchRevenueData()
-  }, [dateRange])
+  }, [dateRange, apiBase])
 
   const handleDotClick = (data: ChartData) => {
     const appointments = appointmentsByDate[data.dateKey] || []

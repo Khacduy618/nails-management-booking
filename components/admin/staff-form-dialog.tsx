@@ -44,7 +44,7 @@ export function StaffFormDialog({
         avatarUrl: '',
     })
 
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api/'
+    const apiBase = (process.env.NEXT_PUBLIC_API_URL || '/api').replace(/\/$/, '')
 
     useEffect(() => {
         const loadData = async () => {
@@ -67,7 +67,7 @@ export function StaffFormDialog({
 
                 // Fetch base salary for editing
                 try {
-                    const res = await fetch(`${apiUrl}admin/staff/${staffToEdit.id}/salary`)
+                    const res = await fetch(`${apiBase}/admin/staff/${staffToEdit.id}/salary`)
                     const result = await res.json()
                     if (result.success && result.data.baseSalary) {
                         setFormData((prev) => ({
@@ -96,7 +96,7 @@ export function StaffFormDialog({
         if (isOpen) {
             loadData()
         }
-    }, [staffToEdit, isOpen, apiUrl])
+    }, [staffToEdit, isOpen, apiBase])
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target
@@ -198,7 +198,7 @@ export function StaffFormDialog({
             const formDataUpload = new FormData()
             formDataUpload.append('file', file)
 
-            const res = await fetch(`${apiUrl}upload`, {
+            const res = await fetch(`${apiBase}/upload`, {
                 method: 'POST',
                 body: formDataUpload,
             })
@@ -271,7 +271,7 @@ export function StaffFormDialog({
             }
 
             const method = staffToEdit ? 'PUT' : 'POST'
-            const url = staffToEdit ? `${apiUrl}admin/staff/${staffToEdit.id}` : `${apiUrl}admin/staff`
+            const url = staffToEdit ? `${apiBase}/admin/staff/${staffToEdit.id}` : `${apiBase}/admin/staff`
 
             const res = await fetch(url, {
                 method,

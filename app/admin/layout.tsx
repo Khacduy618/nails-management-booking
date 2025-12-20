@@ -22,11 +22,13 @@ async function ProtectedLayout({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="flex h-screen bg-background">
-      <AdminSidebar />
-      <div className="flex-1 flex flex-col overflow-hidden">
+    <div className="flex min-h-screen bg-background">
+      <AdminSidebar className="hidden lg:flex" />
+      <div className="flex min-h-screen flex-1 flex-col overflow-hidden">
         <AdminHeader />
-        <main className="flex-1 overflow-y-auto p-6">{children}</main>
+        <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+          <div className="mx-auto w-full max-w-7xl">{children}</div>
+        </main>
       </div>
       <Toaster richColors position="top-right" />
     </div>

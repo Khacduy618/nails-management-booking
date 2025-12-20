@@ -29,7 +29,7 @@ export function CustomerAnalytics({ dateRange }: CustomerAnalyticsProps) {
   const [data, setData] = useState<CustomerData | null>(null)
   const [loading, setLoading] = useState(true)
 
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api/'
+  const apiBase = (process.env.NEXT_PUBLIC_API_URL || '/api').replace(/\/$/, '')
 
   useEffect(() => {
     const fetchCustomerAnalytics = async () => {
@@ -52,7 +52,7 @@ export function CustomerAnalytics({ dateRange }: CustomerAnalyticsProps) {
         }
 
         const response = await fetch(
-          `${apiUrl}admin/revenue?startDate=${format(startDate, 'yyyy-MM-dd')}&endDate=${format(endDate, 'yyyy-MM-dd')}`
+          `${apiBase}/admin/revenue?startDate=${format(startDate, 'yyyy-MM-dd')}&endDate=${format(endDate, 'yyyy-MM-dd')}`
         )
 
         if (!response.ok) {
@@ -107,34 +107,34 @@ export function CustomerAnalytics({ dateRange }: CustomerAnalyticsProps) {
     }
 
     fetchCustomerAnalytics()
-  }, [dateRange])
+  }, [dateRange, apiBase])
 
   if (loading) {
     return (
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <Card>
-          <CardHeader>
+          <CardHeader className="p-[10px] sm:p-6">
             <CardTitle className="text-foreground">Tổng quan khách hàng</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-4 p-[10px] sm:p-6">
             {Array.from({ length: 3 }).map((_, i) => (
               <Skeleton key={i} className="h-[80px] w-full" />
             ))}
           </CardContent>
         </Card>
         <Card>
-          <CardHeader>
+          <CardHeader className="p-[10px] sm:p-6">
             <CardTitle className="text-foreground">Hành vi khách hàng</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-[10px] sm:p-6">
             <Skeleton className="h-[250px] w-full" />
           </CardContent>
         </Card>
         <Card>
-          <CardHeader>
+          <CardHeader className="p-[10px] sm:p-6">
             <CardTitle className="text-foreground">Khách hàng VIP</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-3">
+          <CardContent className="space-y-3 p-[10px] sm:p-6">
             {Array.from({ length: 4 }).map((_, i) => (
               <Skeleton key={i} className="h-[70px] w-full" />
             ))}
@@ -152,10 +152,10 @@ export function CustomerAnalytics({ dateRange }: CustomerAnalyticsProps) {
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
       {/* Customer Overview */}
       <Card>
-        <CardHeader>
+        <CardHeader className="p-[10px] sm:p-6">
           <CardTitle className="text-foreground">Tổng quan khách hàng</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-4 p-[10px] sm:p-6">
           <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
             <div className="flex items-center gap-3">
               <UserPlus className="h-5 w-5 text-primary" />
@@ -197,12 +197,12 @@ export function CustomerAnalytics({ dateRange }: CustomerAnalyticsProps) {
 
       {/* Customer Behavior */}
       <Card>
-        <CardHeader>
+        <CardHeader className="p-[10px] sm:p-6">
           <CardTitle className="text-foreground">Hành vi khách hàng</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-4 p-[10px] sm:p-6">
           <div className="text-center p-6 bg-muted rounded-lg">
-            <div className="text-3xl font-bold text-primary mb-2">{data.averageVisitsPerCustomer}</div>
+            <div className="mb-2 text-2xl font-bold text-primary md:text-3xl">{data.averageVisitsPerCustomer}</div>
             <div className="text-sm text-muted-foreground">Lần ghé thăm trung bình</div>
           </div>
 
@@ -241,10 +241,10 @@ export function CustomerAnalytics({ dateRange }: CustomerAnalyticsProps) {
 
       {/* Top Customers */}
       <Card>
-        <CardHeader>
+        <CardHeader className="p-[10px] sm:p-6">
           <CardTitle className="text-foreground">Khách hàng VIP</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-[10px] sm:p-6">
           <div className="space-y-3">
             {data.topCustomers.map((customer: any, index: number) => (
               <div key={customer.name} className="flex items-center justify-between p-3 bg-muted rounded-lg">

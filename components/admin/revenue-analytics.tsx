@@ -80,12 +80,12 @@ export function RevenueAnalytics() {
   const [modalData, setModalData] = useState<any[]>([])
   const [modalLoading, setModalLoading] = useState(false)
 
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api/'
+  const apiBase = (process.env.NEXT_PUBLIC_API_URL || '/api').replace(/\/$/, '')
 
   // Fetch revenue data khi period thay đổi
   useEffect(() => {
     fetchRevenueData()
-  }, [selectedPeriod, dateRange])
+  }, [selectedPeriod, dateRange, apiBase])
 
   const fetchRevenueData = async () => {
     try {
@@ -105,7 +105,7 @@ export function RevenueAnalytics() {
 
       // Lấy dữ liệu kỳ này
       const currentResponse = await fetch(
-        `${apiUrl}admin/revenue?startDate=${format(startDate, 'yyyy-MM-dd')}&endDate=${format(endDate, 'yyyy-MM-dd')}`
+        `${apiBase}/admin/revenue?startDate=${format(startDate, 'yyyy-MM-dd')}&endDate=${format(endDate, 'yyyy-MM-dd')}`
       )
 
       if (!currentResponse.ok) {
@@ -119,7 +119,7 @@ export function RevenueAnalytics() {
       const previousStartDate = subDays(startDate, daysInPeriod)
 
       const previousResponse = await fetch(
-        `${apiUrl}admin/revenue?startDate=${format(previousStartDate, 'yyyy-MM-dd')}&endDate=${format(startDate, 'yyyy-MM-dd')}`
+        `${apiBase}/admin/revenue?startDate=${format(previousStartDate, 'yyyy-MM-dd')}&endDate=${format(startDate, 'yyyy-MM-dd')}`
       )
 
       if (!previousResponse.ok) {
@@ -190,7 +190,7 @@ export function RevenueAnalytics() {
       }
 
       const response = await fetch(
-        `${apiUrl}admin/revenue?startDate=${format(startDate, 'yyyy-MM-dd')}&endDate=${format(endDate, 'yyyy-MM-dd')}`
+        `${apiBase}/admin/revenue?startDate=${format(startDate, 'yyyy-MM-dd')}&endDate=${format(endDate, 'yyyy-MM-dd')}`
       )
 
       if (!response.ok) throw new Error('Failed to fetch service revenue')
@@ -233,7 +233,7 @@ export function RevenueAnalytics() {
       }
 
       const response = await fetch(
-        `${apiUrl}admin/revenue?startDate=${format(startDate, 'yyyy-MM-dd')}&endDate=${format(endDate, 'yyyy-MM-dd')}`
+        `${apiBase}/admin/revenue?startDate=${format(startDate, 'yyyy-MM-dd')}&endDate=${format(endDate, 'yyyy-MM-dd')}`
       )
 
       if (!response.ok) throw new Error('Failed to fetch appointments')
@@ -269,7 +269,7 @@ export function RevenueAnalytics() {
       }
 
       const response = await fetch(
-        `${apiUrl}admin/revenue?startDate=${format(startDate, 'yyyy-MM-dd')}&endDate=${format(endDate, 'yyyy-MM-dd')}`
+        `${apiBase}/admin/revenue?startDate=${format(startDate, 'yyyy-MM-dd')}&endDate=${format(endDate, 'yyyy-MM-dd')}`
       )
 
       if (!response.ok) throw new Error('Failed to fetch customers')
@@ -291,9 +291,8 @@ export function RevenueAnalytics() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold text-foreground">Thống kê doanh thu</h1>
-        <div className="flex items-center gap-4">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4 sm:ml-auto">
           <Select value={selectedPeriod} onValueChange={handlePeriodChange}>
             <SelectTrigger className="w-48">
               <SelectValue />
@@ -319,13 +318,13 @@ export function RevenueAnalytics() {
       </div>
 
       {/* Key Metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={fetchRevenueByService}>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
+        <Card className="cursor-pointer transition-shadow hover:shadow-lg" onClick={fetchRevenueByService}>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 p-[10px] pb-2 sm:p-6 sm:pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">Tổng doanh thu</CardTitle>
             <DollarSign className="h-5 w-5 text-primary" />
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-[10px] sm:p-6">
             {loading ? (
               <Skeleton className="h-8 w-24 mb-2" />
             ) : (
@@ -338,12 +337,12 @@ export function RevenueAnalytics() {
           </CardContent>
         </Card>
 
-        <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={fetchAppointments}>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <Card className="cursor-pointer transition-shadow hover:shadow-lg" onClick={fetchAppointments}>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 p-[10px] pb-2 sm:p-6 sm:pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">Tổng lịch hẹn</CardTitle>
             <Calendar className="h-5 w-5 text-accent" />
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-[10px] sm:p-6">
             {loading ? (
               <Skeleton className="h-8 w-20 mb-2" />
             ) : (
@@ -354,12 +353,12 @@ export function RevenueAnalytics() {
           </CardContent>
         </Card>
 
-        <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={fetchCustomers}>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <Card className="cursor-pointer transition-shadow hover:shadow-lg" onClick={fetchCustomers}>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 p-[10px] pb-2 sm:p-6 sm:pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">Tổng khách hàng</CardTitle>
             <Users className="h-5 w-5 text-secondary" />
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-[10px] sm:p-6">
             {loading ? (
               <Skeleton className="h-8 w-20 mb-2" />
             ) : (
@@ -371,11 +370,11 @@ export function RevenueAnalytics() {
         </Card>
 
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 p-[10px] pb-2 sm:p-6 sm:pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">Giá trị trung bình</CardTitle>
             <BarChart3 className="h-5 w-5 text-primary" />
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-[10px] sm:p-6">
             {loading ? (
               <Skeleton className="h-8 w-24 mb-2" />
             ) : (

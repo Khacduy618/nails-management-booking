@@ -54,8 +54,8 @@ export function AppointmentLookup() {
     setHasSearched(false);
 
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || '';
-      const res = await fetch(`${apiUrl}appointments?phone=${phoneNumber.replace(/\s/g, "")}`);
+      const apiBase = (process.env.NEXT_PUBLIC_API_URL || '/api').replace(/\/$/, '')
+      const res = await fetch(`${apiBase}/appointments?phone=${phoneNumber.replace(/\s/g, '')}`)
 
       const result = await res.json();
       if (!res.ok || !result.success) {

@@ -36,7 +36,7 @@ export function StaffManagement() {
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false)
   const [editingStaff, setEditingStaff] = useState<ApiStaff | null>(null)
 
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api/'
+  const apiBase = (process.env.NEXT_PUBLIC_API_URL || '/api').replace(/\/$/, '')
   const abortControllerRef = useRef<AbortController | null>(null)
 
   useEffect(() => {
@@ -71,7 +71,7 @@ export function StaffManagement() {
         params.append('status', statusFilter)
       } console.log('[StaffManagement] Fetching staff:', { page, search: debouncedSearch, sort: sortBy, status: statusFilter })
 
-      const res = await fetch(`${apiUrl}admin/staff?${params}`, {
+      const res = await fetch(`${apiBase}/admin/staff?${params}`, {
         signal: abortControllerRef.current.signal,
       })
 
@@ -104,7 +104,7 @@ export function StaffManagement() {
         setLoading(false)
       }
     }
-  }, [debouncedSearch, sortBy, statusFilter, apiUrl])
+  }, [debouncedSearch, sortBy, statusFilter, apiBase])
 
   useEffect(() => {
     if (isMounted) {
@@ -156,7 +156,7 @@ export function StaffManagement() {
 
   const handleDeleteStaff = async (staffId: number) => {
     try {
-      const res = await fetch(`${apiUrl}admin/staff/${staffId}`, {
+      const res = await fetch(`${apiBase}/admin/staff/${staffId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: 'inactive' }),
@@ -179,11 +179,8 @@ export function StaffManagement() {
   if (!isMounted) {
     return (
       <div className="w-full space-y-4">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold">Quản Lý Nhân Viên</h2>
-        </div>
         <Card>
-          <CardContent className="pt-6">
+          <CardContent className="p-[10px] sm:p-6">
             <div className="flex justify-center items-center py-8">
               <p className="text-muted-foreground">Đang tải...</p>
             </div>
@@ -196,14 +193,13 @@ export function StaffManagement() {
   return (
     <div className="w-full space-y-4">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold">Quản Lý Nhân Viên</h2>
+      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end">
         <Button
           onClick={() => {
             setEditingStaff(null)
             setFormDialogOpen(true)
           }}
-          className="gap-2"
+          className="gap-2 w-full sm:w-auto sm:ml-auto"
         >
           <Plus className="w-4 h-4" />
           Thêm Nhân Viên
@@ -212,8 +208,8 @@ export function StaffManagement() {
 
       {/* Search and Filter Section */}
       <Card>
-        <CardContent className="pt-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <CardContent className="p-[10px] sm:p-6">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
             {/* Search Input */}
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
@@ -227,7 +223,7 @@ export function StaffManagement() {
 
             {/* Sort Select */}
             <Select value={sortBy} onValueChange={setSortBy}>
-              <SelectTrigger>
+              <SelectTrigger className="w-full">
                 <SelectValue placeholder="Sắp xếp theo..." />
               </SelectTrigger>
               <SelectContent>
@@ -239,7 +235,7 @@ export function StaffManagement() {
 
             {/* Status Filter */}
             <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger>
+              <SelectTrigger className="w-full">
                 <SelectValue placeholder="Lọc theo trạng thái..." />
               </SelectTrigger>
               <SelectContent>
@@ -256,7 +252,7 @@ export function StaffManagement() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {loading ? (
           <Card className="col-span-full">
-            <CardContent className="pt-6">
+            <CardContent className="p-[10px] sm:p-6">
               <div className="flex justify-center items-center py-8">
                 <p className="text-muted-foreground">Đang tải...</p>
               </div>
@@ -264,7 +260,7 @@ export function StaffManagement() {
           </Card>
         ) : staffList.length === 0 ? (
           <Card className="col-span-full">
-            <CardContent className="pt-6">
+            <CardContent className="p-[10px] sm:p-6">
               <div className="flex justify-center items-center py-8">
                 <p className="text-muted-foreground">Chưa có nhân viên nào</p>
               </div>
@@ -273,10 +269,10 @@ export function StaffManagement() {
         ) : (
           staffList.map((member) => (
             <Card key={member.id} className="overflow-hidden">
-              <CardContent className="p-6">
+              <CardContent className="p-[10px] sm:p-6">
                 <div className="space-y-4">
                   {/* Avatar and Basic Info */}
-                  <div className="flex items-center gap-4">
+                  <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
                     <Avatar className="h-16 w-16">
                       <AvatarImage src={member.avatarUrl || undefined} alt={member.name} />
                       <AvatarFallback className="bg-primary text-primary-foreground">
@@ -287,8 +283,8 @@ export function StaffManagement() {
                       </AvatarFallback>
                     </Avatar>
 
-                    <div className="flex-1">
-                      <div className="flex items-center justify-between mb-1">
+                    <div className="flex-1 w-full space-y-1">
+                      <div className="flex flex-wrap items-center justify-between gap-2">
                         <h3 className="font-semibold">{member.name}</h3>
                         <Badge variant={member.status === 'active' ? 'default' : 'secondary'}>
                           {member.status === 'active' ? 'Hoạt Động' : 'Không Hoạt Động'}
@@ -333,7 +329,7 @@ export function StaffManagement() {
                   )}
 
                   {/* Actions */}
-                  <div className="flex gap-2 pt-2 border-t">
+                  <div className="flex flex-wrap gap-2 pt-2 border-t">
                     <Button
                       size="sm"
                       variant="outline"
@@ -341,7 +337,7 @@ export function StaffManagement() {
                         setSelectedStaffId(member.id)
                         setDetailsDialogOpen(true)
                       }}
-                      className="flex-1"
+                      className="flex-1 min-w-[140px]"
                     >
                       <Eye className="h-3 w-3 mr-1" />
                       Xem
@@ -381,8 +377,8 @@ export function StaffManagement() {
       {/* Pagination */}
       {!loading && staffList.length > 0 && (
         <Card>
-          <CardContent className=" flex items-center justify-between">
-            <div className="text-sm text-muted-foreground">
+          <CardContent className="flex flex-col items-center justify-between gap-3 p-[10px] sm:flex-row sm:p-6">
+            <div className="text-sm text-muted-foreground text-center sm:text-left">
               Trang {pagination.page} / {pagination.totalPages} | Tổng: {pagination.total} nhân viên
             </div>
             <div className="flex gap-2">

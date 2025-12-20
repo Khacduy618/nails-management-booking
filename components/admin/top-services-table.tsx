@@ -26,7 +26,7 @@ export function TopServicesTable({ dateRange }: TopServicesTableProps) {
   const [services, setServices] = useState<ServiceItem[]>([])
   const [loading, setLoading] = useState(true)
 
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api/'
+  const apiBase = (process.env.NEXT_PUBLIC_API_URL || '/api').replace(/\/$/, '')
 
   useEffect(() => {
     const fetchTopServices = async () => {
@@ -53,8 +53,8 @@ export function TopServicesTable({ dateRange }: TopServicesTableProps) {
 
         // Fetch both periods
         const [currentResponse, previousResponse] = await Promise.all([
-          fetch(`${apiUrl}admin/revenue?startDate=${format(startDate, 'yyyy-MM-dd')}&endDate=${format(endDate, 'yyyy-MM-dd')}`),
-          fetch(`${apiUrl}admin/revenue?startDate=${format(previousStartDate, 'yyyy-MM-dd')}&endDate=${format(previousEndDate, 'yyyy-MM-dd')}`),
+          fetch(`${apiBase}/admin/revenue?startDate=${format(startDate, 'yyyy-MM-dd')}&endDate=${format(endDate, 'yyyy-MM-dd')}`),
+          fetch(`${apiBase}/admin/revenue?startDate=${format(previousStartDate, 'yyyy-MM-dd')}&endDate=${format(previousEndDate, 'yyyy-MM-dd')}`),
         ])
 
         if (!currentResponse.ok || !previousResponse.ok) {
@@ -118,7 +118,7 @@ export function TopServicesTable({ dateRange }: TopServicesTableProps) {
     }
 
     fetchTopServices()
-  }, [dateRange])
+  }, [dateRange, apiBase])
 
   const getTrendIcon = (growth: number) => {
     if (growth > 0) return <TrendingUp className="h-3 w-3 text-primary" />

@@ -41,6 +41,7 @@ export function ServiceForm({ service, categories, allStaff, onSave, onCancel }:
   const [selectedStaffIds, setSelectedStaffIds] = useState(service?.staffServices?.map(ss => ss.staff.id) || []);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const apiBase = (process.env.NEXT_PUBLIC_API_URL || '/api').replace(/\/$/, '');
 
   // --- LOGIC ĐỒNG BỘ DỮ LIỆU ---
   useEffect(() => {
@@ -100,8 +101,7 @@ export function ServiceForm({ service, categories, allStaff, onSave, onCancel }:
       if (imageFile) {
         const imageData = new FormData();
         imageData.append('file', imageFile);
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || '';
-        const res = await fetch(`${apiUrl}upload`, { method: 'POST', body: imageData });
+        const res = await fetch(`${apiBase}/upload`, { method: 'POST', body: imageData });
         const result = await res.json();
         if (!result.success) throw new Error("Upload ảnh thất bại.");
         finalImageUrl = result.url;
@@ -124,8 +124,8 @@ export function ServiceForm({ service, categories, allStaff, onSave, onCancel }:
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
       <Card className="w-full max-w-2xl">
-        <CardHeader className="flex flex-row items-center justify-between"><CardTitle>{service ? "Chỉnh sửa dịch vụ" : "Thêm dịch vụ mới"}</CardTitle><Button variant="ghost" size="icon" onClick={onCancel}><X className="h-4 w-4" /></Button></CardHeader>
-        <CardContent className="max-h-[80vh] overflow-y-auto">
+        <CardHeader className="flex flex-row items-center justify-between p-[10px] sm:p-6"><CardTitle>{service ? "Chỉnh sửa dịch vụ" : "Thêm dịch vụ mới"}</CardTitle><Button variant="ghost" size="icon" onClick={onCancel}><X className="h-4 w-4" /></Button></CardHeader>
+        <CardContent className="max-h-[80vh] overflow-y-auto p-[10px] sm:p-6">
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2"><Label htmlFor="name">Tên dịch vụ *</Label><Input id="name" value={name} onChange={(e) => setName(e.target.value)} required /></div>
@@ -151,7 +151,7 @@ export function ServiceForm({ service, categories, allStaff, onSave, onCancel }:
                 </SelectContent>
               </Select>
             </div>
-            <div className="space-y-2"><Label>Nhân viên thực hiện</Label><Card className="p-4"><div className="grid grid-cols-2 md:grid-cols-3 gap-4">{allStaff.map((staff) => (<div key={staff.id} className="flex items-center space-x-2"><Checkbox id={`staff-${staff.id}`} checked={selectedStaffIds.includes(staff.id)} onCheckedChange={(checked) => handleStaffChange(staff.id, checked as boolean)} /><Label htmlFor={`staff-${staff.id}`} className="text-sm font-normal cursor-pointer">{staff.name}</Label></div>))}</div></Card></div>
+            <div className="space-y-2"><Label>Nhân viên thực hiện</Label><Card className="p-[10px] sm:p-4"><div className="grid grid-cols-2 gap-4 md:grid-cols-3">{allStaff.map((staff) => (<div key={staff.id} className="flex items-center space-x-2"><Checkbox id={`staff-${staff.id}`} checked={selectedStaffIds.includes(staff.id)} onCheckedChange={(checked) => handleStaffChange(staff.id, checked as boolean)} /><Label htmlFor={`staff-${staff.id}`} className="text-sm font-normal cursor-pointer">{staff.name}</Label></div>))}</div></Card></div>
             <div className="flex gap-2 justify-end pt-4"><Button type="button" variant="outline" onClick={onCancel}>Hủy</Button><Button type="submit" disabled={isSaving}>{isSaving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}{service ? "Cập nhật" : "Thêm dịch vụ"}</Button></div>
           </form>
         </CardContent>

@@ -28,15 +28,15 @@ export function PayrollManagement() {
     const [showPayrollDialog, setShowPayrollDialog] = useState(false)
     const [loading, setLoading] = useState(true)
 
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api/'
+    const apiBase = (process.env.NEXT_PUBLIC_API_URL || '/api').replace(/\/$/, '')
 
     useEffect(() => {
         fetchStaff()
-    }, [])
+    }, [apiBase])
 
     const fetchStaff = async () => {
         try {
-            const res = await fetch(`${apiUrl}admin/staff?limit=100&status=active`)
+            const res = await fetch(`${apiBase}/admin/staff?limit=100&status=active`)
             const result = await res.json()
 
             if (result.success && result.data) {
@@ -90,22 +90,17 @@ export function PayrollManagement() {
     return (
         <div className="space-y-6">
             {/* Header */}
-            <div>
-                <h1 className="text-3xl font-bold flex items-center gap-2">
-                    <DollarSign className="w-8 h-8" />
-                    Quản Lý Lương Nhân Viên
-                </h1>
-                <p className="text-muted-foreground mt-1">
-                    Xem chi tiết lương, hoa hồng và các khoản khác
-                </p>
+            <div className="flex items-center gap-2 text-muted-foreground">
+                <DollarSign className="w-5 h-5" />
+                <p>Xem chi tiết lương, hoa hồng và các khoản khác</p>
             </div>
 
             {/* Filters */}
             <Card>
-                <CardHeader>
+                <CardHeader className="p-[10px] sm:p-6">
                     <CardTitle className="text-lg">Tìm Kiếm</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4">
+                <CardContent className="space-y-4 p-[10px] sm:p-6">
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         {/* Staff Selection */}
                         <div>
@@ -157,8 +152,8 @@ export function PayrollManagement() {
 
             {/* Info Card */}
             {selectedStaff && (
-                <Card className="bg-blue-50 border-blue-200">
-                    <CardContent className="pt-6">
+                <Card className="border-blue-200 bg-blue-50">
+                    <CardContent className="p-[10px] sm:p-6">
                         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                             <div>
                                 <p className="text-sm text-muted-foreground">Nhân Viên</p>
@@ -181,13 +176,13 @@ export function PayrollManagement() {
 
             {/* Hướng dẫn tính lương */}
             <Card>
-                <CardHeader>
+                <CardHeader className="p-[10px] sm:p-6">
                     <CardTitle className="text-lg flex items-center gap-2">
                         <Users className="w-5 h-5" />
                         Hướng Dẫn Tính Lương
                     </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4">
+                <CardContent className="space-y-4 p-[10px] sm:p-6">
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div className="border rounded-lg p-4 bg-green-50 border-green-200">
                             <h4 className="font-semibold text-green-900 mb-2">💼 Giờ Hành Chính - 100%</h4>

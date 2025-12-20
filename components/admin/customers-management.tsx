@@ -42,7 +42,7 @@ export function CustomersManagement() {
         totalPages: 1,
     })
 
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api/'
+    const apiBase = (process.env.NEXT_PUBLIC_API_URL || '/api').replace(/\/$/, '')
     const abortControllerRef = useRef<AbortController | null>(null)
 
     // Only mount on client
@@ -79,7 +79,7 @@ export function CustomersManagement() {
 
             console.log('[Component] Fetching customers:', { page, search: debouncedSearch, sort: sortBy })
 
-            const res = await fetch(`${apiUrl}admin/customers?${params}`, {
+            const res = await fetch(`${apiBase}/admin/customers?${params}`, {
                 signal: abortControllerRef.current.signal,
             })
 
@@ -122,7 +122,7 @@ export function CustomersManagement() {
                 setLoading(false)
             }
         }
-    }, [debouncedSearch, sortBy, apiUrl])
+    }, [debouncedSearch, sortBy, apiBase])
 
     // Initial fetch when component mounts
     useEffect(() => {
@@ -181,11 +181,8 @@ export function CustomersManagement() {
     if (!isMounted) {
         return (
             <div className="w-full space-y-4">
-                <div className="flex items-center justify-between mb-6">
-                    <h2 className="text-2xl font-bold">Quản Lý Khách Hàng</h2>
-                </div>
                 <Card>
-                    <CardContent className="pt-6">
+                    <CardContent className="p-[10px] sm:p-6">
                         <div className="flex justify-center items-center py-8">
                             <p className="text-muted-foreground">Đang tải...</p>
                         </div>
@@ -197,15 +194,10 @@ export function CustomersManagement() {
 
     return (
         <div className="w-full space-y-4">
-            {/* Header */}
-            <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold">Quản Lý Khách Hàng</h2>
-            </div>
-
             {/* Search and Filter Section */}
             <Card>
-                <CardContent className="pt-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <CardContent className="space-y-4 p-[10px] sm:p-6">
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                         {/* Search Input */}
                         <div className="relative">
                             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
@@ -219,7 +211,7 @@ export function CustomersManagement() {
 
                         {/* Sort Select */}
                         <Select value={sortBy} onValueChange={setSortBy}>
-                            <SelectTrigger>
+                            <SelectTrigger className="w-full">
                                 <SelectValue placeholder="Sắp xếp theo..." />
                             </SelectTrigger>
                             <SelectContent>
@@ -235,13 +227,13 @@ export function CustomersManagement() {
 
             {/* Customers Table/Grid */}
             <Card>
-                <CardHeader>
+                <CardHeader className="p-[10px] sm:p-6">
                     <CardTitle>Danh Sách Khách Hàng</CardTitle>
                     <CardDescription>
                         Tổng số khách hàng: {pagination.total}
                     </CardDescription>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="space-y-3 p-[10px] sm:p-6">
                     {loading ? (
                         <div className="flex justify-center items-center py-8">
                             <p className="text-muted-foreground">Đang tải...</p>
@@ -251,7 +243,7 @@ export function CustomersManagement() {
                             <p className="text-muted-foreground">Chưa có khách hàng nào</p>
                         </div>
                     ) : (
-                        <div className="space-y-3 max-h-[600px] overflow-y-auto">
+                        <div className="max-h-[600px] space-y-3 overflow-y-auto">
                             {customers.map((customer) => {
                                 const rank = getRankBadge(customer.serviceCount)
                                 return (

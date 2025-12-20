@@ -62,14 +62,14 @@ export function PayrollDialog({
     const [currentPage, setCurrentPage] = useState(1)
     const ITEMS_PER_PAGE = 12
 
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api/'
+    const apiBase = (process.env.NEXT_PUBLIC_API_URL || '/api').replace(/\/$/, '')
 
     useEffect(() => {
         if (isOpen) {
             setCurrentPage(1)
             fetchPayroll()
         }
-    }, [isOpen, staffId, month])
+    }, [isOpen, staffId, month, apiBase])
 
     const fetchPayroll = async () => {
         setLoading(true)
@@ -80,7 +80,7 @@ export function PayrollDialog({
             const endDate = new Date(year, monthNum + 1, 0).toISOString().split('T')[0]
 
             const res = await fetch(
-                `${apiUrl}admin/payroll?staffId=${staffId}&startDate=${startDate}&endDate=${endDate}`
+                `${apiBase}/admin/payroll?staffId=${staffId}&startDate=${startDate}&endDate=${endDate}`
             )
             const result = await res.json()
 

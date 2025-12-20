@@ -75,26 +75,26 @@ export function StaffDetailsDialog({
     const [baseSalaryNotesInput, setBaseSalaryNotesInput] = useState('')
     const [savingBaseSalary, setSavingBaseSalary] = useState(false)
 
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api/'
+    const apiBase = (process.env.NEXT_PUBLIC_API_URL || '/api').replace(/\/$/, '')
 
     useEffect(() => {
         if (isOpen && staffId) {
             fetchDetails()
         }
-    }, [isOpen, staffId])
+    }, [isOpen, staffId, apiBase])
 
     const fetchDetails = async () => {
         setLoading(true)
 
         try {
-            const res = await fetch(`${apiUrl}admin/staff/${staffId}`)
+            const res = await fetch(`${apiBase}/admin/staff/${staffId}`)
             const result = await res.json()
 
             if (result.success) {
                 setData(result.data)
 
                 // Fetch base salary
-                const salaryRes = await fetch(`${apiUrl}admin/staff/${staffId}/salary`)
+                const salaryRes = await fetch(`${apiBase}/admin/staff/${staffId}/salary`)
                 const salaryResult = await salaryRes.json()
                 if (salaryResult.success && salaryResult.data.baseSalary) {
                     setBaseSalary(salaryResult.data.baseSalary)
@@ -144,7 +144,7 @@ export function StaffDetailsDialog({
 
         setSavingBaseSalary(true)
         try {
-            const res = await fetch(`${apiUrl}admin/staff/${staffId}/salary`, {
+            const res = await fetch(`${apiBase}/admin/staff/${staffId}/salary`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -467,7 +467,7 @@ export function StaffDetailsDialog({
                                 variant="default"
                                 onClick={() => setShowScheduleModal(true)}
                             >
-                                📅 Quản Lý Lịch Làm
+                                📅 Lịch Làm
                             </Button>
                             <Button
                                 type="button"

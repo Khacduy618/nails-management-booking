@@ -60,15 +60,15 @@ export function ServicesManagement() {
   const [editingService, setEditingService] = useState<ServiceDetailsData | null>(null)
   const [viewingService, setViewingService] = useState<ServiceDetailsData | null>(null)
 
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || '';
+  const apiBase = (process.env.NEXT_PUBLIC_API_URL || '/api').replace(/\/$/, '');
 
   // --- API Calls ---
   useEffect(() => {
     async function fetchInitialData() {
       try {
         const [catRes, staffRes] = await Promise.all([
-          fetch(`${apiUrl}service-categories`),
-          fetch(`${apiUrl}admin/staff`),
+          fetch(`${apiBase}/service-categories`),
+          fetch(`${apiBase}/admin/staff`),
         ]);
         const catData = await catRes.json();
         const staffData = await staffRes.json();
@@ -80,7 +80,7 @@ export function ServicesManagement() {
       }
     }
     fetchInitialData();
-  }, [apiUrl]);
+  }, [apiBase]);
 
   useEffect(() => {
     async function fetchServices() {
@@ -93,7 +93,7 @@ export function ServicesManagement() {
         if (debouncedSearchTerm) params.append('search', debouncedSearchTerm);
         if (selectedCategory !== 'all') params.append('category', selectedCategory);
 
-        const res = await fetch(`${apiUrl}admin/services?${params.toString()}`);
+        const res = await fetch(`${apiBase}/admin/services?${params.toString()}`);
         const data = await res.json();
         setServices(data.services || []);
         setPagination(data.pagination || null);
@@ -104,13 +104,13 @@ export function ServicesManagement() {
       }
     }
     fetchServices();
-  }, [debouncedSearchTerm, selectedCategory, sortBy, currentPage, apiUrl]);
+  }, [debouncedSearchTerm, selectedCategory, sortBy, currentPage, apiBase]);
 
   const refreshServices = () => {
     const params = new URLSearchParams();
     if (debouncedSearchTerm) params.append('search', debouncedSearchTerm);
     if (selectedCategory !== 'all') params.append('category', selectedCategory);
-    fetch(`${apiUrl}admin/services?${params.toString()}`)
+    fetch(`${apiBase}/admin/services?${params.toString()}`)
       .then(res => res.json())
       .then(data => setServices(data.services || []));
   }
@@ -124,7 +124,7 @@ export function ServicesManagement() {
   const handleEditService = async (service: ServiceListItem) => {
     // Trước khi mở form, gọi API để lấy dữ liệu chi tiết nhất
     try {
-      const res = await fetch(`${apiUrl}admin/services/${service.id}`);
+      const res = await fetch(`${apiBase}/admin/services/${service.id}`);
       const result = await res.json();
       if (!res.ok) throw new Error(result.error || "Không thể tải chi tiết dịch vụ.");
 
@@ -137,7 +137,7 @@ export function ServicesManagement() {
 
   const handleViewService = async (service: ServiceListItem) => {
     try {
-      const res = await fetch(`${apiUrl}admin/services/${service.id}`);
+      const res = await fetch(`${apiBase}/admin/services/${service.id}`);
       const result = await res.json();
       if (!res.ok) throw new Error(result.error || "Không thể tải chi tiết dịch vụ.");
 
@@ -151,7 +151,7 @@ export function ServicesManagement() {
   const handleDeleteService = async (serviceId: number) => {
     // if (!confirm("Bạn có chắc chắn muốn tạm dừng dịch vụ này không?")) return;
     try {
-      const res = await fetch(`${apiUrl}admin/services/${serviceId}`, { method: 'DELETE' });
+      const res = await fetch(`${apiBase}/admin/services/${serviceId}`, { method: 'DELETE' });
       if (!res.ok) {
         const result = await res.json();
         throw new Error(result.error || "Tạm dừng thất bại.");
@@ -164,7 +164,7 @@ export function ServicesManagement() {
   }
 
   const handleSaveService = async (serviceData: any, isEditing: boolean) => {
-    const url = isEditing ? `${apiUrl}admin/services/${editingService!.id}` : `${apiUrl}admin/services`;
+    const url = isEditing ? `${apiBase}/admin/services/${editingService!.id}` : `${apiBase}/admin/services`;
     const method = isEditing ? 'PUT' : 'POST';
     try {
       const res = await fetch(url, {
@@ -188,13 +188,14 @@ export function ServicesManagement() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold text-foreground">Quản lý dịch vụ</h1>
-        <Button onClick={handleAddService}><Plus className="h-4 w-4 mr-2" />Thêm dịch vụ</Button>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end">
+        <Button className="w-full sm:w-auto sm:ml-auto" onClick={handleAddService}>
+          <Plus className="h-4 w-4 mr-2" />Thêm dịch vụ
+        </Button>
       </div>
 
       <Card>
-        <CardContent className="p-6">
+        <CardContent className="p-[10px] sm:p-6">
           <div className="flex flex-col md:flex-row gap-4 items-start md:items-center">
             {/* Input tìm kiếm */}
             <div className="relative flex-1 w-full md:max-w-xs">
@@ -210,7 +211,7 @@ export function ServicesManagement() {
             <div className="flex gap-2 flex-wrap items-center">
               <Label htmlFor="category-filter" className="text-sm shrink-0">Danh mục:</Label>
               <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                <SelectTrigger id="category-filter" className="w-[200px]">
+                <SelectTrigger id="category-filter" className="w-full sm:w-[200px]">
                   <SelectValue placeholder="Chọn danh mục" />
                 </SelectTrigger>
                 <SelectContent>
@@ -224,7 +225,7 @@ export function ServicesManagement() {
             <div className="md:ml-auto flex items-center gap-2">
               <Label htmlFor="sort-by" className="text-sm shrink-0">Sắp xếp:</Label>
               <Select value={sortBy} onValueChange={setSortBy}>
-                <SelectTrigger id="sort-by" className="w-[180px]">
+                <SelectTrigger id="sort-by" className="w-full sm:w-[180px]">
                   <SelectValue placeholder="Sắp xếp theo..." />
                 </SelectTrigger>
                 <SelectContent>
@@ -241,9 +242,9 @@ export function ServicesManagement() {
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {services.map((service) => (
-                <Card key={service.id} className="overflow-hidden flex flex-col">
-                  <div className="aspect-video bg-muted relative"><img src={service.imageUrl || "/placeholder.svg"} alt={service.name} className="w-full h-full object-cover" /><Badge className={`absolute top-2 right-2 ${service.status === "active" ? "bg-green-600" : "bg-gray-500"}`}>{service.status === "active" ? "Hoạt động" : "Tạm dừng"}</Badge></div>
-                  <CardContent className="p-4 space-y-3 flex flex-col flex-grow relative">
+                <Card key={service.id} className="flex flex-col overflow-hidden">
+                  <div className="relative aspect-video bg-muted"><img src={service.imageUrl || "/placeholder.svg"} alt={service.name} className="h-full w-full object-cover" /><Badge className={`absolute top-2 right-2 ${service.status === "active" ? "bg-green-600" : "bg-gray-500"}`}>{service.status === "active" ? "Hoạt động" : "Tạm dừng"}</Badge></div>
+                  <CardContent className="relative flex flex-col flex-grow space-y-3 p-[10px] sm:p-4">
                     <div className="pr-24">
                       <h3 className="font-semibold text-foreground line-clamp-2">{service.name}</h3>
                     </div>
@@ -268,7 +269,13 @@ export function ServicesManagement() {
                 </Card>
               ))}
             </div>
-            {!isLoading && services.length === 0 && <Card><CardContent className="p-12 text-center"><p className="text-muted-foreground">Không tìm thấy dịch vụ nào.</p></CardContent></Card>}
+            {!isLoading && services.length === 0 && (
+              <Card>
+                <CardContent className="p-[10px] text-center sm:p-12">
+                  <p className="text-muted-foreground">Không tìm thấy dịch vụ nào.</p>
+                </CardContent>
+              </Card>
+            )}
           </>
         )
       }

@@ -40,7 +40,7 @@ export function StaffPerformanceChart({ dateRange }: StaffPerformanceChartProps)
   const [selectedStaffId, setSelectedStaffId] = useState<string | null>(null)
   const [modalData, setModalData] = useState<any[]>([])
 
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api/'
+  const apiBase = (process.env.NEXT_PUBLIC_API_URL || '/api').replace(/\/$/, '')
 
   useEffect(() => {
     const fetchStaffPerformance = async () => {
@@ -63,7 +63,7 @@ export function StaffPerformanceChart({ dateRange }: StaffPerformanceChartProps)
         }
 
         const response = await fetch(
-          `${apiUrl}admin/revenue?startDate=${format(startDate, 'yyyy-MM-dd')}&endDate=${format(endDate, 'yyyy-MM-dd')}`
+          `${apiBase}/admin/revenue?startDate=${format(startDate, 'yyyy-MM-dd')}&endDate=${format(endDate, 'yyyy-MM-dd')}`
         )
 
         if (!response.ok) {
@@ -106,7 +106,7 @@ export function StaffPerformanceChart({ dateRange }: StaffPerformanceChartProps)
     }
 
     fetchStaffPerformance()
-  }, [dateRange])
+  }, [dateRange, apiBase])
 
   const handleBarClick = async (staffName: string) => {
     try {
@@ -125,7 +125,7 @@ export function StaffPerformanceChart({ dateRange }: StaffPerformanceChartProps)
       }
 
       const response = await fetch(
-        `${apiUrl}admin/revenue?startDate=${format(startDate, 'yyyy-MM-dd')}&endDate=${format(endDate, 'yyyy-MM-dd')}`
+        `${apiBase}/admin/revenue?startDate=${format(startDate, 'yyyy-MM-dd')}&endDate=${format(endDate, 'yyyy-MM-dd')}`
       )
 
       if (!response.ok) throw new Error('Failed to fetch staff details')

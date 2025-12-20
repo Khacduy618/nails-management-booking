@@ -31,7 +31,7 @@ export function ServiceRevenueChart({ dateRange }: ServiceRevenueChartProps) {
   const [data, setData] = useState<ServiceData[]>([])
   const [loading, setLoading] = useState(true)
 
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api/'
+  const apiBase = (process.env.NEXT_PUBLIC_API_URL || '/api').replace(/\/$/, '')
 
   useEffect(() => {
     const fetchServiceRevenue = async () => {
@@ -54,7 +54,7 @@ export function ServiceRevenueChart({ dateRange }: ServiceRevenueChartProps) {
         }
 
         const response = await fetch(
-          `${apiUrl}admin/revenue?startDate=${format(startDate, 'yyyy-MM-dd')}&endDate=${format(endDate, 'yyyy-MM-dd')}`
+          `${apiBase}/admin/revenue?startDate=${format(startDate, 'yyyy-MM-dd')}&endDate=${format(endDate, 'yyyy-MM-dd')}`
         )
 
         if (!response.ok) {
@@ -95,7 +95,7 @@ export function ServiceRevenueChart({ dateRange }: ServiceRevenueChartProps) {
     }
 
     fetchServiceRevenue()
-  }, [dateRange])
+  }, [dateRange, apiBase])
 
   if (loading) {
     return (

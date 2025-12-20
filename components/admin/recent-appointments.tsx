@@ -39,7 +39,7 @@ export function RecentAppointments() {
   const [appointments, setAppointments] = useState<Appointment[]>([])
   const [loading, setLoading] = useState(true)
 
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api/'
+  const apiBase = (process.env.NEXT_PUBLIC_API_URL || '/api').replace(/\/$/, '')
 
   useEffect(() => {
     const fetchRecentAppointments = async () => {
@@ -52,7 +52,7 @@ export function RecentAppointments() {
         endDate.setHours(23, 59, 59, 999)
 
         const response = await fetch(
-          `${apiUrl}admin/revenue?startDate=${format(today, 'yyyy-MM-dd')}&endDate=${format(endDate, 'yyyy-MM-dd')}`
+          `${apiBase}/admin/revenue?startDate=${format(today, 'yyyy-MM-dd')}&endDate=${format(endDate, 'yyyy-MM-dd')}`
         )
 
         if (!response.ok) {
@@ -75,7 +75,7 @@ export function RecentAppointments() {
     }
 
     fetchRecentAppointments()
-  }, [apiUrl])
+  }, [apiBase])
 
   if (loading) {
     return (

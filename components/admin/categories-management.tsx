@@ -39,7 +39,6 @@ const ITEMS_PER_PAGE = 12
 
 export function CategoriesManagement() {
     const [categories, setCategories] = useState<Category[]>([])
-    const [inactiveCategories, setInactiveCategories] = useState<Category[]>([])
     const [deletedCategories, setDeletedCategories] = useState<Category[]>([])
     const [isLoading, setIsLoading] = useState(true)
     const [showForm, setShowForm] = useState(false)
@@ -63,12 +62,6 @@ export function CategoriesManagement() {
         total: 0,
         totalPages: 1,
     })
-    const [inactivePagination, setInactivePagination] = useState<PaginationState>({
-        page: 1,
-        limit: ITEMS_PER_PAGE,
-        total: 0,
-        totalPages: 1,
-    })
     const [deletedPagination, setDeletedPagination] = useState<PaginationState>({
         page: 1,
         limit: ITEMS_PER_PAGE,
@@ -76,7 +69,7 @@ export function CategoriesManagement() {
         totalPages: 1,
     })
 
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || ""
+    const apiBase = (process.env.NEXT_PUBLIC_API_URL || "/api").replace(/\/$/, "")
 
     // Fetch active categories with search and pagination
     const fetchCategories = async (page = 1) => {
@@ -88,7 +81,7 @@ export function CategoriesManagement() {
                 search: searchQuery,
                 sort: sortBy,
             })
-            const res = await fetch(`${apiUrl}admin/service-categories?${params}`)
+            const res = await fetch(`${apiBase}/admin/service-categories?${params}`)
             const data = await res.json()
             setCategories(data.data || [])
             setActivePagination({
@@ -105,31 +98,6 @@ export function CategoriesManagement() {
         }
     }
 
-    // Fetch inactive categories with search and pagination
-    const fetchInactiveCategories = async (page = 1) => {
-        try {
-            const params = new URLSearchParams({
-                page: page.toString(),
-                limit: ITEMS_PER_PAGE.toString(),
-                includeInactive: "true",
-                search: searchQuery,
-                sort: sortBy,
-            })
-            const res = await fetch(`${apiUrl}admin/service-categories?${params}`)
-            const data = await res.json()
-            setInactiveCategories(data.data || [])
-            setInactivePagination({
-                page: data.meta?.page || page,
-                limit: ITEMS_PER_PAGE,
-                total: data.meta?.total || 0,
-                totalPages: data.meta?.totalPages || 1,
-            })
-        } catch (error) {
-            console.error(error)
-            toast.error("Không thể tải danh mục không hoạt động")
-        }
-    }
-
     // Fetch deleted categories with search and pagination
     const fetchDeletedCategories = async (page = 1) => {
         try {
@@ -140,7 +108,7 @@ export function CategoriesManagement() {
                 search: searchQuery,
                 sort: sortBy,
             })
-            const res = await fetch(`${apiUrl}admin/service-categories?${params}`)
+            const res = await fetch(`${apiBase}/admin/service-categories?${params}`)
             const data = await res.json()
             setDeletedCategories(data.data || [])
             setDeletedPagination({
@@ -159,14 +127,12 @@ export function CategoriesManagement() {
         const loadData = async () => {
             if (activeTab === "active") {
                 await fetchCategories(1)
-            } else if (activeTab === "inactive") {
-                await fetchInactiveCategories(1)
             } else if (activeTab === "trash") {
                 await fetchDeletedCategories(1)
             }
         }
         loadData()
-    }, [apiUrl, searchQuery, sortBy, activeTab])
+    }, [apiBase, searchQuery, sortBy, activeTab])
 
     // Handle add/edit form
     const handleOpenForm = (category?: Category) => {
@@ -196,7 +162,7 @@ export function CategoriesManagement() {
         try {
             if (editingCategory) {
                 // Update
-                const res = await fetch(`${apiUrl}admin/service-categories/${editingCategory.id}`, {
+                const res = await fetch(`${apiBase}/admin/service-categories/${editingCategory.id}`, {
                     method: "PUT",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
@@ -214,7 +180,7 @@ export function CategoriesManagement() {
                 toast.success("Cập nhật danh mục thành công")
             } else {
                 // Create
-                const res = await fetch(`${apiUrl}admin/service-categories`, {
+                const res = await fetch(`${apiBase}/admin/service-categories`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
@@ -247,7 +213,7 @@ export function CategoriesManagement() {
         setCategoryToDelete(category)
         // Fetch service count for this category
         try {
-            const res = await fetch(`${apiUrl}admin/services?category=${category.id}&limit=1`)
+            const res = await fetch(`${apiBase}/admin/services?category=${category.id}&limit=1`)
             const data = await res.json()
             setServiceCount(data.pagination?.total || 0)
         } catch (error) {
@@ -261,7 +227,7 @@ export function CategoriesManagement() {
 
         setIsDeleting(true)
         try {
-            const res = await fetch(`${apiUrl}admin/service-categories/${categoryToDelete.id}`, {
+            const res = await fetch(`${apiBase}/admin/service-categories/${categoryToDelete.id}`, {
                 method: "DELETE",
             })
 
@@ -287,7 +253,7 @@ export function CategoriesManagement() {
     // Handle restore
     const handleRestore = async (categoryId: number) => {
         try {
-            const res = await fetch(`${apiUrl}admin/service-categories/${categoryId}?action=restore`, {
+            const res = await fetch(`${apiBase}/admin/service-categories/${categoryId}?action=restore`, {
                 method: "POST",
             })
 
@@ -311,7 +277,7 @@ export function CategoriesManagement() {
         setIsTogglingStatus(true)
         try {
             const newStatus = category.status === "active" ? "inactive" : "active"
-            const res = await fetch(`${apiUrl}admin/service-categories/${category.id}`, {
+            const res = await fetch(`${apiBase}/admin/service-categories/${category.id}`, {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
@@ -330,15 +296,14 @@ export function CategoriesManagement() {
             toast.success(
                 newStatus === "active"
                     ? "Kích hoạt danh mục thành công"
-                    : "Vô hiệu hóa danh mục thành công"
+                    : "Tạm dừng danh mục thành công"
             )
 
-            // Refresh both active and inactive tabs
-            if (activeTab === "active") {
-                fetchCategories(activePagination.page)
-            } else if (activeTab === "inactive") {
-                fetchInactiveCategories(inactivePagination.page)
+            // Refresh current tab after toggle
+            if (activeTab === "trash") {
+                fetchDeletedCategories(deletedPagination.page)
             }
+            fetchCategories(activePagination.page)
         } catch (error) {
             console.error(error)
             toast.error("Lỗi hệ thống")
@@ -348,47 +313,56 @@ export function CategoriesManagement() {
     }
 
     return (
-        <div className="w-full space-y-4">
+        <div className="space-y-6">
             <Tabs value={activeTab} onValueChange={setActiveTab}>
-                <TabsList>
-                    <TabsTrigger value="active">Danh mục hoạt động</TabsTrigger>
-                    <TabsTrigger value="inactive">Danh mục không hoạt động</TabsTrigger>
-                    <TabsTrigger value="trash">Thùng rác</TabsTrigger>
+                <TabsList className="flex w-full flex-row gap-2 bg-transparent p-0">
+                    <TabsTrigger
+                        value="active"
+                        className="flex-1 rounded-lg border border-transparent bg-muted/60 px-4 py-2 text-sm font-medium data-[state=active]:border-primary data-[state=active]:bg-primary/10"
+                    >
+                        Danh mục hoạt động
+                    </TabsTrigger>
+                    <TabsTrigger
+                        value="trash"
+                        className="flex-1 rounded-lg border border-transparent bg-muted/60 px-4 py-2 text-sm font-medium data-[state=active]:border-destructive data-[state=active]:bg-destructive/10"
+                    >
+                        Thùng rác
+                    </TabsTrigger>
                 </TabsList>
 
                 {/* Danh mục hoạt động */}
                 <TabsContent value="active" className="space-y-4">
-                    <div className="flex justify-between items-center">
-                        <h2 className="text-2xl font-bold">Quản lý danh mục dịch vụ</h2>
-                        <Button onClick={() => handleOpenForm()}>
-                            <Plus className="w-4 h-4 mr-2" />
+                    <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end">
+                        <Button onClick={() => handleOpenForm()} className="w-full gap-2 sm:w-auto sm:ml-auto">
+                            <Plus className="h-4 w-4" />
                             Thêm danh mục mới
                         </Button>
                     </div>
 
                     {/* Search, Sort Controls */}
                     <Card>
-                        <CardContent className="pt-6 space-y-4">
-                            <div className="flex gap-3 flex-wrap">
-                                <div className="flex-1 min-w-64">
-                                    <div className="relative">
-                                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                                        <Input
-                                            placeholder="Tìm kiếm danh mục..."
-                                            value={searchQuery}
-                                            onChange={(e) => {
-                                                setSearchQuery(e.target.value)
-                                                setActivePagination({ ...activePagination, page: 1 })
-                                            }}
-                                            className="pl-10"
-                                        />
-                                    </div>
+                        <CardContent className="space-y-4 p-[10px] sm:p-6">
+                            <div className="flex flex-col gap-4 md:flex-row md:items-center">
+                                <div className="relative w-full md:flex-1">
+                                    <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                                    <Input
+                                        placeholder="Tìm kiếm danh mục..."
+                                        value={searchQuery}
+                                        onChange={(e) => {
+                                            setSearchQuery(e.target.value)
+                                            setActivePagination({ ...activePagination, page: 1 })
+                                        }}
+                                        className="pl-10"
+                                    />
                                 </div>
-                                <Select value={sortBy} onValueChange={(value: any) => {
-                                    setSortBy(value)
-                                    setActivePagination({ ...activePagination, page: 1 })
-                                }}>
-                                    <SelectTrigger className="w-40">
+                                <Select
+                                    value={sortBy}
+                                    onValueChange={(value: any) => {
+                                        setSortBy(value)
+                                        setActivePagination({ ...activePagination, page: 1 })
+                                    }}
+                                >
+                                    <SelectTrigger className="w-full md:w-48">
                                         <SelectValue placeholder="Sắp xếp" />
                                     </SelectTrigger>
                                     <SelectContent>
@@ -402,19 +376,19 @@ export function CategoriesManagement() {
 
                     {isLoading ? (
                         <Card>
-                            <CardContent className="py-12 text-center">
+                            <CardContent className="p-[10px] text-center sm:p-6">
                                 <p>Đang tải dữ liệu...</p>
                             </CardContent>
                         </Card>
                     ) : categories.length === 0 ? (
                         <Card>
-                            <CardContent className="py-12 text-center">
-                                <p className="text-gray-500 mb-4">
+                            <CardContent className="p-[10px] text-center sm:p-6">
+                                <p className="mb-4 text-muted-foreground">
                                     {searchQuery ? "Không tìm thấy danh mục nào" : "Chưa có danh mục nào"}
                                 </p>
                                 {!searchQuery && (
-                                    <Button onClick={() => handleOpenForm()}>
-                                        <Plus className="w-4 h-4 mr-2" />
+                                    <Button onClick={() => handleOpenForm()} className="w-full gap-2 sm:w-auto">
+                                        <Plus className="h-4 w-4" />
                                         Tạo danh mục đầu tiên
                                     </Button>
                                 )}
@@ -422,24 +396,25 @@ export function CategoriesManagement() {
                         </Card>
                     ) : (
                         <>
-                            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                            <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
                                 {categories.map((category) => (
-                                    <Card key={category.id} className="hover:shadow-md transition-shadow">
-                                        <CardHeader>
+                                    <Card key={category.id} className="transition-shadow hover:shadow-lg">
+                                        <CardHeader className="space-y-1 border-b border-border/60 p-[10px] sm:p-6">
                                             <CardTitle className="text-lg">{category.name}</CardTitle>
                                         </CardHeader>
-                                        <CardContent className="space-y-4">
+                                        <CardContent className="space-y-4 p-[10px] sm:p-6">
                                             {category.description && (
-                                                <p className="text-sm text-gray-600">{category.description}</p>
+                                                <p className="text-sm text-muted-foreground">{category.description}</p>
                                             )}
-                                            <div className="flex gap-2 pt-4 flex-wrap">
+                                            <div className="flex flex-wrap gap-2 border-t pt-4">
                                                 <Button
                                                     variant="outline"
                                                     size="sm"
                                                     onClick={() => handleOpenForm(category)}
                                                     disabled={isTogglingStatus}
+                                                    className="flex-1 min-w-[140px]"
                                                 >
-                                                    <Edit2 className="w-4 h-4 mr-1" />
+                                                    <Edit2 className="mr-1 h-3 w-3" />
                                                     Sửa
                                                 </Button>
                                                 <Button
@@ -447,16 +422,18 @@ export function CategoriesManagement() {
                                                     size="sm"
                                                     onClick={() => handleToggleStatus(category)}
                                                     disabled={isTogglingStatus}
+                                                    className="flex-1 min-w-[140px]"
                                                 >
-                                                    Vô hiệu hóa
+                                                    {category.status === "active" ? "Tạm dừng" : "Kích hoạt"}
                                                 </Button>
                                                 <Button
                                                     variant="destructive"
                                                     size="sm"
                                                     onClick={() => handleOpenDeleteDialog(category)}
                                                     disabled={isTogglingStatus}
+                                                    className="flex-1 min-w-[140px]"
                                                 >
-                                                    <Trash2 className="w-4 h-4 mr-1" />
+                                                    <Trash2 className="mr-1 h-3 w-3" />
                                                     Xóa
                                                 </Button>
                                             </div>
@@ -467,18 +444,18 @@ export function CategoriesManagement() {
 
                             {/* Pagination */}
                             {activePagination.totalPages > 1 && (
-                                <div className="flex items-center justify-between mt-6 px-2">
-                                    <div className="text-sm text-muted-foreground">
+                                <div className="mt-6 flex flex-col gap-3 rounded-lg border border-border/40 bg-muted/20 p-[10px] sm:flex-row sm:items-center sm:justify-between sm:p-4">
+                                    <div className="text-center text-sm text-muted-foreground sm:text-left">
                                         Trang {activePagination.page} / {activePagination.totalPages} | Tổng: {activePagination.total} danh mục
                                     </div>
-                                    <div className="flex gap-2">
+                                    <div className="flex justify-center gap-2 sm:justify-end">
                                         <Button
                                             variant="outline"
                                             size="sm"
                                             onClick={() => fetchCategories(activePagination.page - 1)}
                                             disabled={activePagination.page === 1}
                                         >
-                                            <ChevronLeft className="w-4 h-4" />
+                                            <ChevronLeft className="h-4 w-4" />
                                         </Button>
                                         <Button
                                             variant="outline"
@@ -486,7 +463,7 @@ export function CategoriesManagement() {
                                             onClick={() => fetchCategories(activePagination.page + 1)}
                                             disabled={activePagination.page === activePagination.totalPages}
                                         >
-                                            <ChevronRight className="w-4 h-4" />
+                                            <ChevronRight className="h-4 w-4" />
                                         </Button>
                                     </div>
                                 </div>
@@ -494,164 +471,33 @@ export function CategoriesManagement() {
                         </>
                     )}
                 </TabsContent>
-
-                {/* Danh mục không hoạt động */}
-                <TabsContent value="inactive" className="space-y-4">
-                    <h2 className="text-2xl font-bold">Danh mục không hoạt động</h2>
-
-                    {/* Search, Sort Controls */}
-                    <Card>
-                        <CardContent className="pt-6 space-y-4">
-                            <div className="flex gap-3 flex-wrap">
-                                <div className="flex-1 min-w-64">
-                                    <div className="relative">
-                                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                                        <Input
-                                            placeholder="Tìm kiếm danh mục..."
-                                            value={searchQuery}
-                                            onChange={(e) => {
-                                                setSearchQuery(e.target.value)
-                                                setInactivePagination({ ...inactivePagination, page: 1 })
-                                            }}
-                                            className="pl-10"
-                                        />
-                                    </div>
-                                </div>
-                                <Select value={sortBy} onValueChange={(value: any) => {
-                                    setSortBy(value)
-                                    setInactivePagination({ ...inactivePagination, page: 1 })
-                                }}>
-                                    <SelectTrigger className="w-40">
-                                        <SelectValue placeholder="Sắp xếp" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="name">Theo tên (A-Z)</SelectItem>
-                                        <SelectItem value="created">Mới nhất</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                            </div>
-                        </CardContent>
-                    </Card>
-
-                    {isLoading ? (
-                        <Card>
-                            <CardContent className="py-12 text-center">
-                                <p>Đang tải dữ liệu...</p>
-                            </CardContent>
-                        </Card>
-                    ) : inactiveCategories.length === 0 ? (
-                        <Card>
-                            <CardContent className="py-12 text-center">
-                                <p className="text-gray-500">
-                                    {searchQuery ? "Không tìm thấy danh mục nào" : "Chưa có danh mục không hoạt động"}
-                                </p>
-                            </CardContent>
-                        </Card>
-                    ) : (
-                        <>
-                            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                                {inactiveCategories.map((category) => (
-                                    <Card key={category.id} className="opacity-60 hover:opacity-80 transition-opacity bg-gray-50">
-                                        <CardHeader>
-                                            <div className="flex justify-between items-start">
-                                                <CardTitle className="text-lg text-gray-600">{category.name}</CardTitle>
-                                                <Badge variant="outline" className="bg-yellow-100">Không hoạt động</Badge>
-                                            </div>
-                                        </CardHeader>
-                                        <CardContent className="space-y-4">
-                                            {category.description && (
-                                                <p className="text-sm text-gray-600">{category.description}</p>
-                                            )}
-                                            <div className="flex gap-2 pt-4 flex-wrap">
-                                                <Button
-                                                    variant="outline"
-                                                    size="sm"
-                                                    onClick={() => handleOpenForm(category)}
-                                                    disabled={isTogglingStatus}
-                                                >
-                                                    <Edit2 className="w-4 h-4 mr-1" />
-                                                    Sửa
-                                                </Button>
-                                                <Button
-                                                    variant="default"
-                                                    size="sm"
-                                                    onClick={() => handleToggleStatus(category)}
-                                                    disabled={isTogglingStatus}
-                                                >
-                                                    Kích hoạt
-                                                </Button>
-                                                <Button
-                                                    variant="destructive"
-                                                    size="sm"
-                                                    onClick={() => handleOpenDeleteDialog(category)}
-                                                    disabled={isTogglingStatus}
-                                                >
-                                                    <Trash2 className="w-4 h-4 mr-1" />
-                                                    Xóa
-                                                </Button>
-                                            </div>
-                                        </CardContent>
-                                    </Card>
-                                ))}
-                            </div>
-
-                            {/* Pagination */}
-                            {inactivePagination.totalPages > 1 && (
-                                <div className="flex items-center justify-between mt-6 px-2">
-                                    <div className="text-sm text-muted-foreground">
-                                        Trang {inactivePagination.page} / {inactivePagination.totalPages} | Tổng: {inactivePagination.total} danh mục
-                                    </div>
-                                    <div className="flex gap-2">
-                                        <Button
-                                            variant="outline"
-                                            size="sm"
-                                            onClick={() => fetchInactiveCategories(inactivePagination.page - 1)}
-                                            disabled={inactivePagination.page === 1}
-                                        >
-                                            <ChevronLeft className="w-4 h-4" />
-                                        </Button>
-                                        <Button
-                                            variant="outline"
-                                            size="sm"
-                                            onClick={() => fetchInactiveCategories(inactivePagination.page + 1)}
-                                            disabled={inactivePagination.page === inactivePagination.totalPages}
-                                        >
-                                            <ChevronRight className="w-4 h-4" />
-                                        </Button>
-                                    </div>
-                                </div>
-                            )}
-                        </>
-                    )}
-                </TabsContent>
-
                 {/* Thùng rác */}
                 <TabsContent value="trash" className="space-y-4">
-                    <h2 className="text-2xl font-bold">Thùng rác danh mục</h2>
 
                     {/* Search, Sort Controls */}
                     <Card>
-                        <CardContent className="pt-6 space-y-4">
-                            <div className="flex gap-3 flex-wrap">
-                                <div className="flex-1 min-w-64">
-                                    <div className="relative">
-                                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                                        <Input
-                                            placeholder="Tìm kiếm danh mục..."
-                                            value={searchQuery}
-                                            onChange={(e) => {
-                                                setSearchQuery(e.target.value)
-                                                setDeletedPagination({ ...deletedPagination, page: 1 })
-                                            }}
-                                            className="pl-10"
-                                        />
-                                    </div>
+                        <CardContent className="space-y-4 p-[10px] sm:p-6">
+                            <div className="flex flex-col gap-4 md:flex-row md:items-center">
+                                <div className="relative w-full md:flex-1">
+                                    <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                                    <Input
+                                        placeholder="Tìm kiếm danh mục..."
+                                        value={searchQuery}
+                                        onChange={(e) => {
+                                            setSearchQuery(e.target.value)
+                                            setDeletedPagination({ ...deletedPagination, page: 1 })
+                                        }}
+                                        className="pl-10"
+                                    />
                                 </div>
-                                <Select value={sortBy} onValueChange={(value: any) => {
-                                    setSortBy(value)
-                                    setDeletedPagination({ ...deletedPagination, page: 1 })
-                                }}>
-                                    <SelectTrigger className="w-40">
+                                <Select
+                                    value={sortBy}
+                                    onValueChange={(value: any) => {
+                                        setSortBy(value)
+                                        setDeletedPagination({ ...deletedPagination, page: 1 })
+                                    }}
+                                >
+                                    <SelectTrigger className="w-full md:w-48">
                                         <SelectValue placeholder="Sắp xếp" />
                                     </SelectTrigger>
                                     <SelectContent>
@@ -665,35 +511,35 @@ export function CategoriesManagement() {
 
                     {isLoading ? (
                         <Card>
-                            <CardContent className="py-12 text-center">
+                            <CardContent className="p-[10px] text-center sm:p-6">
                                 <p>Đang tải dữ liệu...</p>
                             </CardContent>
                         </Card>
                     ) : deletedCategories.length === 0 ? (
                         <Card>
-                            <CardContent className="py-12 text-center">
-                                <p className="text-gray-500">
+                            <CardContent className="p-[10px] text-center sm:p-6">
+                                <p className="text-muted-foreground">
                                     {searchQuery ? "Không tìm thấy danh mục nào" : "Chưa có danh mục bị xóa"}
                                 </p>
                             </CardContent>
                         </Card>
                     ) : (
                         <>
-                            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                            <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
                                 {deletedCategories.map((category) => (
-                                    <Card key={category.id} className="opacity-75 hover:opacity-100 transition-opacity">
-                                        <CardHeader>
-                                            <div className="flex justify-between items-start">
+                                    <Card key={category.id} className="opacity-80 transition-opacity hover:opacity-100">
+                                        <CardHeader className="space-y-1 border-b border-border/60 p-[10px] sm:p-6">
+                                            <div className="flex items-start justify-between gap-2">
                                                 <CardTitle className="text-lg line-through">{category.name}</CardTitle>
                                                 <Badge variant="secondary">Đã xóa</Badge>
                                             </div>
                                         </CardHeader>
-                                        <CardContent className="space-y-4">
+                                        <CardContent className="space-y-4 p-[10px] sm:p-6">
                                             {category.description && (
-                                                <p className="text-sm text-gray-600">{category.description}</p>
+                                                <p className="text-sm text-muted-foreground">{category.description}</p>
                                             )}
                                             {category.deletedAt && (
-                                                <p className="text-xs text-gray-500">
+                                                <p className="text-xs text-muted-foreground">
                                                     Xóa lúc: {new Date(category.deletedAt).toLocaleString("vi-VN")}
                                                 </p>
                                             )}
@@ -701,9 +547,9 @@ export function CategoriesManagement() {
                                                 variant="outline"
                                                 size="sm"
                                                 onClick={() => handleRestore(category.id)}
-                                                className="w-full"
+                                                className="w-full gap-2"
                                             >
-                                                <RotateCcw className="w-4 h-4 mr-2" />
+                                                <RotateCcw className="h-4 w-4" />
                                                 Khôi phục
                                             </Button>
                                         </CardContent>
@@ -713,18 +559,18 @@ export function CategoriesManagement() {
 
                             {/* Pagination */}
                             {deletedPagination.totalPages > 1 && (
-                                <div className="flex items-center justify-between mt-6 px-2">
-                                    <div className="text-sm text-muted-foreground">
+                                <div className="mt-6 flex flex-col gap-3 rounded-lg border border-border/40 bg-muted/20 p-[10px] sm:flex-row sm:items-center sm:justify-between sm:p-4">
+                                    <div className="text-center text-sm text-muted-foreground sm:text-left">
                                         Trang {deletedPagination.page} / {deletedPagination.totalPages} | Tổng: {deletedPagination.total} danh mục
                                     </div>
-                                    <div className="flex gap-2">
+                                    <div className="flex justify-center gap-2 sm:justify-end">
                                         <Button
                                             variant="outline"
                                             size="sm"
                                             onClick={() => fetchDeletedCategories(deletedPagination.page - 1)}
                                             disabled={deletedPagination.page === 1}
                                         >
-                                            <ChevronLeft className="w-4 h-4" />
+                                            <ChevronLeft className="h-4 w-4" />
                                         </Button>
                                         <Button
                                             variant="outline"
@@ -732,7 +578,7 @@ export function CategoriesManagement() {
                                             onClick={() => fetchDeletedCategories(deletedPagination.page + 1)}
                                             disabled={deletedPagination.page === deletedPagination.totalPages}
                                         >
-                                            <ChevronRight className="w-4 h-4" />
+                                            <ChevronRight className="h-4 w-4" />
                                         </Button>
                                     </div>
                                 </div>

@@ -48,7 +48,7 @@ export function HeroSection() {
   }, [])
 
   return (
-    <section className="relative py-20 lg:py-32 bg-gradient-to-br from-card to-background">
+    <section className="relative py-4 sm:py-4 from-card to-background">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           {/* Content */}

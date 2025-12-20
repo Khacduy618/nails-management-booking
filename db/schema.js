@@ -15,12 +15,12 @@ import {
   jsonb,
 } from 'drizzle-orm/pg-core'
 
-const roleEnum = pgEnum('role', ['customer', 'staff', 'admin'])
-const staffStatusEnum = pgEnum('staff_status', ['active', 'inactive'])
-const categoryStatusEnum = pgEnum('category_status', ['active', 'deleted', 'inactive'])
-const serviceStatusEnum = pgEnum('service_status', ['active', 'archived'])
-const payrollStatusEnum = pgEnum('payroll_status', ['pending', 'calculated', 'paid', 'cancelled'])
-const appointmentStatusEnum = pgEnum('appointment_status', ['pending', 'confirmed', 'completed', 'cancelled', 'in-progress'])
+export const roleEnum = pgEnum('role', ['customer', 'staff', 'admin'])
+export const staffStatusEnum = pgEnum('staff_status', ['active', 'inactive'])
+export const categoryStatusEnum = pgEnum('category_status', ['active', 'deleted', 'inactive'])
+export const serviceStatusEnum = pgEnum('service_status', ['active', 'archived'])
+export const payrollStatusEnum = pgEnum('payroll_status', ['pending', 'calculated', 'paid', 'cancelled'])
+export const appointmentStatusEnum = pgEnum('appointment_status', ['pending', 'confirmed', 'completed', 'cancelled', 'in-progress'])
 
 // --- Bảng Users (Authentication) ---
 export const users = pgTable('users', {

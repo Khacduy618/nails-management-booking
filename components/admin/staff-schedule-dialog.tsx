@@ -52,7 +52,7 @@ export function StaffScheduleDialog({
     const [saving, setSaving] = useState(false)
     const [schedules, setSchedules] = useState<ScheduleEntry[]>([])
 
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api/'
+    const apiBase = (process.env.NEXT_PUBLIC_API_URL || '/api').replace(/\/$/, '')
 
     // Initialize schedules for all 7 days
     useEffect(() => {
@@ -75,7 +75,7 @@ export function StaffScheduleDialog({
     const fetchSchedules = async () => {
         setLoading(true)
         try {
-            const res = await fetch(`${apiUrl}admin/staff/${staffId}/schedule`)
+            const res = await fetch(`${apiBase}/admin/staff/${staffId}/schedule`)
             const result = await res.json()
 
             if (result.success && result.data && result.data.length > 0) {
@@ -118,7 +118,7 @@ export function StaffScheduleDialog({
                     endTime: s.endTime,
                 }))
 
-            const res = await fetch(`${apiUrl}admin/staff/${staffId}/schedule`, {
+            const res = await fetch(`${apiBase}/admin/staff/${staffId}/schedule`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ schedules: payload }),
@@ -153,7 +153,7 @@ export function StaffScheduleDialog({
             <DialogContent className="sm:max-w-[600px]">
                 <DialogHeader>
                     <DialogTitle>
-                        📅 Quản Lý Lịch Làm - {staffName}
+                        📅 Lịch Làm - {staffName}
                     </DialogTitle>
                 </DialogHeader>
 
