@@ -19,7 +19,7 @@ const fallbackUrl = (() => {
   return `postgresql://${encodeURIComponent(user)}:${encodeURIComponent(password)}@${host}:${port}/${database}`
 })()
 
-const connectionString = process.env.DATABASE_URL || process.env.POSTGRES_URL || fallbackUrl
+const connectionString = process.env.DATABASE_URL
 
 // Allow build to proceed without DB connection (for static generation phases that don't need DB)
 if (!connectionString) {
