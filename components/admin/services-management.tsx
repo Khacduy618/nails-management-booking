@@ -68,12 +68,12 @@ export function ServicesManagement() {
       try {
         const [catRes, staffRes] = await Promise.all([
           fetch(`${apiBase}/service-categories`),
-          fetch(`${apiBase}/admin/staff`),
+          fetch(`${apiBase}/admin/staff?limit=100`),
         ]);
         const catData = await catRes.json();
         const staffData = await staffRes.json();
         setCategories(catData.categories || []);
-        setAllStaff(staffData.staff || []);
+        setAllStaff(staffData.data || []);
       } catch (e) {
         console.error("Failed to fetch initial data for form");
         toast.error("Không thể tải dữ liệu cho form.");
