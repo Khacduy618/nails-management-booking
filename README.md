@@ -215,9 +215,19 @@ nailsapp/
     NEXTAUTH_URL="http://localhost:3000"
     NEXTAUTH_SECRET="your-super-secret-key" # Chạy `openssl rand -base64 32` để tạo
 
+    # SMTP (gửi email xác nhận)
+    SMTP_HOST="smtp.your-provider.com"
+    SMTP_PORT=587
+    SMTP_SECURE=false
+    SMTP_USER="no-reply@your-domain.com"
+    SMTP_PASS="app-password-or-api-key"
+    SMTP_FROM="Nails Manager <no-reply@your-domain.com>"
+
     # Tùy chọn
     DEBUG_BOOKING=true
     ```
+
+    > ⚠️ Nếu không cấu hình SMTP, hệ thống sẽ bỏ qua bước gửi email và ghi cảnh báo trong logs.
 
 4.  **Thiết lập Database**
     Đẩy cấu trúc bảng lên Neon và tạo dữ liệu mẫu:

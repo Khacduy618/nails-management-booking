@@ -1,8 +1,8 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { appointments, services, staff, appointmentServices, users } from "@/db/schema";
-import { sql, sum, count, eq, and, gte, lte } from "drizzle-orm";
-import { parseISO, endOfDay } from "date-fns";
+import { sql, sum, count, eq, and, gte, lte, type SQL } from "drizzle-orm";
+import { parseISO, format } from "date-fns";
 
 export async function GET(request: NextRequest) {
     try {
@@ -11,11 +11,12 @@ export async function GET(request: NextRequest) {
         const startDate = searchParams.get("startDate");
         const endDate = searchParams.get("endDate");
 
-        const dateConditions = [];
+        const dateConditions: SQL[] = [];
         if (startDate) {
             try {
                 const parsedStart = parseISO(startDate);
-                dateConditions.push(gte(appointments.appointmentDate, parsedStart));
+                const normalizedStart = format(parsedStart, "yyyy-MM-dd");
+                dateConditions.push(gte(appointments.appointmentDate, normalizedStart));
             } catch (e) {
                 console.error('Invalid startDate:', startDate);
             }
@@ -23,15 +24,17 @@ export async function GET(request: NextRequest) {
         if (endDate) {
             try {
                 const parsedEnd = parseISO(endDate);
-                const eod = endOfDay(parsedEnd);
-                dateConditions.push(lte(appointments.appointmentDate, eod));
+                const normalizedEnd = format(parsedEnd, "yyyy-MM-dd");
+                dateConditions.push(lte(appointments.appointmentDate, normalizedEnd));
             } catch (e) {
                 console.error('Invalid endDate:', endDate);
             }
         }
 
+        const hasDateFilters = dateConditions.length > 0;
+
         // 1. Tính tổng quan
-        const overviewResult = await db
+        const overviewBaseQuery = db
             .select({
                 totalRevenue: sql<number>`COALESCE(sum(case when ${appointments.status} = 'completed' then ${appointmentServices.priceAtBooking} else 0 end), 0)`,
                 totalAppointments: sql<number>`count(case when ${appointments.status} != 'cancelled' then 1 end)`,
@@ -39,8 +42,15 @@ export async function GET(request: NextRequest) {
                 totalCustomers: sql<number>`count(distinct ${appointments.customerPhone})`,
             })
             .from(appointments)
-            .leftJoin(appointmentServices, eq(appointments.id, appointmentServices.appointmentId))
-            .where(and(...dateConditions));
+            .leftJoin(appointmentServices, eq(appointments.id, appointmentServices.appointmentId));
+
+        const overviewResult = await (hasDateFilters
+            ? overviewBaseQuery.where(and(...dateConditions))
+            : overviewBaseQuery);
+
+        const completedWithDates = hasDateFilters
+            ? and(eq(appointments.status, 'completed'), ...dateConditions)
+            : eq(appointments.status, 'completed');
 
         // 2. Doanh thu theo dịch vụ
         const serviceRevenue = await db
@@ -53,7 +63,7 @@ export async function GET(request: NextRequest) {
             .from(appointments)
             .innerJoin(appointmentServices, eq(appointments.id, appointmentServices.appointmentId))
             .leftJoin(services, eq(appointmentServices.serviceId, services.id))
-            .where(and(eq(appointments.status, 'completed'), ...dateConditions))
+            .where(completedWithDates)
             .groupBy(services.id, services.name)
             .orderBy(sql`COALESCE(sum(${appointmentServices.priceAtBooking}), 0) desc`);
 
@@ -69,7 +79,7 @@ export async function GET(request: NextRequest) {
             .innerJoin(appointmentServices, eq(appointments.id, appointmentServices.appointmentId))
             .leftJoin(staff, eq(appointmentServices.staffId, staff.id))
             .leftJoin(users, eq(staff.userId, users.id))
-            .where(and(eq(appointments.status, 'completed'), ...dateConditions))
+            .where(completedWithDates)
             .groupBy(staff.id, users.email)
             .orderBy(sql`COALESCE(sum(${appointmentServices.priceAtBooking}), 0) desc`);
 
@@ -94,7 +104,7 @@ export async function GET(request: NextRequest) {
             .leftJoin(services, eq(appointmentServices.serviceId, services.id))
             .leftJoin(staff, eq(appointmentServices.staffId, staff.id))
             .leftJoin(users, eq(staff.userId, users.id))
-            .where(and(eq(appointments.status, 'completed'), ...dateConditions))
+            .where(completedWithDates)
             .orderBy(appointments.appointmentDate);
 
         // Transform to appointments array for frontend
@@ -124,7 +134,7 @@ export async function GET(request: NextRequest) {
             })
             .from(appointments)
             .leftJoin(appointmentServices, eq(appointments.id, appointmentServices.appointmentId))
-            .where(and(eq(appointments.status, 'completed'), ...dateConditions))
+            .where(completedWithDates)
             .orderBy(appointments.customerId);
 
         // Group by customer and sum spending

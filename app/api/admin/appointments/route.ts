@@ -49,12 +49,13 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    const whereClause = and(...conditions.filter(Boolean));
+    const activeConditions = conditions.filter((condition): condition is SQL => Boolean(condition));
+    const whereClause = activeConditions.length ? and(...activeConditions) : undefined;
 
     // --- Truy vấn dữ liệu và tổng số lượng song song ---
     const [allAppointments, totalResult] = await Promise.all([
       db.query.appointments.findMany({
-        where: whereClause,
+        ...(whereClause ? { where: whereClause } : {}),
         with: {
           appointmentServices: {
             with: {
@@ -73,7 +74,10 @@ export async function GET(request: NextRequest) {
         limit: limit,
         offset: (page - 1) * limit,
       }),
-      db.select({ total: count() }).from(appointments).where(whereClause)
+      (() => {
+        const totalBaseQuery = db.select({ total: count() }).from(appointments);
+        return whereClause ? totalBaseQuery.where(whereClause) : totalBaseQuery;
+      })()
     ]);
 
     const total = totalResult[0].total;

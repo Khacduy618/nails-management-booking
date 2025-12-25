@@ -1,5 +1,35 @@
 import { format } from 'date-fns'
 import { vi } from 'date-fns/locale'
+import nodemailer from 'nodemailer'
+
+const smtpHost = process.env.SMTP_HOST
+const smtpPort = Number(process.env.SMTP_PORT ?? 587)
+const smtpUser = process.env.SMTP_USER
+const smtpPass = process.env.SMTP_PASS
+const smtpFrom = process.env.SMTP_FROM || smtpUser
+const smtpSecure = process.env.SMTP_SECURE ? process.env.SMTP_SECURE === 'true' : smtpPort === 465
+
+let mailTransporter: nodemailer.Transporter | null = null
+
+function getMailTransporter() {
+    if (!smtpHost || !smtpUser || !smtpPass) {
+        return null
+    }
+
+    if (!mailTransporter) {
+        mailTransporter = nodemailer.createTransport({
+            host: smtpHost,
+            port: smtpPort,
+            secure: smtpSecure,
+            auth: {
+                user: smtpUser,
+                pass: smtpPass,
+            },
+        })
+    }
+
+    return mailTransporter
+}
 
 interface AppointmentEmailData {
     appointmentId: number
@@ -295,21 +325,23 @@ export async function sendConfirmationEmail(data: AppointmentEmailData) {
 </html>
     `
 
-        // For now, we'll just log the email sending
-        // In production, integrate with SendGrid, Gmail API, or other email service
-        console.log('[EMAIL] Sending confirmation email:', {
+        const transporter = getMailTransporter()
+
+        if (!transporter) {
+            console.warn('[EMAIL] SMTP config missing, skipped sending confirmation email.')
+            return false
+        }
+
+        const subject = `Xác Nhận Đặt Lịch #${appointmentId} - Nails Manager`
+
+        await transporter.sendMail({
+            from: smtpFrom || 'Nails Manager <no-reply@nailsmanager.com>',
             to: customerEmail,
-            subject: `Xác Nhận Đặt Lịch #${appointmentId} - Nails Manager`,
-            htmlContent: htmlContent.substring(0, 100) + '...',
+            subject,
+            html: htmlContent,
         })
 
-        // Placeholder for actual email sending
-        // await sendEmailViaService({
-        //   to: customerEmail,
-        //   subject: `Xác Nhận Đặt Lịch #${appointmentId} - Nails Manager`,
-        //   html: htmlContent,
-        // })
-
+        console.log('[EMAIL] Confirmation email sent to:', customerEmail)
         return true
     } catch (error) {
         console.error('[EMAIL] Error sending confirmation email:', error)
