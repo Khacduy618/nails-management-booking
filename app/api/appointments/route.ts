@@ -253,7 +253,7 @@ export async function POST(request: NextRequest) {
               staff: {
                 with: {
                   user: {
-                    columns: { email: true, phone: true }
+                    columns: { name: true, email: true, phone: true }
                   }
                 }
               },
@@ -276,23 +276,30 @@ export async function POST(request: NextRequest) {
 
     // Send confirmation email if customer provided email
     if (customerEmail && createdAppointment) {
-      const staffName = createdAppointment.appointmentServices?.[0]?.staff?.user?.email || 'Nhân viên'
-      sendConfirmationEmail({
-        appointmentId: createdAppointment.id,
-        customerName,
-        customerEmail,
-        customerPhone: sanitizedPhone,
-        appointmentDate: format(appointmentStart, 'yyyy-MM-dd'),
-        appointmentTime: time,
-        services: createdAppointment.appointmentServices.map(as => ({
-          name: as.service.name,
-          price: as.priceAtBooking.toString(),
-        })),
-        staffName,
-        totalPrice: totalPrice,
-        totalDuration: totalDuration,
-        notes,
-      }).catch(err => logError(err, { context: 'email_sending', appointmentId: createdAppointment.id }))
+      const staffName = createdAppointment.appointmentServices?.[0]?.staff?.user?.name
+        || createdAppointment.appointmentServices?.[0]?.staff?.user?.email
+        || 'Nhân viên'
+
+      try {
+        await sendConfirmationEmail({
+          appointmentId: createdAppointment.id,
+          customerName,
+          customerEmail,
+          customerPhone: sanitizedPhone,
+          appointmentDate: format(appointmentStart, 'yyyy-MM-dd'),
+          appointmentTime: time,
+          services: createdAppointment.appointmentServices.map(as => ({
+            name: as.service.name,
+            price: as.priceAtBooking.toString(),
+          })),
+          staffName,
+          totalPrice: totalPrice,
+          totalDuration: totalDuration,
+          notes,
+        })
+      } catch (err) {
+        logError(err, { context: 'email_sending', appointmentId: createdAppointment.id })
+      }
     }
 
     return ok({ data: createdAppointment, message: "Appointment created successfully" }, 201)

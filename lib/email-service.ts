@@ -230,12 +230,7 @@ export async function sendConfirmationEmail(data: AppointmentEmailData) {
         <div class="content">
             <div class="greeting">
                 <p>Xin chào <strong>${escape(customerName)}</strong>,</p>
-                <p>Cảm ơn bạn đã đặt lịch hẹn tại Nails Manager. Dưới đây là thông tin chi tiết về lịch hẹn của bạn:</p>
-            </div>
-
-            <div class="appointment-id">
-                <div class="appointment-id-label">Mã Lịch Hẹn</div>
-                <div class="appointment-id-value">#${appointmentId}</div>
+                <p>Cảm ơn bạn đã đặt lịch hẹn tại K-Tay Nails. Dưới đây là thông tin chi tiết về lịch hẹn của bạn:</p>
             </div>
 
             <div class="section">
@@ -263,7 +258,7 @@ export async function sendConfirmationEmail(data: AppointmentEmailData) {
                 <div class="services-list">
                     ${services.map(s => `
                     <div class="service-item">
-                        <span>${escape(s.name)}</span>
+                        <span>${escape(s.name)} :</span>
                         <span>${Number(s.price).toLocaleString('vi-VN')} ₫</span>
                     </div>
                     `).join('')}
@@ -310,14 +305,14 @@ export async function sendConfirmationEmail(data: AppointmentEmailData) {
             </center>
         </div>
         <div class="footer">
-            <p style="margin: 0; font-weight: bold;">Nails Manager - Dịch Vụ Chăm Sóc Sắc Đẹp</p>
+            <p style="margin: 0; font-weight: bold;">K-Tay Nails - Dịch Vụ Chăm Sóc Sắc Đẹp</p>
             <div class="footer-contact">
                 <p style="margin: 5px 0;">📞 Liên Hệ: <strong>(028) 1234 5678</strong></p>
                 <p style="margin: 5px 0;">📧 Email: <strong>support@nailsmanager.com</strong></p>
                 <p style="margin: 5px 0;">📍 Địa Chỉ: 123 Đường ABC, Quận 1, TP.HCM</p>
             </div>
             <p style="margin-top: 15px; color: #999;">
-                © 2024 Nails Manager. Tất cả các quyền được bảo lưu.
+                © 2024 K-Tay Nails. Tất cả các quyền được bảo lưu.
             </p>
         </div>
     </div>
@@ -332,10 +327,10 @@ export async function sendConfirmationEmail(data: AppointmentEmailData) {
             return false
         }
 
-        const subject = `Xác Nhận Đặt Lịch #${appointmentId} - Nails Manager`
+        const subject = `Xác Nhận Đặt Lịch - K-Tay Nails`
 
         await transporter.sendMail({
-            from: smtpFrom || 'Nails Manager <no-reply@nailsmanager.com>',
+            from: smtpFrom || 'K-Tay Nails <no-reply@ktaynails.com>',
             to: customerEmail,
             subject,
             html: htmlContent,
