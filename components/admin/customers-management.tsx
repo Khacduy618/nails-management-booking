@@ -196,7 +196,7 @@ export function CustomersManagement() {
         <div className="w-full space-y-4">
             {/* Search and Filter Section */}
             <Card>
-                <CardContent className="space-y-4 p-[10px] sm:p-6">
+                <CardContent className="px-6 sm:px-4">
                     <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                         {/* Search Input */}
                         <div className="relative">

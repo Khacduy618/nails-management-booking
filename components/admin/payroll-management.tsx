@@ -24,7 +24,7 @@ interface Staff {
 export function PayrollManagement() {
     const [staff, setStaff] = useState<Staff[]>([])
     const [selectedStaffId, setSelectedStaffId] = useState<string>('')
-    const [selectedMonth, setSelectedMonth] = useState<Date>(new Date())
+    const [selectedMonth, setSelectedMonth] = useState<Date>(new Date(new Date().getFullYear(), new Date().getMonth(), 1))
     const [showPayrollDialog, setShowPayrollDialog] = useState(false)
     const [loading, setLoading] = useState(true)
 
@@ -97,14 +97,11 @@ export function PayrollManagement() {
 
             {/* Filters */}
             <Card>
-                <CardHeader className="p-[10px] sm:p-6">
-                    <CardTitle className="text-lg">Tìm Kiếm</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4 p-[10px] sm:p-6">
+                <CardContent className="p-4">
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         {/* Staff Selection */}
-                        <div>
-                            <label className="text-sm font-medium mb-2 block">Chọn Nhân Viên</label>
+                        <div className="flex flex-row gap-2 items-center">
+                            <label>Nhân Viên</label>
                             <Select value={selectedStaffId} onValueChange={setSelectedStaffId}>
                                 <SelectTrigger>
                                     <SelectValue placeholder="Chọn nhân viên..." />
@@ -118,10 +115,9 @@ export function PayrollManagement() {
                                 </SelectContent>
                             </Select>
                         </div>
-
                         {/* Month Selection */}
-                        <div>
-                            <label className="text-sm font-medium mb-2 block">Chọn Tháng</label>
+                        <div className="flex flex-row gap-2 items-center">
+                            <label>Tháng</label>
                             <Select
                                 value={selectedMonth.toISOString()}
                                 onValueChange={(val) => setSelectedMonth(new Date(val))}
@@ -140,12 +136,10 @@ export function PayrollManagement() {
                         </div>
 
                         {/* Action Button */}
-                        <div className="flex items-end">
-                            <Button onClick={handleViewPayroll} className="w-full" size="lg">
-                                <Calendar className="w-4 h-4 mr-2" />
-                                Xem Bảng Lương
-                            </Button>
-                        </div>
+                        <Button onClick={handleViewPayroll} className="w-full">
+                            <Calendar className="w-4 h-4 mr-2" />
+                            Xem Bảng Lương
+                        </Button>
                     </div>
                 </CardContent>
             </Card>
@@ -153,17 +147,17 @@ export function PayrollManagement() {
             {/* Info Card */}
             {selectedStaff && (
                 <Card className="border-blue-200 bg-blue-50">
-                    <CardContent className="p-[10px] sm:p-6">
-                        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                            <div>
+                    <CardContent className="p-4">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div className="flex flex-row gap-2 items-center">
                                 <p className="text-sm text-muted-foreground">Nhân Viên</p>
                                 <p className="font-semibold">{selectedStaff.name}</p>
                             </div>
-                            <div>
+                            <div className="flex flex-row gap-2 items-center">
                                 <p className="text-sm text-muted-foreground">Vị Trí</p>
                                 <p className="font-semibold">{selectedStaff.position || 'N/A'}</p>
                             </div>
-                            <div>
+                            <div className="flex flex-row gap-2 items-center">
                                 <p className="text-sm text-muted-foreground">Tháng</p>
                                 <p className="font-semibold">
                                     Tháng {selectedMonth.getMonth() + 1}/{selectedMonth.getFullYear()}

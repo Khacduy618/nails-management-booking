@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
-import { Plus, Search, Edit, Trash2, Eye, Loader2 } from "lucide-react"
+import { Plus, Search, Edit, Trash2, Eye, Loader2, Clock } from "lucide-react"
 import { ServiceForm } from "./service-form"
 import { ServiceDetails } from "./service-details"
 import { toast } from "sonner"
@@ -188,17 +188,13 @@ export function ServicesManagement() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end">
-        <Button className="w-full sm:w-auto sm:ml-auto" onClick={handleAddService}>
-          <Plus className="h-4 w-4 mr-2" />Thêm dịch vụ
-        </Button>
-      </div>
+
 
       <Card>
-        <CardContent className="p-[10px] sm:p-6">
-          <div className="flex flex-col md:flex-row gap-4 items-start md:items-center">
+        <CardContent className="px-6 sm:px-4">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
             {/* Input tìm kiếm */}
-            <div className="relative flex-1 w-full md:max-w-xs">
+            <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Tìm kiếm dịch vụ..."
@@ -208,10 +204,10 @@ export function ServicesManagement() {
               />
             </div>
             {/* Lọc theo category - Select Box */}
-            <div className="flex gap-2 flex-wrap items-center">
+            <div className="flex gap-2 items-center">
               <Label htmlFor="category-filter" className="text-sm shrink-0">Danh mục:</Label>
               <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                <SelectTrigger id="category-filter" className="w-full sm:w-[200px]">
+                <SelectTrigger id="category-filter" className="w-full">
                   <SelectValue placeholder="Chọn danh mục" />
                 </SelectTrigger>
                 <SelectContent>
@@ -222,10 +218,10 @@ export function ServicesManagement() {
                 </SelectContent>
               </Select>
             </div>
-            <div className="md:ml-auto flex items-center gap-2">
+            <div className="flex items-center gap-2">
               <Label htmlFor="sort-by" className="text-sm shrink-0">Sắp xếp:</Label>
               <Select value={sortBy} onValueChange={setSortBy}>
-                <SelectTrigger id="sort-by" className="w-full sm:w-[180px]">
+                <SelectTrigger id="sort-by" className="w-full">
                   <SelectValue placeholder="Sắp xếp theo..." />
                 </SelectTrigger>
                 <SelectContent>
@@ -233,6 +229,9 @@ export function ServicesManagement() {
                 </SelectContent>
               </Select>
             </div>
+            <Button className="w-full" onClick={handleAddService}>
+              <Plus className="h-4 w-4 mr-2" />Thêm dịch vụ
+            </Button>
           </div>
         </CardContent>
       </Card>
@@ -240,30 +239,88 @@ export function ServicesManagement() {
       {isLoading ? <div className="text-center p-12"><Loader2 className="h-8 w-8 animate-spin mx-auto" /></div>
         : (
           <>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {services.map((service) => (
-                <Card key={service.id} className="flex flex-col overflow-hidden">
-                  <div className="relative aspect-video bg-muted"><img src={service.imageUrl || "/placeholder.svg"} alt={service.name} className="h-full w-full object-cover" /><Badge className={`absolute top-2 right-2 ${service.status === "active" ? "bg-green-600" : "bg-gray-500"}`}>{service.status === "active" ? "Hoạt động" : "Tạm dừng"}</Badge></div>
-                  <CardContent className="relative flex flex-col flex-grow space-y-3 p-[10px] sm:p-4">
-                    <div className="pr-24">
-                      <h3 className="font-semibold text-foreground line-clamp-2">{service.name}</h3>
+                <Card key={service.id} className="gap-0 group flex flex-col overflow-hidden rounded-xl border bg-card text-card-foreground shadow-sm transition-all duration-300 hover:shadow-lg hover:-translate-y-1 p-0">
+                  {/* Image Section */}
+                  <div className="relative aspect-[4/3] overflow-hidden bg-muted">
+                    <img
+                      src={service.imageUrl || "/placeholder.svg"}
+                      alt={service.name}
+                      className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
+                    <Badge
+                      className={`absolute right-3 top-3 shadow-sm ${service.status === "active"
+                        ? "bg-green-500 hover:bg-green-600"
+                        : "bg-gray-500 hover:bg-gray-600"
+                        }`}
+                    >
+                      {service.status === "active" ? "Hoạt động" : "Tạm dừng"}
+                    </Badge>
+                  </div>
+
+                  {/* Content Section */}
+                  <CardContent className="flex flex-1 flex-col p-4">
+                    <div className="mb-3 flex items-start justify-between gap-2">
+                      <h3 className="font-bold leading-tight text-foreground line-clamp-2 group-hover:text-primary transition-colors">
+                        {service.name}
+                      </h3>
+                      {service.category?.name && (
+                        <Badge variant="outline" className="shrink-0 font-normal text-muted-foreground">
+                          {service.category.name}
+                        </Badge>
+                      )}
                     </div>
-                    {service.category?.name && <Badge variant="outline" className="absolute top-4 right-4 whitespace-nowrap">{service.category.name}</Badge>}
-                    <div className="flex items-center justify-between text-sm"><span className="font-medium text-primary">{Number(service.price).toLocaleString("vi-VN")}₫</span><span className="text-muted-foreground">{service.duration} phút</span></div>
-                    <div className="flex gap-2 pt-2 border-t mt-auto">
-                      <Button size="sm" variant="outline" className="flex-1" onClick={() => handleViewService(service)}><Eye className="h-3 w-3 mr-1" />Xem</Button>
-                      <Button size="sm" variant="outline" className="flex-1" onClick={() => handleEditService(service)}>
-                        <Edit className="h-3 w-3 mr-1" />Sửa
+
+                    {service.description && (
+                      <p className="mb-2 text-sm text-muted-foreground line-clamp-2">
+                        {service.description}
+                      </p>
+                    )}
+
+                    <div className="mt-auto flex items-center justify-between border-t pt-3">
+                      <span className="text-lg font-bold text-orange-600">
+                        {Number(service.price).toLocaleString("vi-VN")}đ
+                      </span>
+                      <span className="flex items-center text-sm text-muted-foreground">
+                        <Clock className="mr-1 h-3 w-3" />
+                        {service.duration} phút
+                      </span>
+                    </div>
+
+                    <div className="mt-4 grid grid-cols-3 gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="h-8 w-full hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200"
+                        onClick={() => handleViewService(service)}
+                      >
+                        <Eye className="mr-1.5 h-3.5 w-3.5" />
+                        Xem
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="h-8 w-full hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
+                        onClick={() => handleEditService(service)}
+                      >
+                        <Edit className="mr-1.5 h-3.5 w-3.5" />
+                        Sửa
                       </Button>
                       <ConfirmDialog
-                        title="Xác nhận tạm dừng dịch vụ?"
-                        description="Hành động này không thể hoàn tác. Bạn có chắc chắn muốn tạm dừng dịch vụ này không?"
+                        title="Xác nhận xóa?"
+                        description="Hành động này sẽ xóa dịch vụ vĩnh viễn."
                         onConfirm={() => handleDeleteService(service.id)}
                       >
-                        {service.status === 'active' && <Button size="sm" variant="outline" className="flex-1 text-destructive hover:text-destructive"><Trash2 className="h-3 w-3 mr-1" /></Button>}
-
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="h-8 w-full text-destructive hover:bg-red-50 hover:text-red-600 hover:border-red-200"
+                        >
+                          <Trash2 className="mr-1.5 h-3.5 w-3.5" />
+                          Xóa
+                        </Button>
                       </ConfirmDialog>
-
                     </div>
                   </CardContent>
                 </Card>
@@ -271,7 +328,7 @@ export function ServicesManagement() {
             </div>
             {!isLoading && services.length === 0 && (
               <Card>
-                <CardContent className="p-[10px] text-center sm:p-12">
+                <CardContent className="p-2.5 text-center sm:p-12">
                   <p className="text-muted-foreground">Không tìm thấy dịch vụ nào.</p>
                 </CardContent>
               </Card>

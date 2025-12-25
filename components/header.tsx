@@ -14,10 +14,7 @@ export function Header() {
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-2">
-            <div className="h-8 w-8 rounded-full bg-primary flex items-center justify-center">
-              <span className="text-primary-foreground font-bold text-sm">KTs</span>
-            </div>
-            <span className="font-bold text-xl text-foreground">K.Tay Nails</span>
+            <img src="/logo.png" width={170} alt="K.Tay Nails Logo" />
           </Link>
 
           {/* Desktop Navigation */}

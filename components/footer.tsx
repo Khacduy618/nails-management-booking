@@ -9,10 +9,7 @@ export function Footer() {
           {/* Brand */}
           <div className="space-y-4">
             <Link href="/" className="flex items-center space-x-2">
-              <div className="h-8 w-8 rounded-full bg-primary flex items-center justify-center">
-                <span className="text-primary-foreground font-bold text-sm">KTs</span>
-              </div>
-              <span className="font-bold text-xl">K.Tay Nails</span>
+              <img src="/logo.png" width={170} alt="K.Tay Nails Logo" />
             </Link>
             <p className="text-muted-foreground text-pretty leading-relaxed">
               Trung tâm làm đẹp cao cấp với dịch vụ chuyên nghiệp và đội ngũ giàu kinh nghiệm.

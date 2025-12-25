@@ -53,7 +53,7 @@ export async function GET(request: NextRequest) {
     const query = db
       .select({
         id: services.id, name: services.name, price: services.price, duration: services.duration,
-        status: services.status, imageUrl: services.imageUrl,
+        status: services.status, imageUrl: services.imageUrl, description: services.description,
         category: { name: serviceCategories.name },
       })
       .from(services)

@@ -192,24 +192,10 @@ export function StaffManagement() {
 
   return (
     <div className="w-full space-y-4">
-      {/* Header */}
-      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end">
-        <Button
-          onClick={() => {
-            setEditingStaff(null)
-            setFormDialogOpen(true)
-          }}
-          className="gap-2 w-full sm:w-auto sm:ml-auto"
-        >
-          <Plus className="w-4 h-4" />
-          Thêm Nhân Viên
-        </Button>
-      </div>
-
       {/* Search and Filter Section */}
       <Card>
-        <CardContent className="p-[10px] sm:p-6">
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+        <CardContent className="px-6 sm:px-4">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
             {/* Search Input */}
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
@@ -244,6 +230,17 @@ export function StaffManagement() {
                 <SelectItem value="inactive">Không Hoạt Động</SelectItem>
               </SelectContent>
             </Select>
+
+            <Button
+              onClick={() => {
+                setEditingStaff(null)
+                setFormDialogOpen(true)
+              }}
+              className="gap-2 w-full"
+            >
+              <Plus className="w-4 h-4" />
+              Thêm Nhân Viên
+            </Button>
           </div>
         </CardContent>
       </Card>
@@ -329,29 +326,30 @@ export function StaffManagement() {
                   )}
 
                   {/* Actions */}
-                  <div className="flex flex-wrap gap-2 pt-2 border-t">
+                  <div className="grid gap-2 border-t pt-3 sm:grid-cols-3">
                     <Button
                       size="sm"
                       variant="outline"
+                      className="w-full justify-center gap-2 border-primary/30 text-primary hover:bg-primary/5"
                       onClick={() => {
                         setSelectedStaffId(member.id)
                         setDetailsDialogOpen(true)
                       }}
-                      className="flex-1 min-w-[140px]"
                     >
-                      <Eye className="h-3 w-3 mr-1" />
-                      Xem
+                      <Eye className="h-3 w-3" />
+                      Xem hồ sơ
                     </Button>
 
                     <Button
                       size="sm"
-                      variant="outline"
+                      className="w-full justify-center gap-2 bg-secondary text-secondary-foreground hover:bg-secondary/90"
                       onClick={() => {
                         setEditingStaff(member)
                         setFormDialogOpen(true)
                       }}
                     >
                       <Pencil className="h-3 w-3" />
+                      Chỉnh sửa
                     </Button>
 
                     <ConfirmDialog
@@ -362,8 +360,10 @@ export function StaffManagement() {
                       <Button
                         size="sm"
                         variant="ghost"
+                        className="w-full justify-center gap-2 text-destructive hover:bg-destructive/10"
                       >
-                        <Trash2 className="h-3 w-3 text-destructive" />
+                        <Trash2 className="h-3 w-3" />
+                        Vô hiệu hóa
                       </Button>
                     </ConfirmDialog>
                   </div>

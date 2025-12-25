@@ -332,16 +332,11 @@ export function CategoriesManagement() {
 
                 {/* Danh mục hoạt động */}
                 <TabsContent value="active" className="space-y-4">
-                    <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end">
-                        <Button onClick={() => handleOpenForm()} className="w-full gap-2 sm:w-auto sm:ml-auto">
-                            <Plus className="h-4 w-4" />
-                            Thêm danh mục mới
-                        </Button>
-                    </div>
+                    
 
                     {/* Search, Sort Controls */}
                     <Card>
-                        <CardContent className="space-y-4 p-[10px] sm:p-6">
+                        <CardContent className="px-6 sm:px-4">
                             <div className="flex flex-col gap-4 md:flex-row md:items-center">
                                 <div className="relative w-full md:flex-1">
                                     <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -370,19 +365,26 @@ export function CategoriesManagement() {
                                         <SelectItem value="created">Mới nhất</SelectItem>
                                     </SelectContent>
                                 </Select>
+                                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end">
+                                    <Button onClick={() => handleOpenForm()} className="w-full gap-2 sm:w-auto sm:ml-auto">
+                                        <Plus className="h-4 w-4" />
+                                        Thêm danh mục mới
+                                    </Button>
+                                </div>
                             </div>
+                            
                         </CardContent>
                     </Card>
 
                     {isLoading ? (
                         <Card>
-                            <CardContent className="p-[10px] text-center sm:p-6">
+                            <CardContent className="p-2 text-center sm:p-6">
                                 <p>Đang tải dữ liệu...</p>
                             </CardContent>
                         </Card>
                     ) : categories.length === 0 ? (
                         <Card>
-                            <CardContent className="p-[10px] text-center sm:p-6">
+                            <CardContent className="p-2 text-center sm:p-6">
                                 <p className="mb-4 text-muted-foreground">
                                     {searchQuery ? "Không tìm thấy danh mục nào" : "Chưa có danh mục nào"}
                                 </p>
@@ -398,11 +400,9 @@ export function CategoriesManagement() {
                         <>
                             <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
                                 {categories.map((category) => (
-                                    <Card key={category.id} className="transition-shadow hover:shadow-lg">
-                                        <CardHeader className="space-y-1 border-b border-border/60 p-[10px] sm:p-6">
-                                            <CardTitle className="text-lg">{category.name}</CardTitle>
-                                        </CardHeader>
-                                        <CardContent className="space-y-4 p-[10px] sm:p-6">
+                                    <Card key={category.id} className="transition-shadow hover:shadow-lg gap-1">
+                                        <CardTitle className="text-lg lg:px-6 px-2">{category.name}</CardTitle>
+                                        <CardContent className="space-y-4 px-2 lg:px-6 lg:py-2">
                                             {category.description && (
                                                 <p className="text-sm text-muted-foreground">{category.description}</p>
                                             )}

@@ -23,9 +23,15 @@ async function ProtectedLayout({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="flex min-h-screen bg-background">
-      <AdminSidebar className="hidden lg:flex" />
-      <div className="flex min-h-screen flex-1 flex-col overflow-hidden">
-        <AdminHeader />
+      <div className="hidden lg:flex">
+        <div className="sticky top-0 h-screen">
+          <AdminSidebar />
+        </div>
+      </div>
+      <div className="flex min-h-screen flex-1 flex-col">
+        <div className="sticky top-0 z-10">
+          <AdminHeader />
+        </div>
         <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
           <div className="mx-auto w-full max-w-7xl">{children}</div>
         </main>

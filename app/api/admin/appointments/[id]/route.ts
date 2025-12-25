@@ -15,8 +15,8 @@ async function executeQuery<T>(query: any): Promise<T[]> {
 
 // --- GET: Lấy chi tiết một lịch hẹn ---
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id: paramId } = await params
   try {
-    const { id: paramId } = await params
     const id = Number.parseInt(paramId);
     if (isNaN(id)) {
       return NextResponse.json({ success: false, error: "Invalid appointment ID" }, { status: 400 });
@@ -46,15 +46,15 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 
     return NextResponse.json({ success: true, appointment });
   } catch (error) {
-    console.error(`Failed to fetch appointment ${params.id}:`, error);
+    console.error(`Failed to fetch appointment ${paramId}:`, error);
     return NextResponse.json({ success: false, error: "An unexpected error occurred" }, { status: 500 });
   }
 }
 
 // --- PUT: Cập nhật một lịch hẹn (trạng thái, ghi chú, etc.) ---
 export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id: paramId } = await params
   try {
-    const { id: paramId } = await params
     const id = Number.parseInt(paramId);
     if (isNaN(id)) {
       return NextResponse.json({ success: false, error: "Invalid appointment ID" }, { status: 400 });
@@ -79,15 +79,15 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
 
     return NextResponse.json({ success: true, appointment: updatedAppointment });
   } catch (error) {
-    console.error(`Failed to update appointment ${params.id}:`, error);
+    console.error(`Failed to update appointment ${paramId}:`, error);
     return NextResponse.json({ success: false, error: "Invalid request body or server error" }, { status: 500 });
   }
 }
 
 // --- DELETE: Xóa mềm một lịch hẹn (cập nhật status thành 'cancelled') ---
 export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id: paramId } = await params
   try {
-    const { id: paramId } = await params
     const id = Number.parseInt(paramId);
     if (isNaN(id)) {
       return NextResponse.json({ success: false, error: "Invalid appointment ID" }, { status: 400 });
@@ -104,7 +104,7 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
 
     return NextResponse.json({ success: true, message: "Appointment cancelled successfully" });
   } catch (error) {
-    console.error(`Failed to cancel appointment ${params.id}:`, error);
+    console.error(`Failed to cancel appointment ${paramId}:`, error);
     return NextResponse.json({ success: false, error: "An unexpected error occurred" }, { status: 500 });
   }
 }

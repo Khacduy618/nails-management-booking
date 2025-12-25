@@ -242,7 +242,7 @@ export function BookingForm({ onBookingComplete }: BookingFormProps) {
   const goBack = (toStep: number) => { setError(""); setStep(toStep); };
 
   if (success) {
-    const staffMember = availableStaff.find(s => s.id === selectedStaffId);
+    const staffName = assignedStaff?.name || (autoAssign ? "Đã tự động phân công" : "Chưa chọn");
     return (
       <Card>
         <CardContent className="py-8 text-center">
@@ -253,7 +253,7 @@ export function BookingForm({ onBookingComplete }: BookingFormProps) {
             <div><strong>Dịch vụ:</strong> {selectedServices.map(s => s.name).join(', ')}</div>
             <div><strong>Ngày:</strong> {selectedDate && format(selectedDate, "EEEE, dd/MM/yyyy", { locale: vi })}</div>
             <div><strong>Giờ:</strong> {selectedTime}</div>
-            <div><strong>Nhân viên:</strong> {availableStaff.find(s => s.id === selectedStaffId)?.name}</div>
+            <div><strong>Nhân viên:</strong> {staffName}</div>
             <div><strong>Khách hàng:</strong> {customerName}</div>
             <div><strong>SĐT:</strong> {customerPhone}</div>
             {customerEmail && <div><strong>Email:</strong> {customerEmail}</div>}
