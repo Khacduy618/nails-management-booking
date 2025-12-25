@@ -152,7 +152,19 @@ export function ServiceForm({ service, categories, allStaff, onSave, onCancel }:
               </Select>
             </div>
             <div className="space-y-2"><Label>Nhân viên thực hiện</Label><Card className="p-[10px] sm:p-4"><div className="grid grid-cols-2 gap-4 md:grid-cols-3">{allStaff.map((staff) => (<div key={staff.id} className="flex items-center space-x-2"><Checkbox id={`staff-${staff.id}`} checked={selectedStaffIds.includes(staff.id)} onCheckedChange={(checked) => handleStaffChange(staff.id, checked as boolean)} /><Label htmlFor={`staff-${staff.id}`} className="text-sm font-normal cursor-pointer">{staff.name}</Label></div>))}</div></Card></div>
-            <div className="flex gap-2 justify-end pt-4"><Button type="button" variant="outline" onClick={onCancel}>Hủy</Button><Button type="submit" disabled={isSaving}>{isSaving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}{service ? "Cập nhật" : "Thêm dịch vụ"}</Button></div>
+            <div className="flex gap-2 justify-end pt-4">
+              <Button type="button" variant="outline" onClick={onCancel}>Hủy</Button>
+              <Button type="submit" disabled={isSaving}>
+                {isSaving ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Đang lưu...
+                  </>
+                ) : (
+                  service ? "Cập nhật" : "Thêm dịch vụ"
+                )}
+              </Button>
+            </div>
           </form>
         </CardContent>
       </Card>

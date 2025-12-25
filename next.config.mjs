@@ -19,7 +19,7 @@ const nextConfig = {
     // Note: tune CSP to your script/style usage as needed
     const csp = [
       "default-src 'self'",
-      "img-src 'self' data: blob:",
+      "img-src 'self' data: blob: https://*.public.blob.vercel-storage.com",
       "media-src 'self'",
       "connect-src 'self' https: http: ws: wss:", // Added ws/wss for dev server
       "style-src 'self' 'unsafe-inline'",
