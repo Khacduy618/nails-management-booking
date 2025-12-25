@@ -4,9 +4,10 @@ import { staff, appointments, appointmentServices, services, staffBaseSalaries, 
 import { eq, count, sql } from "drizzle-orm";
 
 // --- GET: Lấy chi tiết nhân viên với lịch hẹn và thống kê ---
-export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const id = Number.parseInt(params.id);
+    const { id: paramId } = await params
+    const id = Number.parseInt(paramId);
     if (isNaN(id)) {
       return NextResponse.json(
         { success: false, error: { code: "INVALID_ID", message: "Invalid staff ID" } },
@@ -143,9 +144,10 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
 }
 
 // --- PUT: Cập nhật nhân viên ---
-export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const id = Number.parseInt(params.id);
+    const { id: paramId } = await params
+    const id = Number.parseInt(paramId);
     if (isNaN(id)) {
       return NextResponse.json(
         { success: false, error: { code: "INVALID_ID", message: "Invalid staff ID" } },
@@ -445,9 +447,10 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 }
 
 // --- PATCH: Thay đổi trạng thái nhân viên ---
-export async function PATCH(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const id = Number.parseInt(params.id);
+    const { id: paramId } = await params
+    const id = Number.parseInt(paramId);
     if (isNaN(id)) {
       return NextResponse.json(
         { success: false, error: { code: "INVALID_ID", message: "Invalid staff ID" } },

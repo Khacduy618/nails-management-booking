@@ -23,7 +23,7 @@ export const adminNavigation: NavItem[] = [
   { name: "Nhân viên", href: "/admin/staff", icon: Users, roles: ["admin"] },
   { name: "Lương", href: "/admin/payroll", icon: DollarSign, roles: ["admin"] },
   { name: "Thống kê doanh thu", href: "/admin/revenue", icon: BarChart3, roles: ["admin"] },
-  { name: "Cài đặt", href: "/admin/settings", icon: Settings, roles: ["admin"] },
+  // { name: "Cài đặt", href: "/admin/settings", icon: Settings, roles: ["admin"] },
 ]
 
 type AdminSidebarProps = {

@@ -5,9 +5,10 @@ import { eq } from "drizzle-orm";
 
 const sanitizePhone = (phone: string) => phone.replace(/\D/g, "");
 // --- PUT: Cập nhật lịch hẹn (chủ yếu là status) ---
-export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const id = Number.parseInt(params.id);
+    const { id: paramId } = await params
+    const id = Number.parseInt(paramId);
     if (isNaN(id)) {
       return NextResponse.json({ success: false, error: "Invalid appointment ID" }, { status: 400 });
     }
@@ -51,9 +52,10 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 }
 
 // --- DELETE (logic hủy lịch) ---
-export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const id = Number.parseInt(params.id);
+    const { id: paramId } = await params
+    const id = Number.parseInt(paramId);
     if (isNaN(id)) {
       return NextResponse.json({ success: false, error: "Invalid appointment ID" }, { status: 400 });
     }

@@ -4,9 +4,10 @@ import { eq, inArray } from 'drizzle-orm'
 import { NextResponse } from 'next/server'
 import { ok, fail } from '@/lib/api-response'
 
-export async function GET(request: Request, { params }: { params: { id: string } }) {
+export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
     try {
-        const customerId = parseInt(params.id, 10)
+        const { id } = await params
+        const customerId = parseInt(id, 10)
 
         if (isNaN(customerId)) {
             return NextResponse.json(

@@ -6,10 +6,11 @@ import { eq } from "drizzle-orm";
 // --- GET: Lấy lương cứng của nhân viên ---
 export async function GET(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const staffId = Number.parseInt(params.id);
+        const { id } = await params
+        const staffId = Number.parseInt(id);
         if (isNaN(staffId)) {
             return NextResponse.json(
                 {
@@ -63,10 +64,11 @@ export async function GET(
 // --- PUT: Cập nhật lương cứng của nhân viên ---
 export async function PUT(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const staffId = Number.parseInt(params.id);
+        const { id } = await params
+        const staffId = Number.parseInt(id);
         if (isNaN(staffId)) {
             return NextResponse.json(
                 {

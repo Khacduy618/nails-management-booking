@@ -11,9 +11,10 @@ type UpdateCategoryPayload = {
     status?: "active" | "inactive"
 }
 
-export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
     try {
-        const categoryId = parseInt(params.id)
+        const { id } = await params
+        const categoryId = parseInt(id)
         if (isNaN(categoryId)) {
             return fail("INVALID_INPUT", "Invalid category ID", 400)
         }
@@ -77,9 +78,10 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
     }
 }
 
-export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
     try {
-        const categoryId = parseInt(params.id)
+        const { id } = await params
+        const categoryId = parseInt(id)
         if (isNaN(categoryId)) {
             return fail("INVALID_INPUT", "Invalid category ID", 400)
         }
@@ -134,9 +136,10 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
     }
 }
 
-export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
+export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
     try {
-        const categoryId = parseInt(params.id)
+        const { id } = await params
+        const categoryId = parseInt(id)
         if (isNaN(categoryId)) {
             return fail("INVALID_INPUT", "Invalid category ID", 400)
         }

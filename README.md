@@ -1,160 +1,267 @@
-# Appointment Booking Client
+# Hệ Thống Quản Lý & Đặt Lịch Nail Salon (NailsApp)
 
-Next.js 15 frontend for the appointment booking system. It provides the public booking flow (4-step form) and an admin workspace to manage services, staff, and appointments. All data access happens through the Drizzle-based API routes in this app or any external API specified via `NEXT_PUBLIC_API_URL`.
+Một ứng dụng web hiện đại, toàn diện để quản lý tiệm Nail, bao gồm giao diện đặt lịch công khai cho khách hàng và bảng điều khiển quản trị mạnh mẽ cho nhân viên và quản lý. Được xây dựng với các công nghệ web mới nhất để đảm bảo hiệu suất, khả năng mở rộng và trải nghiệm người dùng tốt nhất.
 
-## Tech Stack
+## 🚀 Chức Năng Chính
 
-- Next.js 15 (App Router, React 19, TypeScript)
-- Tailwind CSS + shadcn/ui for UI primitives
-- Drizzle ORM + MySQL driver for server-side data access
-- Vitest + Testing Library for component tests
-- Playwright for end-to-end smoke tests
+### 🌟 Dành Cho Khách Hàng (Public)
+*   **Xem Dịch Vụ**: Duyệt danh sách dịch vụ chi tiết với giá cả, thời gian thực hiện và danh mục.
+*   **Đặt Lịch Thông Minh**: Chọn ngày giờ trên lịch tương tác, hệ thống tự động tính toán khung giờ trống dựa trên lịch làm việc của nhân viên.
+*   **Chọn Nhân Viên**: Khách hàng có thể chọn nhân viên yêu thích hoặc để hệ thống tự động chỉ định nhân viên rảnh.
+*   **Tra Cứu Lịch Hẹn**: Kiểm tra trạng thái lịch hẹn bằng số điện thoại.
+*   **Giao Diện Responsive**: Tối ưu hóa hoàn toàn cho cả thiết bị di động và máy tính để bàn.
 
-## Prerequisites
+### 🛡️ Dành Cho Quản Trị Viên & Nhân Viên (Dashboard)
+*   **Tổng Quan (Dashboard)**: Xem các chỉ số thời gian thực về lịch hẹn trong ngày, doanh thu, và hiệu suất nhân viên.
+*   **Quản Lý Lịch Hẹn**: Xem danh sách, phê duyệt, dời lịch, hoặc hủy lịch hẹn.
+*   **Quản Lý Nhân Viên**: Quản lý hồ sơ nhân viên, lịch làm việc hàng tuần, và kỹ năng (dịch vụ có thể làm).
+*   **Hệ Thống Tính Lương (Payroll)**: Tự động tính toán hoa hồng và lương dựa trên dịch vụ hoàn thành và giờ làm việc.
+*   **Báo Cáo Doanh Thu**: Báo cáo tài chính chi tiết theo ngày, tuần, tháng.
+*   **Quản Lý Dịch Vụ**: Thêm, sửa, xóa dịch vụ và danh mục dịch vụ.
 
-- Node.js 20+
-- pnpm 10 (workspace root already pins the exact version in `packageManager`)
-- MySQL database (local Docker compose or any hosted instance)
+## 🛠️ Công Nghệ Sử Dụng (Tech Stack)
 
-## Environment Variables
+### Core (Lõi)
+*   **Framework**: [Next.js 15](https://nextjs.org/) (App Router) - Framework React hiện đại nhất.
+*   **Ngôn Ngữ**: [TypeScript](https://www.typescriptlang.org/) - Đảm bảo type-safety.
+*   **Styling**: [Tailwind CSS 4](https://tailwindcss.com/) - Utility-first CSS.
+*   **UI Components**: [Shadcn UI](https://ui.shadcn.com/) - Bộ component đẹp và accessible.
 
-Create `nailsapp/.env` (or re-use the repo root `.env`) with at least:
+### Backend & Database
+*   **Database**: [PostgreSQL](https://www.postgresql.org/) (Neon Tech) - Serverless Postgres.
+*   **ORM**: [Drizzle ORM](https://orm.drizzle.team/) - Truy vấn dữ liệu an toàn và hiệu quả.
+*   **Auth**: [NextAuth.js](https://next-auth.js.org/) - Xác thực và phân quyền.
+*   **Validation**: [Zod](https://zod.dev/) - Kiểm tra dữ liệu đầu vào.
 
-| Name | Description |
-| ---- | ----------- |
-| `NEXT_PUBLIC_API_URL` | Base URL for public API requests (defaults to `http://localhost:3000/api/` for built-in routes). |
-| `DATABASE_HOST` | MySQL host used by Drizzle routes. |
-| `DATABASE_PORT` | MySQL port, e.g. `3306`. |
-| `DATABASE_USER` | Database user. |
-| `DATABASE_PASSWORD` | Password for the database user. |
-| `DATABASE_NAME` | Schema that stores services, staff, appointments, etc. |
-| `NEXTAUTH_SECRET` | Secret key for NextAuth JWT/middleware (generate via `openssl rand -base64 32`). |
-| `NEXTAUTH_URL` | Public base URL when running in production (e.g. `https://admin.example.com`). |
-| `SENTRY_DSN` | Server DSN for Sentry error tracking (leave empty to disable). |
-| `NEXT_PUBLIC_SENTRY_DSN` | Optional DSN exposed to the nailsapp bundle for browser error tracking. |
-| `SENTRY_ORG` / `SENTRY_PROJECT` | Optional; used by the Sentry Webpack plugin for source map uploads. |
+---
 
+## 🔄 Chi Tiết Chức Năng & Vòng Đời (Feature Lifecycle & Workflows)
 
-EZ7BQLLSBVM8NJYT2MWSXUWX
+Phần này mô tả chi tiết cách từng chức năng hoạt động từ lúc bắt đầu đến khi kết thúc và luồng dữ liệu đi kèm.
 
-If you run the Laravel backend instead of the Next.js API routes, point `NEXT_PUBLIC_API_URL` to that service (e.g. `http://localhost:3000/api/`).
+### 1. Hệ Thống Đặt Lịch (Booking System)
+*Dành cho khách hàng (Public Interface)*
 
-## Installation & Local Development
+**Mô tả**: Cho phép khách hàng chọn dịch vụ, nhân viên và khung giờ phù hợp mà không cần đăng nhập.
 
-```bash
-pnpm install        # install workspace dependencies
-pnpm dev            # start the Next.js dev server on http://localhost:3000
-```
+**Vòng Đời (Lifecycle)**:
+1.  **Khởi Tạo (Initialization)**:
+    *   Khách truy cập trang chủ/đặt lịch.
+    *   Hệ thống tải danh sách Danh mục (Categories) và Dịch vụ (Services) đang hoạt động (`active`).
+2.  **Lựa Chọn (Selection)**:
+    *   Khách chọn một hoặc nhiều dịch vụ mong muốn.
+    *   Hệ thống tự động tính tổng thời gian thực hiện và giá tiền ước tính.
+3.  **Kiểm Tra Tình Trạng (Availability Check)**:
+    *   Khách chọn ngày mong muốn trên lịch.
+    *   Hệ thống quét lịch làm việc của nhân viên (`StaffSchedule`) và các lịch hẹn đã tồn tại (`Appointments`) để tìm ra các "khe trống" (slots).
+    *   *Logic thông minh*: Nếu khách chọn nhân viên cụ thể, chỉ kiểm tra nhân viên đó. Nếu chọn "Bất kỳ ai", kiểm tra toàn bộ nhân viên có kỹ năng làm dịch vụ đó.
+4.  **Xác Nhận (Confirmation)**:
+    *   Khách nhập thông tin cá nhân (Tên, SĐT, Email, Ghi chú).
+    *   Hệ thống tạo một "Giao dịch" (Transaction) để lưu dữ liệu vào Database.
+5.  **Hoàn Tất (Completion)**:
+    *   Hiển thị thông báo thành công và mã lịch hẹn.
+    *   Gửi email xác nhận cho khách và thông báo cho Admin (nếu được cấu hình).
 
-Database utilities (requires the env vars above):
+**Workflow Kỹ Thuật**:
+*   `GET /api/services`: Lấy dữ liệu hiển thị lên UI.
+*   `GET /api/staff/available?date=...&services=...`: API quan trọng nhất. Tính toán logic giao nhau giữa thời gian làm việc và thời gian bận.
+*   `POST /api/appointments`:
+    *   Validate dữ liệu đầu vào bằng Zod Schema.
+    *   Sử dụng `db.transaction()`: Tạo `Customer` (nếu mới) -> Tạo `Appointment` -> Tạo `AppointmentService`.
 
-```bash
-pnpm db:generate    # regenerate Drizzle SQL based on schema definitions
-pnpm db:push        # sync schema to the database
-pnpm db:migrate     # run SQL migrations inside ./drizzle
-pnpm db:seed        # seed demo data (ensure .env is present)
-```
+### 2. Quản Lý Lịch Hẹn (Appointment Management)
+*Dành cho Admin/Staff (Dashboard)*
 
-## Testing
+**Mô tả**: Theo dõi, xử lý và cập nhật trạng thái các cuộc hẹn của tiệm.
 
-| Command | Description |
-| ------- | ----------- |
-| `pnpm test` / `pnpm test:unit` | Run Vitest in CI mode (jsdom + Testing Library). |
-| `pnpm test:watch` | Watch mode for Vitest during development. |
-| `pnpm test:e2e` | Run Playwright smoke tests (requires the dev server and `npx playwright install`). |
+**Vòng Đời (Lifecycle)**:
+1.  **Tiếp Nhận (Pending)**: Lịch hẹn mới từ web sẽ có trạng thái mặc định là `Pending`.
+2.  **Xử Lý (Processing)**:
+    *   Admin/Lễ tân kiểm tra lịch.
+    *   Duyệt lịch -> Chuyển sang `Confirmed`.
+    *   Hoặc nếu khách hủy/spam -> Chuyển sang `Cancelled`.
+3.  **Thực Hiện (In-Service)**: Khách đến tiệm, check-in và bắt đầu làm dịch vụ.
+4.  **Kết Thúc (Completed)**:
+    *   Khách thanh toán xong.
+    *   Admin cập nhật trạng thái `Completed`. *Lưu ý: Chỉ trạng thái này mới được tính vào lương/doanh thu.*
+5.  **Vắng Mặt (No-show)**: Khách không đến và không báo -> Đánh dấu `No-show` để lưu vết lịch sử uy tín của khách.
 
-Recommended workflow:
+**Workflow Kỹ Thuật**:
+*   `GET /api/admin/appointments`: Fetch danh sách với phân trang (Pagination) & bộ lọc theo ngày (Date Filter).
+*   `PATCH /api/admin/appointments/[id]`: Cập nhật trạng thái (`status`) hoặc ghi chú.
+*   `DELETE /api/admin/appointments/[id]`: Soft delete (chỉ ẩn khỏi giao diện, vẫn lưu trong DB để đối soát).
 
-1. `pnpm test:watch` while working on UI/stateful logic to catch regressions quickly.
-2. `pnpm dev` in one terminal, then `pnpm test:e2e` in another to verify top-level flows before pushing. The Playwright base URL defaults to `http://localhost:3000`; override via `PLAYWRIGHT_BASE_URL` if needed.
+### 3. Quản Lý Nhân Viên & Lịch Làm Việc (Staff Management)
+*Dành cho Admin*
 
-## Project Structure
+**Mô tả**: Quản lý hồ sơ nhân viên, kỹ năng tay nghề và thời gian làm việc hàng tuần.
+
+**Vòng Đời (Lifecycle)**:
+1.  **Onboarding (Tạo mới)**:
+    *   Admin tạo hồ sơ nhân viên (Tên, SĐT, Màu hiển thị trên lịch).
+    *   Tạo tài khoản đăng nhập hệ thống (User account) liên kết với hồ sơ này.
+2.  **Cấu Hình Kỹ Năng (Skill Set)**:
+    *   Gán các dịch vụ mà nhân viên này có thể làm (Ví dụ: Nhân viên A chỉ làm Nail, không làm Mi).
+    *   Hệ thống booking sẽ dựa vào đây để lọc nhân viên phù hợp khi khách chọn dịch vụ.
+3.  **Thiết Lập Lịch (Scheduling)**:
+    *   Cấu hình lịch làm việc hàng tuần (Thứ 2 - CN, giờ bắt đầu - kết thúc).
+    *   Cấu hình ngày nghỉ phép (Day off) hoặc nghỉ đột xuất.
+4.  **Vận Hành**: Nhân viên nhận lịch hẹn dựa trên cấu hình trên.
+
+**Workflow Kỹ Thuật**:
+*   `POST /api/admin/staff`: Tạo nhân viên + User trong một transaction.
+*   `PUT /api/admin/staff/[id]/schedule`: Cập nhật bảng `staff_schedules`.
+*   `GET /api/admin/staff/[id]`: Lấy chi tiết thông tin để chỉnh sửa.
+
+### 4. Hệ Thống Tính Lương (Payroll System)
+*Dành cho Admin*
+
+**Mô tả**: Tự động tính toán thu nhập cho nhân viên dựa trên hiệu suất làm việc.
+
+**Vòng Đời (Lifecycle)**:
+1.  **Thu Thập Dữ Liệu**:
+    *   Admin chọn khoảng thời gian tính lương (Ví dụ: 01/12 - 31/12).
+    *   Hệ thống truy vấn tất cả lịch hẹn có trạng thái `Completed` trong khoảng này.
+2.  **Tính Toán (Calculation)**:
+    *   **Lương cơ bản**: Dựa trên số ngày/giờ làm việc (nếu có).
+    *   **Hoa hồng (Commission)**: Tổng giá trị dịch vụ hoàn thành * % hoa hồng được cài đặt cho nhân viên đó.
+    *   **Tips**: Cộng dồn tiền tip từ khách (nếu có).
+3.  **Tổng Hợp & Báo Cáo**: Hiển thị bảng lương chi tiết, cho phép xuất ra Excel/PDF (tính năng mở rộng).
+
+**Workflow Kỹ Thuật**:
+*   `GET /api/admin/payroll`:
+    *   Query bảng `appointments` join với `appointment_services`.
+    *   Filter điều kiện `status = 'completed'`.
+    *   Group by `staffId`.
+    *   Sum `price` và áp dụng công thức tính `commission`.
+
+### 5. Xác Thực & Phân Quyền (Authentication & Authorization)
+*Bảo mật hệ thống*
+
+**Vòng Đời (Lifecycle)**:
+1.  **Đăng Nhập**: User nhập email/password -> Hệ thống mã hóa password và so sánh với hash trong Database.
+2.  **Cấp Phiên (Session)**: Nếu đúng, hệ thống cấp JWT Token chứa `userId` và `role` (Admin/Staff).
+3.  **Điều Hướng (Routing)**:
+    *   **Admin**: Truy cập toàn quyền (Quản lý nhân viên, Doanh thu, Cấu hình).
+    *   **Staff**: Quyền hạn chế (Chỉ xem lịch hẹn của mình, không xem doanh thu tổng).
+4.  **Bảo Vệ API**: Mọi request tới `/api/admin/*` đều bị chặn bởi Middleware để kiểm tra tính hợp lệ của Token.
+
+**Workflow Kỹ Thuật**:
+*   `lib/auth.ts`: Cấu hình NextAuth Credentials Provider.
+*   `middleware.ts`: Chặn request không có token hoặc token hết hạn, redirect về trang login.
+
+---
+
+## 📂 Cấu Trúc Dự Án (Project Structure)
 
 ```
 nailsapp/
-├─ app/                # Next.js routes (public + admin + API)
-├─ components/         # Reusable UI + booking/admin flows
-├─ db/                 # Drizzle schema & connection
-├─ hooks/, lib/, types/
-├─ public/             # Static assets & uploads
-├─ scripts/            # Drizzle migration runner, schema helpers
-└─ tests/              # Playwright specs
+├── app/                # Next.js App Router (Pages & API Routes)
+│   ├── api/            # Các API endpoints (Backend logic)
+│   ├── admin/          # Các trang quản trị (Dashboard)
+│   ├── (public)/       # Các trang công khai (Booking, Home)
+│   └── layout.tsx      # Layout chính của ứng dụng
+├── components/         # Các React components tái sử dụng
+│   ├── ui/             # Shadcn UI components (Button, Input, Dialog...)
+│   ├── admin/          # Components dành riêng cho trang Admin
+│   └── ...             # Các components chức năng khác
+├── db/                 # Cấu hình Database và Schema
+│   ├── schema.ts       # Định nghĩa bảng (Tables) bằng Drizzle
+│   └── index.ts        # Khởi tạo kết nối Database
+├── lib/                # Các hàm tiện ích (Utils) và logic chung
+│   ├── auth.ts         # Cấu hình NextAuth
+│   ├── rate-limit.ts   # Logic giới hạn lượt truy cập API
+│   └── ...
+├── scripts/            # Scripts bảo trì và migration
+├── tests/              # Unit tests
+└── e2e/                # End-to-end tests
 ```
 
-## Notes
+## 🔧 Các Kỹ Thuật Kỹ Thuật Chính (Key Patterns)
 
-- The admin UI expects seed data for services/staff. After `pnpm db:seed`, refresh the dashboard to see demo rows.
-- File uploads land in `public/uploads`. Make sure the folder exists (the upload API creates it automatically in production builds).
-- When pointing to the Laravel backend, keep the API responses aligned with the types in `nailsapp/types/index.ts` to avoid runtime casting.
-- Admin area now uses NextAuth credentials login (email + password from the `users` table). Only users with role `admin` or `staff` can sign in: admins see every module, while staff is limited to lịch hẹn/lịch làm. Update seeds accordingly and remember to store hashed passwords (`bcrypt`).
-- Upload API hiện yêu cầu tài khoản admin/staff, giới hạn định dạng (PNG/JPEG/WebP/GIF/MP4) và kích thước (ảnh ≤ 5MB, video ≤ 50MB). Điều này giúp ngăn abuse và thuận lợi hơn khi scale sang storage bên ngoài.
-- Booking flow hỗ trợ tự động phân công nhân viên, hiển thị số nhân sự rảnh theo khung giờ, và cung cấp trang `/lookup` để khách chủ động tra cứu lịch theo số điện thoại.
-- Sentry logging đã được bật (xem `sentry.*.config.ts`). Các API response trả về `error.code`/`error.message` nhất quán để frontend hiển thị đúng và trace lỗi dễ dàng.
+*   **Database Transactions**: Sử dụng `db.transaction()` của Drizzle cho các thao tác ghi quan trọng (Đặt lịch, Tính lương) để đảm bảo tính nhất quán dữ liệu. Nếu một bước lỗi, toàn bộ thao tác sẽ được hoàn tác (rollback).
+*   **Zod Validation**: Tất cả API routes đều sử dụng `zod` schemas để kiểm tra dữ liệu JSON body và Query Parameters đầu vào, đảm bảo dữ liệu rác không bao giờ lọt vào database.
+*   **Rate Limiting**: `lib/rate-limit.ts` triển khai thuật toán Token Bucket để bảo vệ các API công khai (như Booking và Lookup) khỏi spam và tấn công DDoS.
+*   **Server-Side Pagination**: Các bảng dữ liệu Admin sử dụng phân trang phía server (`limit`, `offset`) để xử lý lượng dữ liệu lớn hiệu quả, thay vì tải toàn bộ về trình duyệt.
 
+## ⚡ Hướng Dẫn Cài Đặt & Chạy (Getting Started)
 
+### Yêu cầu
+*   Node.js 18 trở lên
+*   pnpm (khuyên dùng) hoặc npm/yarn
 
-# Tổng Quan Dự Án (nailsapp)
+### Các bước cài đặt
 
-## Thành phần hiện có
-- **Landing page** với Hero, dịch vụ, testimonial, đội ngũ và CTA tới đặt lịch/tra cứu (`nailsapp/components/hero-section.tsx`).
-- **Booking Form 4 bước** (dịch vụ → ngày/giờ → nhân viên → thông tin) dùng Drizzle API routes để lấy dữ liệu và kiểm tra nhân viên rảnh (`nailsapp/components/booking-form.tsx`).
-- **Trang admin** quản lý dịch vụ và lịch hẹn: lọc, phân trang, CRUD, xem chi tiết và cập nhật trạng thái (`nailsapp/components/admin/services-management.tsx`, `.../appointments-management.tsx`).
-- **API nội bộ** cho admin appointments (lọc nâng cao, phân trang, PUT/DELETE) (`nailsapp/app/api/admin/appointments/route.ts`, `[id]/route.ts`).
-- **Tài liệu & test cơ bản**: `nailsapp/README.md`, Vitest + Playwright khởi động (`nailsapp/components/__tests__/booking-form.test.tsx`, `nailsapp/tests/basic.spec.ts`).
+1.  **Clone dự án**
+    ```bash
+    git clone <repository-url>
+    cd nailsapp
+    ```
 
-## Thiếu sót chính
-2. **Không có auth/role** cho admin; dashboard public -> rủi ro bảo mật. **Done**
-3. **Thiếu migrations Drizzle** (`./drizzle` trống) nên không thể `pnpm db:migrate`. **Done**
-4. **Upload file trực tiếp vào `public/uploads`** không giới hạn và không xác thực ⇒ khó scale + nguy hiểm. **Done**
-5. **Test coverage mỏng** (chỉ 1 unit + 1 e2e smoke), chưa kiểm tra toàn bộ luồng booking/admin/API. **Done**
-## Cải tiến cần thiết
-1. **Hoàn thiện Next API**: viết lại GET/POST cho booking và staff availability, thêm kiểm tra xung đột, transaction, mã lỗi rõ ràng, response thống nhất với `nailsapp/types`.  **Done**
-2. **Bảo vệ trang admin**: tích hợp auth (NextAuth/Clerk), middleware kiểm tra role, khóa `/app/admin/**`.  **Done**
-3. **Quy trình dữ liệu**: tạo thư mục `drizzle/` với migrations, script seed thực sự, hỗ trợ đồng bộ env staging/prod. Thêm job gửi thông báo và nhắc lịch.
-4. **Nâng UX booking**: tiếp tục cải thiện auto-assign staff, hiển thị lịch trống chi tiết hơn, và mở rộng trải nghiệm tra cứu `/lookup` (ví dụ cho phép hủy hoặc đặt lại).
-5. **Giám sát & logging**: tích hợp Sentry/Axiom, chuẩn hóa lỗi front-end theo mã trả về, log đầy đủ.  **Done**
+2.  **Cài đặt dependencies**
+    ```bash
+    pnpm install
+    ```
 
-## Chuẩn bị Production & Scale
-- **Hạ tầng**: deploy Next.js trên Vercel/Docker; dùng MySQL managed (PlanetScale/RDS) với pool tối ưu. 
-- **Caching**: SWR/React Query + ISR cho trang public; cache danh mục/dịch vụ trên CDN; API booking vẫn động.
-- **Tránh overbooking**: dùng transaction/Redis lock để khóa slot; chuyển upload sang S3/Supabase với signed URL.
-- **Testing & CI**: mở rộng Vitest (hooks/libs), viết Playwright full flow booking + admin, chạy trong CI trước deploy; thêm load test (k6/Artillery).
-- **Observability**: theo dõi response time, error rate, pool usage; bật Vercel Analytics + log drain, đặt alert khi 5xx tăng.
+3.  **Cấu hình môi trường**
+    Tạo file `.env.local` tại thư mục gốc với các biến sau:
 
-Thực hiện các hạng mục này sẽ giúp hệ thống book lịch nails hoạt động an toàn, chuẩn bị được cho lưu lượng lớn và deploy ổn định lên production.
+    ```env
+    # Database (Neon Postgres)
+    DATABASE_URL="postgresql://<user>:<password>@<host>/<dbname>?sslmode=require"
+    DIRECT_URL="postgresql://<user>:<password>@<host>/<dbname>?sslmode=require"
 
+    # NextAuth
+    NEXTAUTH_URL="http://localhost:3000"
+    NEXTAUTH_SECRET="your-super-secret-key" # Chạy `openssl rand -base64 32` để tạo
 
+    # Tùy chọn
+    DEBUG_BOOKING=true
+    ```
 
-## NextAuth JWT Flow
+4.  **Thiết lập Database**
+    Đẩy cấu trúc bảng lên Neon và tạo dữ liệu mẫu:
 
-# User submits credentials
+    ```bash
+    # Đẩy schema lên DB
+    pnpm db:push
 
-- **-** Admin/staff mở /admin/login, nhập email & password. next-auth gọi authorize trong Credentials provider (nailsapp/lib/auth.ts).
-Code truy vấn users bằng Drizzle, kiểm tra role + bcrypt. Nếu hợp lệ, hàm authorize trả về object { id, name, email, role }.
-JWT issued
+    # Tạo dữ liệu mẫu (Seed)
+    pnpm db:seed
+    ```
 
-- **-** Vì session.strategy = "jwt", NextAuth tạo một JSON Web Token:
-Payload chứa thông tin user (sub, name, email) cộng với trường bổ sung bạn set trong callback jwt (token.id, token.role).
-- **-** Token được ký bằng NEXTAUTH_SECRET để chống giả mạo.
-- **-** Token được gửi lại cho trình duyệt trong cookie next-auth.session-token (hoặc __Secure-next-auth.session-token nếu HTTPS).
-Subsequent requests
+5.  **Chạy Server Development**
+    ```bash
+    pnpm dev
+    ```
+    Mở [http://localhost:3000](http://localhost:3000) để xem ứng dụng.
 
-- **-** Trình duyệt tự đính kèm cookie JWT cho mọi request cùng domain.
-  + **-** Server-side: middleware.ts gọi getToken({ req }) → NextAuth đọc cookie, giải mã JWT, kiểm tra chữ ký và trả payload (role, id). Dựa vào đó ta redirect nhân viên khỏi khu vực admin getServerSession(authOptions) trong app/admin/layout.tsx làm điều tương tự khi render server component để chắn người chưa login.
-  + **-** client-side React: SessionProvider đọc cookie, gọi /api/auth/session (NextAuth endpoint) → endpoint giải JWT rồi trả session JSON. useSession() hook tiêu thụ dữ liệu đó để hiển thị tên/role, logout, v.v.
+## 🧪 Kiểm Thử (Testing)
 
-# Logout
+*   **Chạy Unit Tests**:
+    ```bash
+    pnpm test
+    ```
+*   **Chạy E2E Tests**:
+    ```bash
+    pnpm test:e2e
+    ```
 
-- **-** Gọi signOut() xóa cookie JWT. Vì token không lưu DB, logout chỉ là xóa cookie + option redirect, không cần thao tác database.
+## 🔒 Tính Năng Bảo Mật
 
-# Refresh / expiry
+*   **Rate Limiting**: Giới hạn tần suất gọi API để chống spam.
+*   **RBAC (Role-Based Access Control)**: Phân quyền dựa trên vai trò (Admin/Staff) thông qua Middleware.
+*   **Input Validation**: Kiểm tra chặt chẽ dữ liệu đầu vào bằng Zod.
+*   **Secure Headers**: Middleware thực thi các security headers và kiểm tra nguồn gốc (Origin check).
 
-- **-** JWT có exp mặc định ~30 ngày (có thể config). Mỗi lần session endpoint được hit, NextAuth kiểm tra token; nếu hết hạn sẽ yêu cầu login lại. Không có server state nên không thể revoke thủ công trừ khi đổi NEXTAUTH_SECRET hoặc chuyển sang chiến lược database.
+## 🚀 Triển Khai (Deployment)
 
+Dự án được tối ưu để triển khai trên **Vercel**.
 
-# Tóm tắt
+1.  Đẩy code lên GitHub.
+2.  Import dự án vào Vercel.
+3.  Cấu hình Environment Variables (`DATABASE_URL`, `NEXTAUTH_SECRET`, v.v.).
+4.  Deploy!
 
-- **-** JWT sống trong cookie, không ghi xuống DB.
-- **-** Middleware + getServerSession đều đọc token này để enforce role.
-- **-** SessionProvider chỉ giúp client-side truy cập thông tin token đã được giải.
-- **-** Admin/staff phải có user record + password hash; khách không đụng tới JWT vì họ không login.
+---
+*Được xây dựng với ❤️ bởi Khac Duy*

@@ -14,9 +14,10 @@ async function executeQuery<T>(query: any): Promise<T[]> {
 }
 
 // --- GET: Lấy chi tiết một lịch hẹn ---
-export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const id = Number.parseInt(params.id);
+    const { id: paramId } = await params
+    const id = Number.parseInt(paramId);
     if (isNaN(id)) {
       return NextResponse.json({ success: false, error: "Invalid appointment ID" }, { status: 400 });
     }
@@ -51,9 +52,10 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
 }
 
 // --- PUT: Cập nhật một lịch hẹn (trạng thái, ghi chú, etc.) ---
-export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const id = Number.parseInt(params.id);
+    const { id: paramId } = await params
+    const id = Number.parseInt(paramId);
     if (isNaN(id)) {
       return NextResponse.json({ success: false, error: "Invalid appointment ID" }, { status: 400 });
     }
@@ -83,9 +85,10 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 }
 
 // --- DELETE: Xóa mềm một lịch hẹn (cập nhật status thành 'cancelled') ---
-export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const id = Number.parseInt(params.id);
+    const { id: paramId } = await params
+    const id = Number.parseInt(paramId);
     if (isNaN(id)) {
       return NextResponse.json({ success: false, error: "Invalid appointment ID" }, { status: 400 });
     }
