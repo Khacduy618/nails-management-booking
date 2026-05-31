@@ -41,7 +41,7 @@ export async function GET(request: NextRequest) {
       }
       const relevantAppointmentIdsQuery = db.selectDistinct({ id: appointmentServices.appointmentId }).from(appointmentServices).where(and(...subqueryConditions));
       const relevantAppointmentIdsResult = await relevantAppointmentIdsQuery;
-      const relevantIds = relevantAppointmentIdsResult.map(item => item.id);
+      const relevantIds = relevantAppointmentIdsResult.map((item: any) => item.id);
       if (relevantIds.length > 0) {
         conditions.push(inArray(appointments.id, relevantIds));
       } else {

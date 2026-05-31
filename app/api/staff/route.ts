@@ -32,7 +32,7 @@ export async function GET(request: NextRequest) {
     })
 
     // Transform response to match expected format
-    const transformed = staffList.map(s => {
+    const transformed = staffList.map((s: typeof staffList[number]) => {
       const email = s.user?.email || 'unknown@example.com'
       const phone = s.user?.phone || ''
       const namePrefix = email.split('@')[0]

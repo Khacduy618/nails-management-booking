@@ -20,7 +20,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
       return NextResponse.json({ success: false, error: "Status is required for update" }, { status: 400 });
     }
 
-    const updatedAppointment = await db.transaction(async (tx) => {
+    const updatedAppointment = await db.transaction(async (tx: any) => {
       const result = await tx
         .update(appointments)
         .set({ status: status })

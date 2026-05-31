@@ -1,7 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { db } from "@/db"
 import { appointments, appointmentServices, services, customers, staff, staffServices, staffSchedules } from "@/db/schema"
-import { eq, and, sql, inArray, not } from "drizzle-orm"
+import { eq, and, sql, inArray, not, desc } from "drizzle-orm"
 import { addMinutes, format } from "date-fns"
 import { ok, fail } from "@/lib/api-response"
 import { logError, logDebug, logInfo } from "@/lib/logger"
@@ -36,7 +36,7 @@ export async function GET(request: NextRequest) {
   try {
     // Rate limiting for lookup
     const key = `apt-lookup:${getClientKey(request as unknown as Request)}`
-    const rl = rateLimit(key, LIMITS.lookupTight)
+    const rl = await rateLimit(key, LIMITS.lookupTight)
     if (!rl.allowed) {
       return NextResponse.json({ success: false, error: { code: "FETCH_ERROR", message: "Too many requests" } }, { status: 429, headers: rateLimitResponse(rl.remaining, rl.resetMs) as any })
     }
@@ -59,15 +59,12 @@ export async function GET(request: NextRequest) {
         appointmentTime: true,
         status: true,
       },
-      orderBy: (appointments, { desc }) => [
-        desc(appointments.appointmentDate),
-        desc(appointments.appointmentTime),
-      ],
+      orderBy: [desc(appointments.appointmentDate), desc(appointments.appointmentTime)],
     })
 
     logInfo(`GET /api/appointments: Found ${userAppointments.length} appointments for phone ${cleanedPhone}`, { phone: cleanedPhone, count: userAppointments.length })
 
-    const formatted: AppointmentDTO[] = userAppointments.map((apt) => {
+    const formatted: AppointmentDTO[] = userAppointments.map((apt: any) => {
       return {
         id: apt.id,
         date: apt.appointmentDate,
@@ -87,10 +84,24 @@ export async function POST(request: NextRequest) {
   try {
     // Rate limiting for booking
     const key = `apt-book:${getClientKey(request as unknown as Request)}`
-    const rl = rateLimit(key, LIMITS.booking)
+    const rl = await rateLimit(key, LIMITS.booking)
     if (!rl.allowed) {
       return NextResponse.json({ success: false, error: { code: "CONFLICT", message: "Too many requests" } }, { status: 429, headers: rateLimitResponse(rl.remaining, rl.resetMs) as any })
     }
+
+    // CSRF Protection
+    const origin = request.headers.get("origin")
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL
+    if (appUrl && origin && origin !== appUrl) {
+      logError(new Error("CSRF check failed: Origin mismatch"), { origin, appUrl })
+      return NextResponse.json({ success: false, error: { code: "CSRF_ERROR", message: "Forbidden" } }, { status: 403 })
+    }
+    const xRequestedWith = request.headers.get("x-requested-with")
+    if (!xRequestedWith || xRequestedWith !== "XMLHttpRequest") {
+      logError(new Error("CSRF check failed: Missing or invalid X-Requested-With header"), { xRequestedWith })
+      return NextResponse.json({ success: false, error: { code: "CSRF_ERROR", message: "Forbidden" } }, { status: 403 })
+    }
+
     const body = (await request.json()) as Partial<CreateAppointmentPayload>
     const { serviceIds, customerName, customerPhone, customerEmail, date, time, staffId, notes } = body
     logDebug('POST /api/appointments received', { body })
@@ -104,10 +115,10 @@ export async function POST(request: NextRequest) {
     const sanitizedPhone = sanitizePhone(customerPhone)
 
     const servicesSelected = await db.query.services.findMany({ where: inArray(services.id, serviceIds) })
-    logDebug('Fetched services for booking', { serviceIds, found: servicesSelected.map(s => ({ id: s.id, name: s.name, price: s.price, duration: s.duration })) })
+    logDebug('Fetched services for booking', { serviceIds, found: servicesSelected.map((s: any) => ({ id: s.id, name: s.name, price: s.price, duration: s.duration })) })
     if (servicesSelected.length !== serviceIds.length) {
-      logDebug('POST /api/appointments service not found', { requested: serviceIds, foundIds: servicesSelected.map(s => s.id) })
-      logInfo('POST /api/appointments: SERVICE NOT FOUND', { requested: serviceIds, foundIds: servicesSelected.map(s => s.id), missing: serviceIds.filter(id => !servicesSelected.map(s => s.id).includes(id)) })
+      logDebug('POST /api/appointments service not found', { requested: serviceIds, foundIds: servicesSelected.map((s: any) => s.id) })
+      logInfo('POST /api/appointments: SERVICE NOT FOUND', { requested: serviceIds, foundIds: servicesSelected.map((s: any) => s.id), missing: serviceIds.filter((id: number) => !servicesSelected.map((s: any) => s.id).includes(id)) })
       return fail("SERVICE_NOT_FOUND", "One or more services not found", 404)
     }
 
@@ -116,8 +127,8 @@ export async function POST(request: NextRequest) {
       return fail("INVALID_INPUT", "Invalid date or time", 400)
     }
 
-    const totalDuration = servicesSelected.reduce((sum, svc) => sum + svc.duration, 0)
-    const totalPrice = servicesSelected.reduce((sum, svc) => sum + Number(svc.price), 0)
+    const totalDuration = servicesSelected.reduce((sum: number, svc: any) => sum + svc.duration, 0)
+    const totalPrice = servicesSelected.reduce((sum: number, svc: any) => sum + Number(svc.price), 0)
     const appointmentEnd = addMinutes(appointmentStart, totalDuration)
 
     const appointmentDateStr = format(appointmentStart, "yyyy-MM-dd")
@@ -145,8 +156,8 @@ export async function POST(request: NextRequest) {
     const skills = await db.query.staffServices.findMany({
       where: eq(staffServices.staffId, staffId),
     })
-    const skilledServiceIds = new Set(skills.map(s => s.serviceId))
-    const lacksSkills = serviceIds.some(id => !skilledServiceIds.has(id))
+    const skilledServiceIds = new Set(skills.map((s: any) => s.serviceId))
+    const lacksSkills = serviceIds.some((id: number) => !skilledServiceIds.has(id))
     if (lacksSkills) {
       logInfo(`POST /api/appointments: STAFF LACKS SKILLS (ID: ${staffId}, Services: ${serviceIds})`, { staffId, serviceIds })
       return fail("INVALID_INPUT", "Nhân viên không có đủ kỹ năng thực hiện các dịch vụ yêu cầu", 400)
@@ -196,7 +207,7 @@ export async function POST(request: NextRequest) {
 
     if (conflicting.length > 0) {
       logDebug('POST /api/appointments conflict detected', { staffId, date: format(appointmentStart, "yyyy-MM-dd"), time, conflictingCount: conflicting.length })
-      logInfo(`POST /api/appointments: CONFLICT DETECTED - Staff ${staffId} has ${conflicting.length} appointment(s) on ${format(appointmentStart, "yyyy-MM-dd")} at ${time}`, { staffId, date: format(appointmentStart, "yyyy-MM-dd"), time, conflictingCount: conflicting.length, conflictingIds: conflicting.map(c => c.id) })
+      logInfo(`POST /api/appointments: CONFLICT DETECTED - Staff ${staffId} has ${conflicting.length} appointment(s) on ${format(appointmentStart, "yyyy-MM-dd")} at ${time}`, { staffId, date: format(appointmentStart, "yyyy-MM-dd"), time, conflictingCount: conflicting.length, conflictingIds: conflicting.map((c: any) => c.id) })
       return fail(
         "STAFF_CONFLICT",
         "Khung giờ này đã có lịch hẹn. Vui lòng chọn thời gian hoặc nhân viên khác.",
@@ -217,7 +228,7 @@ export async function POST(request: NextRequest) {
       isOvertime: !isBusinessHours(appointmentStart),
     }
 
-    const appointmentServicePayloads = servicesSelected.map((svc) => ({
+    const appointmentServicePayloads = servicesSelected.map((svc: any) => ({
       serviceId: svc.id,
       staffId,
       priceAtBooking: svc.price,
@@ -227,7 +238,7 @@ export async function POST(request: NextRequest) {
 
     logDebug('About to run booking transaction', { appointmentInsertPayload, appointmentServicePayloads })
 
-    const createdAppointment = await db.transaction(async (tx) => {
+    const createdAppointment = await db.transaction(async (tx: any) => {
       // Find or create customer
       let customerId: number | null = null
 
@@ -242,10 +253,6 @@ export async function POST(request: NextRequest) {
           await tx
             .update(customers)
             .set({
-              serviceCount: existingCustomer.serviceCount + servicesSelected.length,
-              totalAmount: (
-                Number(existingCustomer.totalAmount) + totalPrice
-              ).toString(),
               lastAppointmentDate: format(appointmentStart, 'yyyy-MM-dd'),
               email: customerEmail || existingCustomer.email,
               updatedAt: new Date(),
@@ -259,8 +266,6 @@ export async function POST(request: NextRequest) {
               phone: sanitizedPhone,
               name: customerName,
               email: customerEmail || undefined,
-              serviceCount: servicesSelected.length,
-              totalAmount: totalPrice.toString(),
               lastAppointmentDate: format(appointmentStart, 'yyyy-MM-dd'),
               createdAt: new Date(),
               updatedAt: new Date(),
@@ -286,7 +291,7 @@ export async function POST(request: NextRequest) {
 
       if (servicesSelected.length) {
         await tx.insert(appointmentServices).values(
-          servicesSelected.map((svc) => ({
+          servicesSelected.map((svc: any) => ({
             appointmentId,
             serviceId: svc.id,
             staffId: svc.id === svc.id ? staffId : staffId, // keep simple mapping
@@ -341,7 +346,7 @@ export async function POST(request: NextRequest) {
           customerPhone: sanitizedPhone,
           appointmentDate: format(appointmentStart, 'yyyy-MM-dd'),
           appointmentTime: time,
-          services: createdAppointment.appointmentServices.map(as => ({
+          services: createdAppointment.appointmentServices.map((as: any) => ({
             name: as.service.name,
             price: as.priceAtBooking.toString(),
           })),

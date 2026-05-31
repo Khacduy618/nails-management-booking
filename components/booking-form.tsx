@@ -208,7 +208,10 @@ export function BookingForm({ onBookingComplete }: BookingFormProps) {
       };
       const response = await fetch(`${apiUrl}appointments`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "X-Requested-With": "XMLHttpRequest",
+        },
         body: JSON.stringify(appointmentData),
       });
       const result = await response.json();

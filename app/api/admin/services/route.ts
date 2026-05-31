@@ -101,7 +101,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
-    const newService = await db.transaction(async (tx) => {
+    const newService = await db.transaction(async (tx: any) => {
       const result = await tx
         .insert(services)
         .values(body)

@@ -23,7 +23,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
             .select()
             .from(customers)
             .where(eq(customers.id, customerId))
-            .then(result => result[0])
+            .then((result: any[]) => result[0])
 
         if (!customer) {
             return NextResponse.json(
@@ -46,7 +46,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
             .where(eq(appointments.customerId, customerId))
 
         // Lấy chi tiết dịch vụ của từng lịch hẹn
-        const appointmentIds = customerAppointments.map(apt => apt.appointmentId)
+        const appointmentIds = customerAppointments.map((apt: any) => apt.appointmentId)
 
         let appointmentServicesList: Array<{
             appointmentId: number
@@ -71,11 +71,11 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
         }
 
         // Organize services by appointment
-        const appointmentsWithServices = customerAppointments.map(apt => ({
+        const appointmentsWithServices = customerAppointments.map((apt: any) => ({
             ...apt,
             services: appointmentServicesList
-                .filter(s => s.appointmentId === apt.appointmentId)
-                .map(s => ({
+                .filter((s: any) => s.appointmentId === apt.appointmentId)
+                .map((s: any) => ({
                     id: s.serviceId,
                     name: s.serviceName,
                     price: s.servicePrice,
@@ -84,8 +84,8 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
         }))
 
         // Calculate total services and total amount by service
-        const servicesSummary = appointmentServicesList.reduce((acc, item) => {
-            const existing = acc.find(s => s.serviceId === item.serviceId)
+        const servicesSummary = appointmentServicesList.reduce((acc: any[], item: any) => {
+            const existing = acc.find((s: any) => s.serviceId === item.serviceId)
             if (existing) {
                 existing.count += 1
                 existing.totalAmount = String(
@@ -101,13 +101,15 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
                 })
             }
             return acc
-        }, [] as Array<{
-            serviceId: number
-            serviceName: string
-            price: string
-            count: number
-            totalAmount: string
-        }>)
+        }, [] as any[])
+
+        const activeAppointments = customerAppointments.filter((apt: any) => apt.status !== 'cancelled')
+        const activeAppointmentIds = activeAppointments.map((apt: any) => apt.appointmentId)
+        const activeServicesList = appointmentServicesList.filter((s: any) => activeAppointmentIds.includes(s.appointmentId))
+
+        const dynamicTotalAmount = activeAppointments
+            .reduce((sum: number, apt: any) => sum + parseFloat(apt.totalPrice), 0)
+            .toFixed(2)
 
         const response = {
             data: {
@@ -123,8 +125,8 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
                 servicesSummary: servicesSummary,
                 statistics: {
                     totalAppointments: customerAppointments.length,
-                    totalServices: appointmentServicesList.length,
-                    totalAmount: customer.totalAmount,
+                    totalServices: activeServicesList.length,
+                    totalAmount: dynamicTotalAmount,
                     lastAppointmentDate: customer.lastAppointmentDate,
                 },
             },

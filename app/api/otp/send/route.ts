@@ -14,7 +14,7 @@ export async function POST(request: NextRequest) {
     try {
         // Rate limiting for OTP requests
         const key = `otp-send:${getClientKey(request as unknown as Request)}`
-        const rl = rateLimit(key, LIMITS.lookupTight)
+        const rl = await rateLimit(key, LIMITS.lookupTight)
         if (!rl.allowed) {
             return NextResponse.json(
                 { success: false, error: { code: "RATE_LIMITED", message: "Too many OTP requests" } },

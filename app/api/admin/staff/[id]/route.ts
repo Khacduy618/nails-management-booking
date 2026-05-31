@@ -61,8 +61,8 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 
     // Group appointments by appointment ID
     const appointmentsGrouped = appointmentList.reduce(
-      (acc, row) => {
-        const existing = acc.find((a) => a.id === row.id);
+      (acc: any[], row: any) => {
+        const existing = acc.find((a: any) => a.id === row.id);
         if (existing) {
           existing.services.push({
             name: row.serviceName || "Unknown Service",
@@ -120,7 +120,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       data: {
         staff: staffMember,
         appointments: appointmentsGrouped.sort(
-          (a, b) =>
+          (a: any, b: any) =>
             new Date(b.appointmentDate).getTime() -
             new Date(a.appointmentDate).getTime()
         ),
@@ -359,7 +359,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
       );
     }
 
-    const updatedStaff = await db.transaction(async (tx) => {
+    const updatedStaff = await db.transaction(async (tx: any) => {
       // Update user table if email or phone provided
       if (body.email || body.phone) {
         const userUpdateData: any = {}
@@ -470,7 +470,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
       );
     }
 
-    const updatedStaff = await db.transaction(async (tx) => {
+    const updatedStaff = await db.transaction(async (tx: any) => {
       const result = await tx
         .update(staff)
         .set({ status: body.status })

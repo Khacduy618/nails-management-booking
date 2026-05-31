@@ -58,7 +58,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     const body = await request.json();
     const { staffIds, ...serviceData } = body;
 
-    const updatedService = await db.transaction(async (tx) => {
+    const updatedService = await db.transaction(async (tx: any) => {
       await tx.update(services).set(serviceData).where(eq(services.id, id));
 
       // 2. Cập nhật bảng staff_services: Xóa liên kết cũ, thêm liên kết mới

@@ -108,7 +108,7 @@ export async function GET(request: NextRequest) {
             .orderBy(appointments.appointmentDate);
 
         // Transform to appointments array for frontend
-        const appointmentsList = dailyRevenueRaw.map(record => ({
+        const appointmentsList = dailyRevenueRaw.map((record: any) => ({
             id: record.id,
             appointmentDate: record.appointmentDate,
             appointmentTime: record.appointmentTime,
@@ -139,7 +139,7 @@ export async function GET(request: NextRequest) {
 
         // Group by customer and sum spending
         const customerMap: Record<string, any> = {};
-        customerSpendingRaw.forEach((record) => {
+        customerSpendingRaw.forEach((record: any) => {
             const customerId = record.customerId;
             if (!customerId) return;
 

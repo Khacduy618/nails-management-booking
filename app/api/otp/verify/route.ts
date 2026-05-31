@@ -13,7 +13,7 @@ export async function POST(request: NextRequest) {
     try {
         // Rate limiting for OTP verification
         const key = `otp-verify:${getClientKey(request as unknown as Request)}`
-        const rl = rateLimit(key, LIMITS.lookupTight)
+        const rl = await rateLimit(key, LIMITS.lookupTight)
         if (!rl.allowed) {
             return NextResponse.json(
                 { success: false, error: { code: "RATE_LIMITED", message: "Too many verification attempts" } },
@@ -114,7 +114,7 @@ export async function POST(request: NextRequest) {
                 customerPhone: appointment.customerPhone,
                 appointmentDate: appointment.appointmentDate,
                 appointmentTime: appointment.appointmentTime,
-                services: appointment.appointmentServices.map(as => ({
+                services: appointment.appointmentServices.map((as: any) => ({
                     name: as.service.name,
                     price: as.priceAtBooking.toString(),
                 })),

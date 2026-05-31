@@ -95,7 +95,7 @@ export async function GET(request: NextRequest) {
     ]);
 
     // Format lại dữ liệu
-    const availableCategories = availableCategoriesResult.filter(c => c.count > 0);
+    const availableCategories = availableCategoriesResult.filter((c: any) => c.count > 0);
     const availableDurations = [
         { id: '30', label: "Dưới 30 phút", count: durationResult[0]?.range30 || 0 },
         { id: '60', label: "30 - 60 phút", count: durationResult[0]?.range60 || 0 },
