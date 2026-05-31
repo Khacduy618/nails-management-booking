@@ -1,6 +1,7 @@
 "use client"
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+
 import { ServicesFilter } from "./services-filter";
 import { ServicesList } from "./services-list";
 import { useDebounce } from "@/hooks/use-debounce";
@@ -48,6 +49,16 @@ export function ServicesPageClient() {
   const [filterOptions, setFilterOptions] = useState<FilterOptions | null>(null);
   const [isMetaLoading, setIsMetaLoading] = useState(true);
 
+  // Ref để lưu trữ khoảng giá gốc (global price bounds) từ hệ thống để dùng khi Clear All
+  const globalPriceBoundsRef = useRef<{ min: number; max: number } | null>(null);
+
+  // Ref để lưu trữ khoảng giá trước đó nhằm so sánh và tự động sync theo bounds mới
+  const prevPriceBoundsRef = useRef<{ min: number; max: number } | null>(null);
+
+  // Ref để tránh stale closure trong useEffect
+  const filterOptionsRef = useRef<FilterOptions | null>(null);
+  filterOptionsRef.current = filterOptions;
+
   // Debounce các giá trị thay đổi nhanh để tránh gọi API liên tục
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
   const debouncedPriceRange = useDebounce(priceRange, 500);
@@ -69,11 +80,24 @@ export function ServicesPageClient() {
       if (debouncedSearchTerm) params.append('search', debouncedSearchTerm);
       if (selectedCategories.length > 0) params.append('category', selectedCategories.join(','));
       if (selectedDurations.length > 0) params.append('duration', selectedDurations.join(','));
-      if (debouncedPriceRange[0] > 0) params.append('minPrice', debouncedPriceRange[0].toString());
-      if (debouncedPriceRange[1] < 1000000) params.append('maxPrice', debouncedPriceRange[1].toString());
+      // Chỉ append price khi đã có bounds thực từ API (dùng ref để tránh stale closure)
+      const currentBounds = filterOptionsRef.current?.priceRange;
+      if (currentBounds) {
+        if (debouncedPriceRange[0] > currentBounds.min)
+          params.append('minPrice', debouncedPriceRange[0].toString());
+        if (debouncedPriceRange[1] < currentBounds.max)
+          params.append('maxPrice', debouncedPriceRange[1].toString());
+      }
 
       const servicesUrl = `${apiUrl}services?${params.toString()}`;
-      const metaUrl = `${apiUrl}services-meta?${params.toString()}`;
+
+      // Meta URL: không bỏ price params để slider luôn hiển thị full bounds,
+      // chỉ giữ search/category/duration để faceted counts được đúng
+      const metaParams = new URLSearchParams();
+      if (debouncedSearchTerm) metaParams.append('search', debouncedSearchTerm);
+      if (selectedCategories.length > 0) metaParams.append('category', selectedCategories.join(','));
+      if (selectedDurations.length > 0) metaParams.append('duration', selectedDurations.join(','));
+      const metaUrl = `${apiUrl}services-meta?${metaParams.toString()}`;
 
       console.log('Fetching services from:', servicesUrl);
       console.log('Fetching meta from:', metaUrl);
@@ -95,10 +119,33 @@ export function ServicesPageClient() {
         setPagination(servicesData.pagination);
         setFilterOptions(metaData.meta);
 
-        // Cập nhật lại thanh trượt giá lần đầu tiên
-        if (priceRange[0] === 0 && priceRange[1] === 1000000) {
-          setPriceRange([metaData.meta.priceRange.min, metaData.meta.priceRange.max]);
+        // Lưu bounds gốc nếu chưa có
+        if (!globalPriceBoundsRef.current && metaData.meta.priceRange) {
+          globalPriceBoundsRef.current = metaData.meta.priceRange;
         }
+
+        // Quyết định tự động sync priceRange theo bounds mới
+        const newBounds = metaData.meta.priceRange;
+        const prevBounds = prevPriceBoundsRef.current;
+        if (!prevBounds) {
+          if (priceRange[0] !== newBounds.min || priceRange[1] !== newBounds.max) {
+            setPriceRange([newBounds.min, newBounds.max]);
+          }
+        } else {
+          const isAtOldBounds =
+            debouncedPriceRange[0] === prevBounds.min &&
+            debouncedPriceRange[1] === prevBounds.max;
+          const isOutOfBounds =
+            debouncedPriceRange[0] < newBounds.min ||
+            debouncedPriceRange[1] > newBounds.max;
+
+          if (isAtOldBounds || isOutOfBounds) {
+            if (priceRange[0] !== newBounds.min || priceRange[1] !== newBounds.max) {
+              setPriceRange([newBounds.min, newBounds.max]);
+            }
+          }
+        }
+        prevPriceBoundsRef.current = newBounds;
 
       } catch (err: any) {
         setError(err.message);
@@ -109,12 +156,24 @@ export function ServicesPageClient() {
     };
 
     fetchData();
-  }, [currentPage, debouncedSearchTerm, selectedCategories, selectedDurations, debouncedPriceRange]);
+  }, [currentPage, debouncedSearchTerm, selectedCategories, selectedDurations, debouncedPriceRange]); // eslint-disable-line react-hooks/exhaustive-deps
+  // filterOptions sẽ luôn có giá trị sau lần fetch đầu tiên, không cần đưa vào deps
+
 
   // Hàm xử lý chung khi bộ lọc thay đổi, sẽ reset về trang 1
   const handleFilterChange = (setter: React.Dispatch<React.SetStateAction<any>>) => (value: any) => {
     setter(value);
     setCurrentPage(1); // Quan trọng: Reset về trang đầu tiên khi thay đổi bộ lọc
+  };
+
+  // Xóa toàn bộ bộ lọc, reset price về bounds gốc
+  const handleClearAll = () => {
+    setSearchTerm("");
+    setSelectedCategories([]);
+    setSelectedDurations([]);
+    const globalBounds = globalPriceBoundsRef.current;
+    setPriceRange(globalBounds ? [globalBounds.min, globalBounds.max] : [0, 1000000]);
+    setCurrentPage(1);
   };
 
   return (
@@ -131,6 +190,7 @@ export function ServicesPageClient() {
             onDurationChange={handleFilterChange(setSelectedDurations)}
             priceRange={priceRange}
             onPriceRangeChange={handleFilterChange(setPriceRange)}
+            onClearAll={handleClearAll}
 
             // Props động được truyền xuống
             availableCategories={filterOptions?.categories}

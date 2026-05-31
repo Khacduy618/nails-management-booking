@@ -26,10 +26,18 @@ async function seed() {
 
         // 2. Create Services
         const createdServices = await db.insert(services).values([
-            { name: 'Classic Manicure', description: 'Basic manicure service', price: '25.00', duration: 30, categoryId: categories[0].id, status: 'active' },
-            { name: 'Gel Manicure', description: 'Long-lasting gel manicure', price: '40.00', duration: 45, categoryId: categories[0].id, status: 'active' },
-            { name: 'Classic Pedicure', description: 'Basic pedicure service', price: '35.00', duration: 40, categoryId: categories[1].id, status: 'active' },
-            { name: 'Deluxe Pedicure', description: 'Premium pedicure with massage', price: '55.00', duration: 60, categoryId: categories[1].id, status: 'active' },
+            // Manicure
+            { name: 'Manicure Cơ Bản', description: 'Dịch vụ làm móng tay cơ bản, làm sạch và sơn móng', price: '150000', duration: 30, categoryId: categories[0].id, status: 'active', popular: true },
+            { name: 'Gel Manicure', description: 'Làm móng tay gel bền dếp, giữ màu lâu', price: '250000', duration: 45, categoryId: categories[0].id, status: 'active', popular: true },
+            { name: 'Manicure Cao Cấp', description: 'Trọi nghiệm làm móng tay cao cấp kèm massage tay', price: '350000', duration: 60, categoryId: categories[0].id, status: 'active' },
+            // Pedicure
+            { name: 'Pedicure Cơ Bản', description: 'Dịch vụ làm móng chân cơ bản', price: '180000', duration: 40, categoryId: categories[1].id, status: 'active' },
+            { name: 'Pedicure Cao Cấp', description: 'Làm móng chân cao cấp kèm massage chân', price: '300000', duration: 60, categoryId: categories[1].id, status: 'active', popular: true },
+            { name: 'Gel Pedicure', description: 'Làm móng chân gel siêu bền', price: '280000', duration: 50, categoryId: categories[1].id, status: 'active' },
+            // Nail Art
+            { name: 'Nail Art Cơ Bản', description: 'Vẽ họa tiết đơn giản trên móng', price: '200000', duration: 45, categoryId: categories[2].id, status: 'active' },
+            { name: 'Nail Art 3D', description: 'Thiết kế móng nghệ thuật 3D độc đáo', price: '450000', duration: 90, categoryId: categories[2].id, status: 'active', popular: true },
+            { name: 'Nail Art Đính Đá', description: 'Trang trí móng với đá và họa tiết cao cấp', price: '550000', duration: 120, categoryId: categories[2].id, status: 'active' },
         ]).returning();
         console.log('✅ Services created');
 
