@@ -15,33 +15,20 @@ import {
 } from "@/components/ui/pagination"
 import { Skeleton } from "@/components/ui/skeleton"
 import { ApiService, PaginationInfo } from './services-page-client'; // Import kiểu từ component cha
+import PhantomWrapper from "@/components/ui/phantom-wrapper"
+import { useRouter } from "next/navigation"
 
 const ITEMS_PER_PAGE = 6;
 
-// --- Component hiển thị trạng thái loading ---
-function LoadingSkeleton({ viewMode }: { viewMode: "grid" | "list" }) {
-  return (
-    <div className={viewMode === "grid" ? "grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6" : "space-y-4"}>
-      {[...Array(ITEMS_PER_PAGE)].map((_, index) => (
-        <Card key={index} className="p-0 overflow-hidden">
-          <div className={viewMode === "list" ? "flex" : ""}>
-            <Skeleton className={`${viewMode === "list" ? "w-48 h-full flex-shrink-0" : "h-48 w-full"}`} />
-            <div className="flex-1 p-6 space-y-4">
-              <Skeleton className="h-6 w-3/4" />
-              <Skeleton className="h-4 w-1/4" />
-              <Skeleton className="h-10 w-full" />
-              <div className="flex justify-between">
-                <Skeleton className="h-4 w-1/3" />
-                <Skeleton className="h-4 w-1/3" />
-              </div>
-              <Skeleton className="h-10 w-full" />
-            </div>
-          </div>
-        </Card>
-      ))}
-    </div>
-  );
-}
+const MOCK_SERVICES: ApiService[] = Array.from({ length: ITEMS_PER_PAGE }, (_, i) => ({
+  id: -i - 1,
+  name: "Tên Dịch Vụ Mẫu Cho Skeleton",
+  description: "Đây là mô tả mẫu có độ dài vừa phải để tạo khung shimmer loader tương thích với thiết kế thật của thẻ dịch vụ.",
+  price: "150000",
+  duration: 45,
+  popular: i === 0,
+  imageUrl: null,
+}));
 
 // --- Định nghĩa props cho component chính ---
 interface ServicesListProps {
@@ -63,18 +50,18 @@ export function ServicesList({
   onPageChange,
 }: ServicesListProps) {
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const router = useRouter();
 
   const handleBooking = (serviceId: number) => {
-    // Logic đặt lịch sẽ được xử lý ở đây hoặc được truyền từ cha
-    console.log("Booking service:", serviceId);
-  }
+    router.push(`/book?serviceId=${serviceId}`);
+  };
 
   // --- Render Logic ---
 
   if (error) {
     return <div className="text-center py-12 text-destructive">{error}</div>;
   }
-  
+
   const startIndex = pagination ? (pagination.page - 1) * pagination.limit : 0;
 
   return (
@@ -88,7 +75,7 @@ export function ServicesList({
               {pagination.total} dịch vụ
             </p>
           )}
-           {isLoading && <Skeleton className="h-5 w-48" />}
+          {isLoading && <Skeleton className="h-5 w-48" />}
         </div>
         <div className="hidden md:flex items-center space-x-2">
           <Button variant={viewMode === "grid" ? "default" : "outline"} size="sm" onClick={() => setViewMode("grid")}>
@@ -101,31 +88,37 @@ export function ServicesList({
       </div>
 
       {/* Services Grid/List */}
-      {isLoading ? (
-        <LoadingSkeleton viewMode={viewMode} />
-      ) : (
+      <PhantomWrapper loading={isLoading} animation="wave">
         <div className={viewMode === "grid"
-              ? "grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6"
-              : "space-y-4"}>
-          {services.map((service) => (
+          ? "grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6"
+          : "space-y-4"}>
+          {(isLoading && services.length === 0 ? MOCK_SERVICES : services).map((service) => (
             <Card key={service.id} className="group hover:shadow-lg transition-all p-0 duration-300 hover:-translate-y-1 overflow-hidden">
               <div className={viewMode === "list" ? "flex" : ""}>
                 {/* Image */}
-                <div className={`${viewMode === "list" ? "w-48 flex-shrink-0" : "aspect-video"} overflow-hidden`}>
-                  <img
-                    src={service.imageUrl || "/placeholder.svg"}
-                    alt={service.name}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                  />
+                <div className={`${viewMode === "list" ? "w-48 flex-shrink-0" : "aspect-video"} overflow-hidden bg-muted`}>
+                  {service.imageUrl ? (
+                    <img
+                      src={service.imageUrl}
+                      alt={service.name}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-muted-foreground bg-slate-200 dark:bg-slate-800">
+                      Ảnh dịch vụ
+                    </div>
+                  )}
                 </div>
 
                 {/* Content */}
                 <div className="flex-1 flex flex-col">
                   <CardHeader className="pb-3">
-                    <div className="flex items-start justify-between">
+                    <div className="flex items-center justify-between">
                       <div className="space-y-1">
-                        <CardTitle className="text-lg h-14 group-hover:text-primary transition-colors line-clamp-2">
-                          {service.name}
+                        <CardTitle className="flex items-center text-lg h-14 group-hover:text-primary transition-colors">
+                          <span className="line-clamp-2 leading-tight">
+                            {service.name}
+                          </span>
                         </CardTitle>
                         {service.popular && <Badge variant="secondary">Phổ biến</Badge>}
                       </div>
@@ -133,9 +126,9 @@ export function ServicesList({
                     </div>
                   </CardHeader>
                   <CardContent className="p-6 pt-0 space-y-4 flex-grow flex flex-col justify-between">
-                     <CardDescription className="text-pretty leading-relaxed line-clamp-2">
-                        {service.description}
-                     </CardDescription>
+                    <CardDescription className="text-pretty leading-relaxed line-clamp-2">
+                      {service.description}
+                    </CardDescription>
 
                     {/* Service Info */}
                     <div className="flex flex-wrap gap-x-4 gap-y-2 text-sm text-muted-foreground">
@@ -157,7 +150,7 @@ export function ServicesList({
             </Card>
           ))}
         </div>
-      )}
+      </PhantomWrapper>
 
       {/* Pagination */}
       {pagination && pagination.totalPages > 1 && !isLoading && (
@@ -171,18 +164,18 @@ export function ServicesList({
                   className={currentPage === 1 ? "pointer-events-none opacity-50" : ""}
                 />
               </PaginationItem>
-              
+
               {/* Logic phân trang đơn giản, hiển thị tất cả các trang */}
               {[...Array(pagination.totalPages)].map((_, i) => (
-                  <PaginationItem key={i}>
-                      <PaginationLink 
-                          href="#"
-                          onClick={(e) => { e.preventDefault(); onPageChange(i + 1); }}
-                          isActive={currentPage === i + 1}
-                      >
-                          {i + 1}
-                      </PaginationLink>
-                  </PaginationItem>
+                <PaginationItem key={i}>
+                  <PaginationLink
+                    href="#"
+                    onClick={(e) => { e.preventDefault(); onPageChange(i + 1); }}
+                    isActive={currentPage === i + 1}
+                  >
+                    {i + 1}
+                  </PaginationLink>
+                </PaginationItem>
               ))}
 
               <PaginationItem>

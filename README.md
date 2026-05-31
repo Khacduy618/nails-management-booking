@@ -186,65 +186,81 @@ nailsapp/
 
 ## ⚡ Hướng Dẫn Cài Đặt & Chạy (Getting Started)
 
-### Yêu cầu
-*   Node.js 18 trở lên
-*   pnpm (khuyên dùng) hoặc npm/yarn
+### 📋 Yêu cầu hệ thống
+*   Docker & Docker Compose
+*   Node.js 18+ & `pnpm` (Nếu chạy ứng dụng trên máy Host)
 
-### Các bước cài đặt
+---
 
-1.  **Clone dự án**
+### 1️⃣ Cấu hình môi trường (Environment Variables)
+Ứng dụng sử dụng tệp `.env` ở thư mục gốc để cấu hình. Bản mẫu `.env` mặc định đã được cấu hình sẵn để kết nối với cơ sở dữ liệu Postgres chạy bằng Docker:
+*   `DATABASE_URL="postgresql://postgres:password@localhost:5432/nails_db"` (khi chạy ứng dụng trên Host)
+*   `NEXTAUTH_SECRET`: Khóa ký phiên đăng nhập (đã điền mã mặc định cho local dev).
+
+Nếu muốn kết nối với cơ sở dữ liệu khác (như Neon Postgres), hãy cập nhật lại `DATABASE_URL` tương ứng trong tệp `.env`.
+
+---
+
+### 2️⃣ Khởi động và chạy ứng dụng
+
+Bạn có thể lựa chọn 1 trong 2 phương án phát triển dưới đây:
+
+#### 🔹 PHƯƠNG ÁN A: Chạy Database trong Docker + Ứng dụng chạy trên Host (Khuyên Dùng)
+*Phương án này giúp Hot-Reload của Next.js hoạt động nhanh nhất và tối ưu hiệu suất trên macOS/Windows.*
+
+1.  **Khởi động Postgres database bằng Docker:**
     ```bash
-    git clone <repository-url>
-    cd nailsapp
+    docker compose up -d postgres
     ```
 
-2.  **Cài đặt dependencies**
+2.  **Cài đặt các dependencies trên máy Host:**
     ```bash
     pnpm install
     ```
 
-3.  **Cấu hình môi trường**
-    Tạo file `.env.local` tại thư mục gốc với các biến sau:
-
-    ```env
-    # Database (Neon Postgres)
-    DATABASE_URL="postgresql://<user>:<password>@<host>/<dbname>?sslmode=require"
-    DIRECT_URL="postgresql://<user>:<password>@<host>/<dbname>?sslmode=require"
-
-    # NextAuth
-    NEXTAUTH_URL="http://localhost:3000"
-    NEXTAUTH_SECRET="your-super-secret-key" # Chạy `openssl rand -base64 32` để tạo
-
-    # SMTP (gửi email xác nhận)
-    SMTP_HOST="smtp.your-provider.com"
-    SMTP_PORT=587
-    SMTP_SECURE=false
-    SMTP_USER="no-reply@your-domain.com"
-    SMTP_PASS="app-password-or-api-key"
-    SMTP_FROM="Nails Manager <no-reply@your-domain.com>"
-
-    # Tùy chọn
-    DEBUG_BOOKING=true
-    ```
-
-    > ⚠️ Nếu không cấu hình SMTP, hệ thống sẽ bỏ qua bước gửi email và ghi cảnh báo trong logs.
-
-4.  **Thiết lập Database**
-    Đẩy cấu trúc bảng lên Neon và tạo dữ liệu mẫu:
-
+3.  **Chạy Migrations và Seeding để khởi tạo cấu trúc và dữ liệu mẫu:**
     ```bash
-    # Đẩy schema lên DB
-    pnpm db:push
+    # Đẩy cấu trúc bảng (schema) lên Database
+    pnpm db:migrate
 
-    # Tạo dữ liệu mẫu (Seed)
+    # Nạp dữ liệu mẫu (Admin, Staff, Dịch vụ...)
     pnpm db:seed
     ```
 
-5.  **Chạy Server Development**
+4.  **Chạy Next.js ở chế độ Development:**
     ```bash
     pnpm dev
     ```
-    Mở [http://localhost:3000](http://localhost:3000) để xem ứng dụng.
+    Mở [http://localhost:3000](http://localhost:3000) trên trình duyệt để sử dụng.
+
+---
+
+#### 🔹 PHƯƠNG ÁN B: Chạy TOÀN BỘ trong Docker (Database + Web App)
+*Phương án này phù hợp nếu bạn không muốn cài đặt Node.js/pnpm trên máy Host.*
+
+1.  **Build và khởi động tất cả các container:**
+    ```bash
+    docker compose up -d --build
+    ```
+
+2.  **Chạy Migrations và Seeding bên trong container `nailsapp-web`:**
+    ```bash
+    # Chạy migrations để khởi tạo database schema
+    docker compose exec web pnpm db:migrate
+
+    # Chạy seed để nạp dữ liệu mẫu
+    docker compose exec web pnpm db:seed
+    ```
+
+3.  **Truy cập ứng dụng:**
+    Ứng dụng sẽ chạy tại [http://localhost:3000](http://localhost:3000).
+
+---
+
+### 🔑 Tài khoản đăng nhập mặc định (Seed Data)
+Sau khi chạy lệnh `db:seed`, bạn có thể đăng nhập vào trang quản trị (`/admin/login`) bằng:
+*   **Admin Account**: `admin@example.com` / Mật khẩu: `password123`
+*   **Staff Account**: `sarah@example.com` / Mật khẩu: `password123`
 
 ## 🧪 Kiểm Thử (Testing)
 

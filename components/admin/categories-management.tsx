@@ -20,6 +20,8 @@ import {
     SelectValue,
 } from "@/components/ui/select"
 
+import PhantomWrapper from "@/components/ui/phantom-wrapper"
+
 interface Category {
     id: number
     name: string
@@ -36,6 +38,14 @@ interface PaginationState {
 }
 
 const ITEMS_PER_PAGE = 12
+
+const MOCK_CATEGORIES: Category[] = Array.from({ length: 6 }, (_, i) => ({
+    id: -i - 1,
+    name: "Tên danh mục mẫu " + (i + 1),
+    description: "Mô tả danh mục mẫu có độ dài hợp lý để vẽ shim loader đẹp mắt.",
+    status: "active",
+    deletedAt: null,
+}));
 
 export function CategoriesManagement() {
     const [categories, setCategories] = useState<Category[]>([])
@@ -100,6 +110,7 @@ export function CategoriesManagement() {
 
     // Fetch deleted categories with search and pagination
     const fetchDeletedCategories = async (page = 1) => {
+        setIsLoading(true)
         try {
             const params = new URLSearchParams({
                 page: page.toString(),
@@ -120,6 +131,8 @@ export function CategoriesManagement() {
         } catch (error) {
             console.error(error)
             toast.error("Không thể tải danh sách thùng rác")
+        } finally {
+            setIsLoading(false)
         }
     }
 
@@ -332,7 +345,7 @@ export function CategoriesManagement() {
 
                 {/* Danh mục hoạt động */}
                 <TabsContent value="active" className="space-y-4">
-                    
+
 
                     {/* Search, Sort Controls */}
                     <Card>
@@ -372,104 +385,106 @@ export function CategoriesManagement() {
                                     </Button>
                                 </div>
                             </div>
-                            
+
                         </CardContent>
                     </Card>
 
-                    {isLoading ? (
-                        <Card>
-                            <CardContent className="p-2 text-center sm:p-6">
-                                <p>Đang tải dữ liệu...</p>
-                            </CardContent>
-                        </Card>
-                    ) : categories.length === 0 ? (
-                        <Card>
-                            <CardContent className="p-2 text-center sm:p-6">
-                                <p className="mb-4 text-muted-foreground">
-                                    {searchQuery ? "Không tìm thấy danh mục nào" : "Chưa có danh mục nào"}
-                                </p>
-                                {!searchQuery && (
-                                    <Button onClick={() => handleOpenForm()} className="w-full gap-2 sm:w-auto">
-                                        <Plus className="h-4 w-4" />
-                                        Tạo danh mục đầu tiên
-                                    </Button>
-                                )}
-                            </CardContent>
-                        </Card>
-                    ) : (
-                        <>
-                            <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
-                                {categories.map((category) => (
-                                    <Card key={category.id} className="transition-shadow hover:shadow-lg gap-1">
-                                        <CardTitle className="text-lg lg:px-6 px-2">{category.name}</CardTitle>
-                                        <CardContent className="space-y-4 px-2 lg:px-6 lg:py-2">
-                                            {category.description && (
-                                                <p className="text-sm text-muted-foreground">{category.description}</p>
+                    <PhantomWrapper loading={isLoading} animation="wave">
+                        {(() => {
+                            const displayCategories = isLoading && categories.length === 0 ? MOCK_CATEGORIES : categories;
+                            if (categories.length === 0 && !isLoading) {
+                                return (
+                                    <Card>
+                                        <CardContent className="p-2 text-center sm:p-6">
+                                            <p className="mb-4 text-muted-foreground">
+                                                {searchQuery ? "Không tìm thấy danh mục nào" : "Chưa có danh mục nào"}
+                                            </p>
+                                            {!searchQuery && (
+                                                <Button onClick={() => handleOpenForm()} className="w-full gap-2 sm:w-auto">
+                                                    <Plus className="h-4 w-4" />
+                                                    Tạo danh mục đầu tiên
+                                                </Button>
                                             )}
-                                            <div className="flex flex-wrap gap-2 border-t pt-4">
+                                        </CardContent>
+                                    </Card>
+                                );
+                            }
+                            return (
+                                <>
+                                    <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+                                        {displayCategories.map((category) => (
+                                            <Card key={category.id} className="transition-shadow hover:shadow-lg gap-1">
+                                                <CardTitle className="text-lg lg:px-6 px-2">{category.name}</CardTitle>
+                                                <CardContent className="space-y-4 px-2 lg:px-6 lg:py-2">
+                                                    {category.description && (
+                                                        <p className="text-sm text-muted-foreground">{category.description}</p>
+                                                    )}
+                                                    <div className="flex flex-wrap gap-2 border-t pt-4">
+                                                        <Button
+                                                            variant="outline"
+                                                            size="sm"
+                                                            onClick={() => handleOpenForm(category)}
+                                                            disabled={isTogglingStatus || isLoading}
+                                                            className="flex-1 min-w-[140px]"
+                                                        >
+                                                            <Edit2 className="mr-1 h-3 w-3" />
+                                                            Sửa
+                                                        </Button>
+                                                        <Button
+                                                            variant="secondary"
+                                                            size="sm"
+                                                            onClick={() => handleToggleStatus(category)}
+                                                            disabled={isTogglingStatus || isLoading}
+                                                            className="flex-1 min-w-[140px]"
+                                                        >
+                                                            {category.status === "active" ? "Tạm dừng" : "Kích hoạt"}
+                                                        </Button>
+                                                        <Button
+                                                            variant="destructive"
+                                                            size="sm"
+                                                            onClick={() => handleOpenDeleteDialog(category)}
+                                                            disabled={isTogglingStatus || isLoading}
+                                                            className="flex-1 min-w-[140px]"
+                                                        >
+                                                            <Trash2 className="mr-1 h-3 w-3" />
+                                                            Xóa
+                                                        </Button>
+                                                    </div>
+                                                </CardContent>
+                                            </Card>
+                                        ))}
+                                    </div>
+
+                                    {/* Pagination */}
+                                    {activePagination.totalPages > 1 && !isLoading && (
+                                        <div className="mt-6 flex flex-col gap-3 rounded-lg border border-border/40 bg-muted/20 p-[10px] sm:flex-row sm:items-center sm:justify-between sm:p-4">
+                                            <div className="text-center text-sm text-muted-foreground sm:text-left">
+                                                Trang {activePagination.page} / {activePagination.totalPages} | Tổng: {activePagination.total} danh mục
+                                            </div>
+                                            <div className="flex justify-center gap-2 sm:justify-end">
                                                 <Button
                                                     variant="outline"
                                                     size="sm"
-                                                    onClick={() => handleOpenForm(category)}
-                                                    disabled={isTogglingStatus}
-                                                    className="flex-1 min-w-[140px]"
+                                                    onClick={() => fetchCategories(activePagination.page - 1)}
+                                                    disabled={activePagination.page === 1}
                                                 >
-                                                    <Edit2 className="mr-1 h-3 w-3" />
-                                                    Sửa
+                                                    <ChevronLeft className="h-4 w-4" />
                                                 </Button>
                                                 <Button
-                                                    variant="secondary"
+                                                    variant="outline"
                                                     size="sm"
-                                                    onClick={() => handleToggleStatus(category)}
-                                                    disabled={isTogglingStatus}
-                                                    className="flex-1 min-w-[140px]"
+                                                    onClick={() => fetchCategories(activePagination.page + 1)}
+                                                    disabled={activePagination.page === activePagination.totalPages}
                                                 >
-                                                    {category.status === "active" ? "Tạm dừng" : "Kích hoạt"}
-                                                </Button>
-                                                <Button
-                                                    variant="destructive"
-                                                    size="sm"
-                                                    onClick={() => handleOpenDeleteDialog(category)}
-                                                    disabled={isTogglingStatus}
-                                                    className="flex-1 min-w-[140px]"
-                                                >
-                                                    <Trash2 className="mr-1 h-3 w-3" />
-                                                    Xóa
+                                                    <ChevronRight className="h-4 w-4" />
                                                 </Button>
                                             </div>
-                                        </CardContent>
-                                    </Card>
-                                ))}
-                            </div>
-
-                            {/* Pagination */}
-                            {activePagination.totalPages > 1 && (
-                                <div className="mt-6 flex flex-col gap-3 rounded-lg border border-border/40 bg-muted/20 p-[10px] sm:flex-row sm:items-center sm:justify-between sm:p-4">
-                                    <div className="text-center text-sm text-muted-foreground sm:text-left">
-                                        Trang {activePagination.page} / {activePagination.totalPages} | Tổng: {activePagination.total} danh mục
-                                    </div>
-                                    <div className="flex justify-center gap-2 sm:justify-end">
-                                        <Button
-                                            variant="outline"
-                                            size="sm"
-                                            onClick={() => fetchCategories(activePagination.page - 1)}
-                                            disabled={activePagination.page === 1}
-                                        >
-                                            <ChevronLeft className="h-4 w-4" />
-                                        </Button>
-                                        <Button
-                                            variant="outline"
-                                            size="sm"
-                                            onClick={() => fetchCategories(activePagination.page + 1)}
-                                            disabled={activePagination.page === activePagination.totalPages}
-                                        >
-                                            <ChevronRight className="h-4 w-4" />
-                                        </Button>
-                                    </div>
-                                </div>
-                            )}
-                        </>
-                    )}
+                                        </div>
+                                    )}
+                                </>
+                            );
+                        })()}
+                    </PhantomWrapper>
                 </TabsContent>
                 {/* Thùng rác */}
                 <TabsContent value="trash" className="space-y-4">
@@ -509,82 +524,89 @@ export function CategoriesManagement() {
                         </CardContent>
                     </Card>
 
-                    {isLoading ? (
-                        <Card>
-                            <CardContent className="p-[10px] text-center sm:p-6">
-                                <p>Đang tải dữ liệu...</p>
-                            </CardContent>
-                        </Card>
-                    ) : deletedCategories.length === 0 ? (
-                        <Card>
-                            <CardContent className="p-[10px] text-center sm:p-6">
-                                <p className="text-muted-foreground">
-                                    {searchQuery ? "Không tìm thấy danh mục nào" : "Chưa có danh mục bị xóa"}
-                                </p>
-                            </CardContent>
-                        </Card>
-                    ) : (
-                        <>
-                            <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
-                                {deletedCategories.map((category) => (
-                                    <Card key={category.id} className="opacity-80 transition-opacity hover:opacity-100">
-                                        <CardHeader className="space-y-1 border-b border-border/60 p-[10px] sm:p-6">
-                                            <div className="flex items-start justify-between gap-2">
-                                                <CardTitle className="text-lg line-through">{category.name}</CardTitle>
-                                                <Badge variant="secondary">Đã xóa</Badge>
-                                            </div>
-                                        </CardHeader>
-                                        <CardContent className="space-y-4 p-[10px] sm:p-6">
-                                            {category.description && (
-                                                <p className="text-sm text-muted-foreground">{category.description}</p>
-                                            )}
-                                            {category.deletedAt && (
-                                                <p className="text-xs text-muted-foreground">
-                                                    Xóa lúc: {new Date(category.deletedAt).toLocaleString("vi-VN")}
-                                                </p>
-                                            )}
-                                            <Button
-                                                variant="outline"
-                                                size="sm"
-                                                onClick={() => handleRestore(category.id)}
-                                                className="w-full gap-2"
-                                            >
-                                                <RotateCcw className="h-4 w-4" />
-                                                Khôi phục
-                                            </Button>
+                    <PhantomWrapper loading={isLoading} animation="wave">
+                        {(() => {
+                            const displayDeleted = isLoading && deletedCategories.length === 0 ? MOCK_CATEGORIES : deletedCategories;
+                            if (deletedCategories.length === 0 && !isLoading) {
+                                return (
+                                    <Card>
+                                        <CardContent className="p-[10px] text-center sm:p-6">
+                                            <p className="text-muted-foreground">
+                                                {searchQuery ? "Không tìm thấy danh mục nào" : "Chưa có danh mục bị xóa"}
+                                            </p>
                                         </CardContent>
                                     </Card>
-                                ))}
-                            </div>
+                                );
+                            }
+                            return (
+                                <>
+                                    <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+                                        {displayDeleted.map((category) => (
+                                            <Card key={category.id} className="opacity-80 transition-opacity hover:opacity-100">
+                                                <CardHeader className="space-y-1 border-b border-border/60 p-[10px] sm:p-6">
+                                                    <div className="flex items-start justify-between gap-2">
+                                                        <CardTitle className="text-lg line-through">{category.name}</CardTitle>
+                                                        <Badge variant="secondary">Đã xóa</Badge>
+                                                    </div>
+                                                </CardHeader>
+                                                <CardContent className="space-y-4 p-[10px] sm:p-6">
+                                                    {category.description && (
+                                                        <p className="text-sm text-muted-foreground">{category.description}</p>
+                                                    )}
+                                                    {category.deletedAt ? (
+                                                        <p className="text-xs text-muted-foreground">
+                                                            Xóa lúc: {new Date(category.deletedAt).toLocaleString("vi-VN")}
+                                                        </p>
+                                                    ) : (
+                                                        <p className="text-xs text-muted-foreground">
+                                                            Xóa lúc: Chưa rõ
+                                                        </p>
+                                                    )}
+                                                    <Button
+                                                        variant="outline"
+                                                        size="sm"
+                                                        onClick={() => handleRestore(category.id)}
+                                                        className="w-full gap-2"
+                                                        disabled={isLoading}
+                                                    >
+                                                        <RotateCcw className="h-4 w-4" />
+                                                        Khôi phục
+                                                    </Button>
+                                                </CardContent>
+                                            </Card>
+                                        ))}
+                                    </div>
 
-                            {/* Pagination */}
-                            {deletedPagination.totalPages > 1 && (
-                                <div className="mt-6 flex flex-col gap-3 rounded-lg border border-border/40 bg-muted/20 p-[10px] sm:flex-row sm:items-center sm:justify-between sm:p-4">
-                                    <div className="text-center text-sm text-muted-foreground sm:text-left">
-                                        Trang {deletedPagination.page} / {deletedPagination.totalPages} | Tổng: {deletedPagination.total} danh mục
-                                    </div>
-                                    <div className="flex justify-center gap-2 sm:justify-end">
-                                        <Button
-                                            variant="outline"
-                                            size="sm"
-                                            onClick={() => fetchDeletedCategories(deletedPagination.page - 1)}
-                                            disabled={deletedPagination.page === 1}
-                                        >
-                                            <ChevronLeft className="h-4 w-4" />
-                                        </Button>
-                                        <Button
-                                            variant="outline"
-                                            size="sm"
-                                            onClick={() => fetchDeletedCategories(deletedPagination.page + 1)}
-                                            disabled={deletedPagination.page === deletedPagination.totalPages}
-                                        >
-                                            <ChevronRight className="h-4 w-4" />
-                                        </Button>
-                                    </div>
-                                </div>
-                            )}
-                        </>
-                    )}
+                                    {/* Pagination */}
+                                    {deletedPagination.totalPages > 1 && !isLoading && (
+                                        <div className="mt-6 flex flex-col gap-3 rounded-lg border border-border/40 bg-muted/20 p-[10px] sm:flex-row sm:items-center sm:justify-between sm:p-4">
+                                            <div className="text-center text-sm text-muted-foreground sm:text-left">
+                                                Trang {deletedPagination.page} / {deletedPagination.totalPages} | Tổng: {deletedPagination.total} danh mục
+                                            </div>
+                                            <div className="flex justify-center gap-2 sm:justify-end">
+                                                <Button
+                                                    variant="outline"
+                                                    size="sm"
+                                                    onClick={() => fetchDeletedCategories(deletedPagination.page - 1)}
+                                                    disabled={deletedPagination.page === 1}
+                                                >
+                                                    <ChevronLeft className="h-4 w-4" />
+                                                </Button>
+                                                <Button
+                                                    variant="outline"
+                                                    size="sm"
+                                                    onClick={() => fetchDeletedCategories(deletedPagination.page + 1)}
+                                                    disabled={deletedPagination.page === deletedPagination.totalPages}
+                                                >
+                                                    <ChevronRight className="h-4 w-4" />
+                                                </Button>
+                                            </div>
+                                        </div>
+                                    )}
+                                </>
+                            );
+                        })()}
+                    </PhantomWrapper>
                 </TabsContent>
             </Tabs>
 

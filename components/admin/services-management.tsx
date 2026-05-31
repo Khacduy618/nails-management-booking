@@ -16,6 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Label } from "@/components/ui/label"
 import { ConfirmDialog } from "../ui/confirm-dialog"
 import { ChevronLeft, ChevronRight } from "lucide-react"
+import PhantomWrapper from "@/components/ui/phantom-wrapper"
 
 
 // --- Định nghĩa kiểu dữ liệu ---
@@ -40,6 +41,17 @@ const sortOptions = [
   { value: 'price-asc', label: 'Giá tăng dần' },
   { value: 'price-desc', label: 'Giá giảm dần' },
 ];
+
+const MOCK_SERVICES_ADMIN: ServiceListItem[] = Array.from({ length: 8 }, (_, i) => ({
+  id: -i - 1,
+  name: "Dịch Vụ Làm Móng Mẫu Cho Skeleton " + (i + 1),
+  price: "150000",
+  duration: 45,
+  status: "active",
+  imageUrl: null,
+  category: { name: "Danh mục mẫu" },
+  description: "Đây là mô tả mẫu có độ dài vừa phải để tạo khung shimmer loader tương thích với thiết kế thật.",
+}));
 
 export function ServicesManagement() {
   const [services, setServices] = useState<ServiceListItem[]>([])
@@ -236,106 +248,118 @@ export function ServicesManagement() {
         </CardContent>
       </Card>
 
-      {isLoading ? <div className="text-center p-12"><Loader2 className="h-8 w-8 animate-spin mx-auto" /></div>
-        : (
-          <>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {services.map((service) => (
-                <Card key={service.id} className="gap-0 group flex flex-col overflow-hidden rounded-xl border bg-card text-card-foreground shadow-sm transition-all duration-300 hover:shadow-lg hover:-translate-y-1 p-0">
-                  {/* Image Section */}
-                  <div className="relative aspect-[4/3] overflow-hidden bg-muted">
-                    <img
-                      src={service.imageUrl || "/placeholder.svg"}
-                      alt={service.name}
-                      className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                    />
-                    <Badge
-                      className={`absolute right-3 top-3 shadow-sm ${service.status === "active"
-                        ? "bg-green-500 hover:bg-green-600"
-                        : "bg-gray-500 hover:bg-gray-600"
-                        }`}
-                    >
-                      {service.status === "active" ? "Hoạt động" : "Tạm dừng"}
-                    </Badge>
-                  </div>
-
-                  {/* Content Section */}
-                  <CardContent className="flex flex-1 flex-col p-4">
-                    <div className="mb-3 flex items-start justify-between gap-2">
-                      <h3 className="font-bold leading-tight text-foreground line-clamp-2 group-hover:text-primary transition-colors">
-                        {service.name}
-                      </h3>
-                      {service.category?.name && (
-                        <Badge variant="outline" className="shrink-0 font-normal text-muted-foreground">
-                          {service.category.name}
-                        </Badge>
+      <PhantomWrapper loading={isLoading} animation="wave">
+        {(() => {
+          const displayServices = isLoading && services.length === 0 ? MOCK_SERVICES_ADMIN : services;
+          return (
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {displayServices.map((service) => (
+                  <Card key={service.id} className="gap-0 group flex flex-col overflow-hidden rounded-xl border bg-card text-card-foreground shadow-sm transition-all duration-300 hover:shadow-lg hover:-translate-y-1 p-0">
+                    {/* Image Section */}
+                    <div className="relative aspect-[4/3] overflow-hidden bg-muted">
+                      {service.imageUrl ? (
+                        <img
+                          src={service.imageUrl}
+                          alt={service.name}
+                          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-muted-foreground bg-slate-200 dark:bg-slate-800">
+                          Ảnh dịch vụ
+                        </div>
                       )}
+                      <Badge
+                        className={`absolute right-3 top-3 shadow-sm ${service.status === "active"
+                          ? "bg-green-500 hover:bg-green-600"
+                          : "bg-gray-500 hover:bg-gray-600"
+                          }`}
+                      >
+                        {service.status === "active" ? "Hoạt động" : "Tạm dừng"}
+                      </Badge>
                     </div>
 
-                    {service.description && (
-                      <p className="mb-2 text-sm text-muted-foreground line-clamp-2">
-                        {service.description}
-                      </p>
-                    )}
+                    {/* Content Section */}
+                    <CardContent className="flex flex-1 flex-col p-4">
+                      <div className="mb-3 flex items-start justify-between gap-2">
+                        <h3 className="font-bold leading-tight text-foreground line-clamp-2 group-hover:text-primary transition-colors">
+                          {service.name}
+                        </h3>
+                        {service.category?.name && (
+                          <Badge variant="outline" className="shrink-0 font-normal text-muted-foreground">
+                            {service.category.name}
+                          </Badge>
+                        )}
+                      </div>
 
-                    <div className="mt-auto flex items-center justify-between border-t pt-3">
-                      <span className="text-lg font-bold text-orange-600">
-                        {Number(service.price).toLocaleString("vi-VN")}đ
-                      </span>
-                      <span className="flex items-center text-sm text-muted-foreground">
-                        <Clock className="mr-1 h-3 w-3" />
-                        {service.duration} phút
-                      </span>
-                    </div>
+                      {service.description && (
+                        <p className="mb-2 text-sm text-muted-foreground line-clamp-2">
+                          {service.description}
+                        </p>
+                      )}
 
-                    <div className="mt-4 grid grid-cols-3 gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="h-8 w-full hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200"
-                        onClick={() => handleViewService(service)}
-                      >
-                        <Eye className="mr-1.5 h-3.5 w-3.5" />
-                        Xem
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="h-8 w-full hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
-                        onClick={() => handleEditService(service)}
-                      >
-                        <Edit className="mr-1.5 h-3.5 w-3.5" />
-                        Sửa
-                      </Button>
-                      <ConfirmDialog
-                        title="Xác nhận xóa?"
-                        description="Hành động này sẽ xóa dịch vụ vĩnh viễn."
-                        onConfirm={() => handleDeleteService(service.id)}
-                      >
+                      <div className="mt-auto flex items-center justify-between border-t pt-3">
+                        <span className="text-lg font-bold text-orange-600">
+                          {Number(service.price).toLocaleString("vi-VN")}đ
+                        </span>
+                        <span className="flex items-center text-sm text-muted-foreground">
+                          <Clock className="mr-1 h-3 w-3" />
+                          {service.duration} phút
+                        </span>
+                      </div>
+
+                      <div className="mt-4 grid grid-cols-3 gap-2">
                         <Button
                           variant="outline"
                           size="sm"
-                          className="h-8 w-full text-destructive hover:bg-red-50 hover:text-red-600 hover:border-red-200"
+                          className="h-8 w-full hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200"
+                          onClick={() => handleViewService(service)}
+                          disabled={isLoading}
                         >
-                          <Trash2 className="mr-1.5 h-3.5 w-3.5" />
-                          Xóa
+                          <Eye className="mr-1.5 h-3.5 w-3.5" />
+                          Xem
                         </Button>
-                      </ConfirmDialog>
-                    </div>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="h-8 w-full hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
+                          onClick={() => handleEditService(service)}
+                          disabled={isLoading}
+                        >
+                          <Edit className="mr-1.5 h-3.5 w-3.5" />
+                          Sửa
+                        </Button>
+                        <ConfirmDialog
+                          title="Xác nhận xóa?"
+                          description="Hành động này sẽ xóa dịch vụ vĩnh viễn."
+                          onConfirm={() => handleDeleteService(service.id)}
+                        >
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="h-8 w-full text-destructive hover:bg-red-50 hover:text-red-600 hover:border-red-200"
+                            disabled={isLoading}
+                          >
+                            <Trash2 className="mr-1.5 h-3.5 w-3.5" />
+                            Xóa
+                          </Button>
+                        </ConfirmDialog>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+              {!isLoading && services.length === 0 && (
+                <Card>
+                  <CardContent className="p-2.5 text-center sm:p-12">
+                    <p className="text-muted-foreground">Không tìm thấy dịch vụ nào.</p>
                   </CardContent>
                 </Card>
-              ))}
-            </div>
-            {!isLoading && services.length === 0 && (
-              <Card>
-                <CardContent className="p-2.5 text-center sm:p-12">
-                  <p className="text-muted-foreground">Không tìm thấy dịch vụ nào.</p>
-                </CardContent>
-              </Card>
-            )}
-          </>
-        )
-      }
+              )}
+            </>
+          );
+        })()}
+      </PhantomWrapper>
 
       {/* Pagination */}
       {pagination && pagination.totalPages > 1 && !isLoading && (

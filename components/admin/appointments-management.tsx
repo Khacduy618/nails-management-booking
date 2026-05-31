@@ -19,6 +19,7 @@ import { Pagination, PaginationContent, PaginationItem, PaginationLink, Paginati
 import { Plus } from "lucide-react"
 import { BookingForm } from "@/components/booking-form"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import PhantomWrapper from "@/components/ui/phantom-wrapper"
 
 const statusConfig: Record<AppointmentStatus, { label: string; color: string }> = {
   pending: { label: "Chờ xác nhận", color: "bg-yellow-100 text-yellow-800 border-yellow-200" },
@@ -27,6 +28,26 @@ const statusConfig: Record<AppointmentStatus, { label: string; color: string }> 
   completed: { label: "Hoàn thành", color: "bg-gray-100 text-gray-800 border-gray-200" },
   cancelled: { label: "Đã hủy", color: "bg-red-100 text-red-800 border-red-200" },
 };
+
+const MOCK_APPOINTMENTS: ApiAppointment[] = Array.from({ length: 5 }, (_, i) => ({
+  id: -i - 1,
+  appointmentDate: "2026-05-31",
+  appointmentTime: "12:00:00",
+  durationAtBooking: 60,
+  priceAtBooking: "250000",
+  customerName: "Khách hàng mẫu " + (i + 1),
+  customerPhone: "090000000" + i,
+  status: "pending" as AppointmentStatus,
+  notes: "",
+  appointmentServices: [
+    {
+      service: { name: "Dịch Vụ Làm Móng Mẫu" },
+      staff: { name: "Nhân viên mẫu" }
+    }
+  ],
+  createdAt: "2026-05-31T00:00:00.000Z",
+  updatedAt: "2026-05-31T00:00:00.000Z"
+}));
 
 export function AppointmentsManagement() {
   const [appointments, setAppointments] = useState<ApiAppointment[]>([]);
@@ -125,7 +146,7 @@ export function AppointmentsManagement() {
 
   return (
     <div className="space-y-6">
-      
+
       <Card>
         <CardContent className="px-6 sm:px-4">
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-5">
@@ -180,194 +201,195 @@ export function AppointmentsManagement() {
       )}
       <Card>
         <CardContent className="p-0">
-          {isLoading ? (
-            <div className="h-96 flex items-center justify-center">
-              <Loader2 className="h-8 w-8 animate-spin" />
-            </div>
-          ) : (
-            <>
-              <div className="hidden md:block overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead className="border-b bg-muted/50">
-                    <tr>
-                      <th className="p-4 font-medium text-left">Khách hàng</th>
-                      <th className="p-4 font-medium text-left">Dịch vụ</th>
-                      <th className="p-4 font-medium text-left">Nhân viên</th>
-                      <th className="p-4 font-medium text-left">Thời gian</th>
-                      <th className="p-4 font-medium text-left">Giá</th>
-                      <th className="p-4 font-medium text-left">Trạng thái</th>
-                      <th className="p-4 font-medium text-left">Thao tác</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {appointments.map((appointment) => {
+          <PhantomWrapper loading={isLoading} animation="wave">
+            {(() => {
+              const displayAppointments = isLoading && appointments.length === 0 ? MOCK_APPOINTMENTS : appointments;
+              return (
+                <>
+                  <div className="hidden md:block overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead className="border-b bg-muted/50">
+                        <tr>
+                          <th className="p-4 font-medium text-left">Khách hàng</th>
+                          <th className="p-4 font-medium text-left">Dịch vụ</th>
+                          <th className="p-4 font-medium text-left">Nhân viên</th>
+                          <th className="p-4 font-medium text-left">Thời gian</th>
+                          <th className="p-4 font-medium text-left">Giá</th>
+                          <th className="p-4 font-medium text-left">Trạng thái</th>
+                          <th className="p-4 font-medium text-left">Thao tác</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {displayAppointments.map((appointment) => {
+                          const staffNames = [...new Set(appointment.appointmentServices.map(as => as.staff?.name).filter(Boolean))].join(', ')
+                          const serviceNames = appointment.appointmentServices.map(as => as.service.name).join(' + ')
+                          const config = statusConfig[appointment.status]
+                          return (
+                            <tr key={appointment.id} className="border-b hover:bg-muted/30">
+                              <td className="p-4 align-top">
+                                <div className="font-medium flex items-center gap-2">
+                                  <User className="h-4 w-4 text-muted-foreground" />
+                                  {appointment.customerName}
+                                </div>
+                                <div className="text-muted-foreground flex items-center gap-2 mt-1">
+                                  <Phone className="h-3 w-3" />
+                                  {appointment.customerPhone}
+                                </div>
+                              </td>
+                              <td className="p-4 align-top max-w-xs">
+                                <div className="font-medium truncate">{serviceNames}</div>
+                                <div className="text-muted-foreground">{appointment.durationAtBooking} phút</div>
+                              </td>
+                              <td className="p-4 align-top">
+                                <div className="truncate">{staffNames || 'Chưa phân công'}</div>
+                              </td>
+                              <td className="p-4 align-top">
+                                <div className="flex items-center gap-2">
+                                  <Calendar className="h-3 w-3" />
+                                  {format(new Date(appointment.appointmentDate), "dd/MM/yyyy")}
+                                </div>
+                                <div className="text-muted-foreground flex items-center gap-2 mt-1">
+                                  <Clock className="h-3 w-3" />
+                                  {appointment.appointmentTime.substring(0, 5)}
+                                </div>
+                              </td>
+                              <td className="p-4 align-top font-medium text-primary">
+                                {Number(appointment.priceAtBooking).toLocaleString("vi-VN")}₫
+                              </td>
+                              <td className="p-4 align-top">
+                                {config ? (
+                                  <Badge className={config.color}>{config.label}</Badge>
+                                ) : (
+                                  <Badge variant="secondary">{appointment.status}</Badge>
+                                )}
+                              </td>
+                              <td className="p-4 align-top">
+                                <div className="flex gap-1">
+                                  <Button size="icon" variant="ghost" onClick={() => handleViewDetails(appointment)} disabled={isLoading}>
+                                    <Eye className="h-4 w-4" />
+                                  </Button>
+                                  <Button size="icon" variant="ghost" onClick={() => handleOpenStatusUpdate(appointment)} disabled={isLoading}>
+                                    <Edit className="h-4 w-4" />
+                                  </Button>
+                                  {appointment.status !== 'cancelled' && (
+                                    <ConfirmDialog
+                                      title="Xác nhận hủy lịch?"
+                                      description="Hành động này sẽ chuyển trạng thái lịch hẹn thành 'Đã hủy'. Bạn có chắc chắn?"
+                                      onConfirm={() => handleDeleteAppointment(appointment.id)}
+                                    >
+                                      <Button size="icon" variant="ghost" className="text-destructive hover:text-destructive" disabled={isLoading}>
+                                        <Trash2 className="h-4 w-4" />
+                                      </Button>
+                                    </ConfirmDialog>
+                                  )}
+                                </div>
+                              </td>
+                            </tr>
+                          )
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  <div className="md:hidden space-y-4 p-4">
+                    {displayAppointments.map((appointment) => {
                       const staffNames = [...new Set(appointment.appointmentServices.map(as => as.staff?.name).filter(Boolean))].join(', ')
                       const serviceNames = appointment.appointmentServices.map(as => as.service.name).join(' + ')
                       const config = statusConfig[appointment.status]
+
                       return (
-                        <tr key={appointment.id} className="border-b hover:bg-muted/30">
-                          <td className="p-4 align-top">
-                            <div className="font-medium flex items-center gap-2">
-                              <User className="h-4 w-4 text-muted-foreground" />
-                              {appointment.customerName}
-                            </div>
-                            <div className="text-muted-foreground flex items-center gap-2 mt-1">
-                              <Phone className="h-3 w-3" />
-                              {appointment.customerPhone}
-                            </div>
-                          </td>
-                          <td className="p-4 align-top max-w-xs">
-                            <div className="font-medium truncate">{serviceNames}</div>
-                            <div className="text-muted-foreground">{appointment.durationAtBooking} phút</div>
-                          </td>
-                          <td className="p-4 align-top">
-                            <div className="truncate">{staffNames || 'Chưa phân công'}</div>
-                          </td>
-                          <td className="p-4 align-top">
-                            <div className="flex items-center gap-2">
-                              <Calendar className="h-3 w-3" />
-                              {format(new Date(appointment.appointmentDate), "dd/MM/yyyy")}
-                            </div>
-                            <div className="text-muted-foreground flex items-center gap-2 mt-1">
-                              <Clock className="h-3 w-3" />
-                              {appointment.appointmentTime.substring(0, 5)}
-                            </div>
-                          </td>
-                          <td className="p-4 align-top font-medium text-primary">
-                            {Number(appointment.priceAtBooking).toLocaleString("vi-VN")}₫
-                          </td>
-                          <td className="p-4 align-top">
-                            {config ? (
-                              <Badge className={config.color}>{config.label}</Badge>
-                            ) : (
-                              <Badge variant="secondary">{appointment.status}</Badge>
-                            )}
-                          </td>
-                          <td className="p-4 align-top">
-                            <div className="flex gap-1">
-                              <Button size="icon" variant="ghost" onClick={() => handleViewDetails(appointment)}>
-                                <Eye className="h-4 w-4" />
-                              </Button>
-                              <Button size="icon" variant="ghost" onClick={() => handleOpenStatusUpdate(appointment)}>
-                                <Edit className="h-4 w-4" />
-                              </Button>
-                              {appointment.status !== 'cancelled' && (
-                                <ConfirmDialog
-                                  title="Xác nhận hủy lịch?"
-                                  description="Hành động này sẽ chuyển trạng thái lịch hẹn thành 'Đã hủy'. Bạn có chắc chắn?"
-                                  onConfirm={() => handleDeleteAppointment(appointment.id)}
-                                >
-                                  <Button size="icon" variant="ghost" className="text-destructive hover:text-destructive">
-                                    <Trash2 className="h-4 w-4" />
-                                  </Button>
-                                </ConfirmDialog>
+                        <Card key={`mobile-${appointment.id}`} className="shadow-sm border">
+                          <CardContent className="space-y-3 p-[10px] sm:p-4">
+                            <div className="flex items-start justify-between gap-3">
+                              <div>
+                                <p className="font-semibold text-foreground">{appointment.customerName}</p>
+                                <p className="text-sm text-muted-foreground flex items-center gap-1">
+                                  <Phone className="h-3 w-3" />
+                                  {appointment.customerPhone}
+                                </p>
+                              </div>
+                              {config ? (
+                                <Badge className={config.color}>{config.label}</Badge>
+                              ) : (
+                                <Badge variant="secondary">{appointment.status}</Badge>
                               )}
                             </div>
-                          </td>
-                        </tr>
+
+                            <div className="space-y-2 text-sm">
+                              <div className="flex items-start gap-2">
+                                <Calendar className="h-4 w-4 text-muted-foreground mt-0.5" />
+                                <div>
+                                  <p className="font-medium text-foreground">
+                                    {format(new Date(appointment.appointmentDate), "dd/MM/yyyy")}
+                                  </p>
+                                  <p className="text-muted-foreground flex items-center gap-1">
+                                    <Clock className="h-3 w-3" />
+                                    {appointment.appointmentTime.substring(0, 5)}
+                                  </p>
+                                </div>
+                              </div>
+
+                              <div className="flex items-start gap-2">
+                                <Badge variant="outline" className="mt-0.5">Dịch vụ</Badge>
+                                <div>
+                                  <p className="font-medium text-foreground">{serviceNames}</p>
+                                  <p className="text-muted-foreground">{appointment.durationAtBooking} phút</p>
+                                </div>
+                              </div>
+
+                              <div className="flex items-start gap-2">
+                                <User className="h-4 w-4 text-muted-foreground mt-0.5" />
+                                <div>
+                                  <p className="font-medium text-foreground">{staffNames || 'Chưa phân công'}</p>
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t">
+                              <p className="text-base font-semibold text-primary">
+                                {Number(appointment.priceAtBooking).toLocaleString("vi-VN")}₫
+                              </p>
+                              <div className="flex flex-wrap gap-2">
+                                <Button size="sm" variant="outline" onClick={() => handleViewDetails(appointment)} disabled={isLoading}>
+                                  Xem
+                                </Button>
+                                <Button size="sm" variant="outline" onClick={() => handleOpenStatusUpdate(appointment)} disabled={isLoading}>
+                                  Cập nhật
+                                </Button>
+                                {appointment.status !== 'cancelled' && (
+                                  <ConfirmDialog
+                                    title="Xác nhận hủy lịch?"
+                                    description="Hành động này sẽ chuyển trạng thái lịch hẹn thành 'Đã hủy'. Bạn có chắc chắn?"
+                                    onConfirm={() => handleDeleteAppointment(appointment.id)}
+                                  >
+                                    <Button size="sm" variant="destructive" disabled={isLoading}>
+                                      Hủy lịch
+                                    </Button>
+                                  </ConfirmDialog>
+                                )}
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
                       )
                     })}
-                  </tbody>
-                </table>
-              </div>
 
-              <div className="md:hidden space-y-4 p-4">
-                {appointments.map((appointment) => {
-                  const staffNames = [...new Set(appointment.appointmentServices.map(as => as.staff?.name).filter(Boolean))].join(', ')
-                  const serviceNames = appointment.appointmentServices.map(as => as.service.name).join(' + ')
-                  const config = statusConfig[appointment.status]
-
-                  return (
-                    <Card key={`mobile-${appointment.id}`} className="shadow-sm border">
-                      <CardContent className="space-y-3 p-[10px] sm:p-4">
-                        <div className="flex items-start justify-between gap-3">
-                          <div>
-                            <p className="font-semibold text-foreground">{appointment.customerName}</p>
-                            <p className="text-sm text-muted-foreground flex items-center gap-1">
-                              <Phone className="h-3 w-3" />
-                              {appointment.customerPhone}
-                            </p>
-                          </div>
-                          {config ? (
-                            <Badge className={config.color}>{config.label}</Badge>
-                          ) : (
-                            <Badge variant="secondary">{appointment.status}</Badge>
-                          )}
-                        </div>
-
-                        <div className="space-y-2 text-sm">
-                          <div className="flex items-start gap-2">
-                            <Calendar className="h-4 w-4 text-muted-foreground mt-0.5" />
-                            <div>
-                              <p className="font-medium text-foreground">
-                                {format(new Date(appointment.appointmentDate), "dd/MM/yyyy")}
-                              </p>
-                              <p className="text-muted-foreground flex items-center gap-1">
-                                <Clock className="h-3 w-3" />
-                                {appointment.appointmentTime.substring(0, 5)}
-                              </p>
-                            </div>
-                          </div>
-
-                          <div className="flex items-start gap-2">
-                            <Badge variant="outline" className="mt-0.5">Dịch vụ</Badge>
-                            <div>
-                              <p className="font-medium text-foreground">{serviceNames}</p>
-                              <p className="text-muted-foreground">{appointment.durationAtBooking} phút</p>
-                            </div>
-                          </div>
-
-                          <div className="flex items-start gap-2">
-                            <User className="h-4 w-4 text-muted-foreground mt-0.5" />
-                            <div>
-                              <p className="font-medium text-foreground">{staffNames || 'Chưa phân công'}</p>
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t">
-                          <p className="text-base font-semibold text-primary">
-                            {Number(appointment.priceAtBooking).toLocaleString("vi-VN")}₫
-                          </p>
-                          <div className="flex flex-wrap gap-2">
-                            <Button size="sm" variant="outline" onClick={() => handleViewDetails(appointment)}>
-                              Xem
-                            </Button>
-                            <Button size="sm" variant="outline" onClick={() => handleOpenStatusUpdate(appointment)}>
-                              Cập nhật
-                            </Button>
-                            {appointment.status !== 'cancelled' && (
-                              <ConfirmDialog
-                                title="Xác nhận hủy lịch?"
-                                description="Hành động này sẽ chuyển trạng thái lịch hẹn thành 'Đã hủy'. Bạn có chắc chắn?"
-                                onConfirm={() => handleDeleteAppointment(appointment.id)}
-                              >
-                                <Button size="sm" variant="destructive">
-                                  Hủy lịch
-                                </Button>
-                              </ConfirmDialog>
-                            )}
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  )
-                })}
-
-                {appointments.length === 0 && (
-                  <div className="p-6 text-center text-muted-foreground">
-                    Không tìm thấy lịch hẹn nào.
+                    {!isLoading && appointments.length === 0 && (
+                      <div className="p-6 text-center text-muted-foreground">
+                        Không tìm thấy lịch hẹn nào.
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
 
-              {appointments.length === 0 && (
-                <div className="hidden md:block p-12 text-center text-muted-foreground">
-                  Không tìm thấy lịch hẹn nào.
-                </div>
-              )}
-            </>
-          )}
+                  {!isLoading && appointments.length === 0 && (
+                    <div className="hidden md:block p-12 text-center text-muted-foreground">
+                      Không tìm thấy lịch hẹn nào.
+                    </div>
+                  )}
+                </>
+              );
+            })()}
+          </PhantomWrapper>
         </CardContent>
       </Card>
       {/* Pagination */}

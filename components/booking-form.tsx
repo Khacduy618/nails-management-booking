@@ -69,6 +69,22 @@ export function BookingForm({ onBookingComplete }: BookingFormProps) {
     fetchInitialData();
   }, []);
 
+  useEffect(() => {
+    if (allServices.length > 0 && typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const serviceIdParam = params.get("serviceId");
+      if (serviceIdParam) {
+        const targetId = parseInt(serviceIdParam, 10);
+        const selected = allServices.find(s => s.id === targetId);
+        if (selected) {
+          setSelectedServices([selected]);
+          // Tự động chuyển sang bước chọn Ngày & Giờ để tối ưu trải nghiệm
+          setStep(2);
+        }
+      }
+    }
+  }, [allServices]);
+
 
   const filteredServices = useMemo(() => {
     if (!searchTerm) return allServices;
@@ -362,22 +378,6 @@ export function BookingForm({ onBookingComplete }: BookingFormProps) {
         </Card>
       )}
 
-      {/* {step === 2 && <Card>
-        <CardHeader><div className="flex justify-between"><div><CardTitle>Bước 2: Chọn Nhân viên</CardTitle><CardDescription>Nhân viên có thể thực hiện tất cả dịch vụ đã chọn</CardDescription></div><Button variant="ghost" size="icon" onClick={() => goBack(1)}><ArrowLeft /></Button></div></CardHeader>
-        <CardContent className="space-y-2">{isLoading ? <Skeleton className="h-12 w-full" /> : availableStaff.map((staff) => (<div key={staff.id} onClick={() => setSelectedStaffId(staff.id)} className={`p-4 border rounded-lg cursor-pointer hover:bg-muted/50 ${selectedStaffId === staff.id ? 'bg-muted ring-2 ring-primary' : ''}`}><div className="flex items-center space-x-3"><User className="h-5 w-5" /><span className="font-medium">{staff.name}</span></div></div>))}<Button onClick={() => setStep(3)} disabled={!selectedStaffId} className="w-full mt-4">Tiếp tục</Button></CardContent>
-      </Card>}
-
-      {step === 3 && <Card>
-        <CardHeader><div className="flex justify-between"><div><CardTitle>Bước 3: Chọn Ngày & Giờ</CardTitle></div><Button variant="ghost" size="icon" onClick={() => goBack(2)}><ArrowLeft /></Button></div></CardHeader>
-        <CardContent className="flex flex-col md:flex-row gap-4 items-start"><CalendarComponent mode="single" selected={selectedDate} onSelect={setSelectedDate} disabled={(date) => isBefore(date, startOfToday())} className="rounded-md border" />
-          <div className="flex-1 w-full max-h-[300px] overflow-y-auto pr-2">
-            {selectedDate ? (<><p className="font-medium mb-2 text-center">{format(selectedDate, "dd/MM/yyyy")}</p><div className="grid grid-cols-3 gap-2">{timeSlots.map((time) => (<Button key={time} variant={selectedTime === time ? "default" : "outline"} onClick={() => setSelectedTime(time)} disabled={isTimeSlotDisabled(time)}>{time}</Button>))}</div></>) : <p className="text-center text-muted-foreground pt-4">Vui lòng chọn ngày</p>}
-          </div>
-        </CardContent>
-        <div className="p-6 pt-0"><Button onClick={() => setStep(4)} disabled={!selectedDate || !selectedTime} className="w-full">Tiếp tục</Button></div>
-      </Card>}
-       */}
-
       {/* Step 2: Chọn Ngày & Giờ */}
       {step === 2 && (
         <Card>
@@ -465,8 +465,8 @@ export function BookingForm({ onBookingComplete }: BookingFormProps) {
       {step === 4 && <Card>
         <CardHeader><div className="flex justify-between"><div><CardTitle>Bước 4: Thông tin khách hàng</CardTitle></div><Button variant="ghost" size="icon" onClick={() => goBack(3)}><ArrowLeft /></Button></div></CardHeader>
         <CardContent className="space-y-6">
-          <div className="p-4 bg-muted rounded-lg space-y-2">
-            <h3 className="font-medium">Tóm tắt đặt lịch</h3>
+          <div className="bg-muted rounded-lg space-y-2">
+            <h3 className="font-bold">Tóm tắt đặt lịch</h3>
             <div className="text-sm space-y-1">
               <div><strong>Dịch vụ:</strong> {selectedServices.map(s => s.name).join(', ')}</div>
               <div><strong>Nhân viên:</strong> {assignedStaff?.name || (autoAssign ? 'Sẽ tự động phân công' : 'Chưa chọn')}</div>
@@ -479,19 +479,19 @@ export function BookingForm({ onBookingComplete }: BookingFormProps) {
           <div className="space-y-4">
             <div>
               <Label htmlFor="name">Họ và tên *</Label>
-              <Input id="name" value={customerName} onChange={(e) => setCustomerName(e.target.value)} />
+              <Input className="mt-2" id="name" value={customerName} onChange={(e) => setCustomerName(e.target.value)} placeholder="Ví dụ: nguyen khac duy" />
             </div>
             <div>
               <Label htmlFor="phone">Số điện thoại *</Label>
-              <Input id="phone" type="tel" value={customerPhone} onChange={(e) => setCustomerPhone(e.target.value)} />
+              <Input className="mt-2" id="phone" type="tel" value={customerPhone} onChange={(e) => setCustomerPhone(e.target.value)} placeholder="Ví dụ: 0932105214" />
             </div>
             <div>
               <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" value={customerEmail} onChange={(e) => setCustomerEmail(e.target.value)} placeholder="email@example.com" />
+              <Input className="mt-2" id="email" type="email" value={customerEmail} onChange={(e) => setCustomerEmail(e.target.value)} placeholder="Ví dụ: email@example.com" />
             </div>
             <div>
               <Label htmlFor="notes">Ghi chú</Label>
-              <Textarea id="notes" value={notes} onChange={(e) => setNotes(e.target.value)} />
+              <Textarea className="mt-2" id="notes" value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Ví dụ: abc" />
             </div>
           </div>
           <Button onClick={handleSubmit} disabled={isLoading} className="w-full">{isLoading ? 'Đang xử lý...' : 'Xác nhận đặt lịch'}</Button>

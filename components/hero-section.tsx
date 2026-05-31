@@ -20,32 +20,26 @@ export function HeroSection() {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/api/"
-
-        // Fetch customers count
-        const customersRes = await fetch(`${apiUrl}admin/revenue`)
-        if (customersRes.ok) {
-          const data = await customersRes.json()
-          const customers = data?.customers?.length || 0
-          setStats((prev) => ({ ...prev, totalCustomers: customers }))
-        }
-
-        // Fetch services count
-        const servicesRes = await fetch(`${apiUrl}services`)
-        if (servicesRes.ok) {
-          const data = await servicesRes.json()
-          const services = data?.data?.length || 0
-          setStats((prev) => ({ ...prev, totalServices: services }))
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || "/api/";
+        const res = await fetch(`${apiUrl.replace(/\/$/, "")}/stats/public`);
+        if (res.ok) {
+          const result = await res.json();
+          if (result.success && result.data) {
+            setStats({
+              totalCustomers: result.data.totalCustomers || 0,
+              totalServices: result.data.totalServices || 0,
+            });
+          }
         }
       } catch (error) {
-        console.error("Error fetching stats:", error)
+        console.error("Error fetching stats:", error);
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
+    };
 
-    fetchStats()
-  }, [])
+    fetchStats();
+  }, []);
 
   return (
     <section className="relative py-4 sm:py-4 from-card to-background">

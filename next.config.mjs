@@ -1,7 +1,15 @@
 import { withSentryConfig } from "@sentry/nextjs"
+import { fileURLToPath } from "url"
+import path from "path"
+
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  turbopack: {
+    root: __dirname,
+  },
   typescript: {
     ignoreBuildErrors: true,
   },
@@ -9,9 +17,7 @@ const nextConfig = {
     unoptimized: true,
   },
   serverExternalPackages: ['import-in-the-middle', 'require-in-the-middle'],
-  turbopack: {
-    root: '/Users/khacduy/Downloads/appointment-booking/nailsapp',
-  },
+
   async headers() {
     // Development mode requires 'unsafe-eval' for HMR and debugging
     const isDev = process.env.NODE_ENV === 'development'
