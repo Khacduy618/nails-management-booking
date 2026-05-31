@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
-import { appointments } from "@/db/schema";
+import { appointments, adminNotifications } from "@/db/schema";
 import { eq } from "drizzle-orm";
 
 const sanitizePhone = (phone: string) => phone.replace(/\D/g, "");
@@ -87,6 +87,16 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
 
     if (result.length === 0) {
       return NextResponse.json({ success: false, error: "Appointment not found" }, { status: 404 });
+    }
+
+    // Ghi nhận thông báo cho admin
+    try {
+      await db.insert(adminNotifications).values({
+        title: `Khách hủy lịch: #${id}`,
+        message: `Khách hàng ${apt.customerName} (${sanitizedPhone}) đã hủy lịch hẹn lúc ${apt.appointmentTime.substring(0, 5)} ngày ${apt.appointmentDate}.`,
+      });
+    } catch (notifError) {
+      console.error("Failed to create admin notification for cancellation:", notifError);
     }
 
     return NextResponse.json({

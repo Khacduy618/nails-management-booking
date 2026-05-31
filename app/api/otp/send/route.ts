@@ -1,17 +1,14 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { db } from "@/db"
-import { appointments } from "@/db/schema"
+import { appointments, otpTokens } from "@/db/schema"
 import { eq } from "drizzle-orm"
 import { sendOTP } from "@/lib/email-service"
 import { fail, ok } from "@/lib/api-response"
 import { logError, logDebug, logInfo } from "@/lib/logger"
 import { getClientKey, rateLimit, rateLimitResponse, LIMITS } from "@/lib/rate-limit"
+import { randomInt } from "crypto"
 
 const sanitizePhone = (input: string) => input.replace(/\D/g, "")
-
-// Store OTP in memory (in production, use Redis or database)
-// Format: { appointmentId: { code: string, expiresAt: number } }
-const otpStore = new Map<number, { code: string; expiresAt: number }>()
 
 export async function POST(request: NextRequest) {
     try {
@@ -61,26 +58,44 @@ export async function POST(request: NextRequest) {
             return fail("TOO_LATE", "Cannot cancel appointments within 2 hours of scheduled time", 400)
         }
 
-        // Generate 6-digit OTP
-        const otp = Math.floor(100000 + Math.random() * 900000).toString()
-        const expiresAt = Date.now() + 5 * 60 * 1000 // 5 minutes
+        // Generate cryptographically secure 6-digit OTP
+        const otp = randomInt(100000, 999999).toString()
+        const expiresAt = new Date(Date.now() + 5 * 60 * 1000) // 5 minutes
 
-        // Store OTP
-        otpStore.set(appointmentId, { code: otp, expiresAt })
+        // Store or overwrite OTP in Database
+        await db
+            .insert(otpTokens)
+            .values({
+                appointmentId,
+                code: otp,
+                expiresAt,
+            })
+            .onConflictDoUpdate({
+                target: otpTokens.appointmentId,
+                set: {
+                    code: otp,
+                    expiresAt,
+                    createdAt: new Date(),
+                },
+            })
 
         // Send OTP via SMS/Email
         try {
             await sendOTP(phone, otp, appointment.customerName)
-            logInfo("OTP sent successfully", { appointmentId, phone: sanitizedPhone, otpCode: otp })
+            
+            // Secure logging: no plaintext OTP, masked phone
+            logInfo("OTP sent successfully", { 
+                appointmentId, 
+                phone: sanitizedPhone.length > 4 ? `***${sanitizedPhone.slice(-4)}` : sanitizedPhone 
+            })
 
-            // Development mode: log OTP to console and return it
+            // Development mode: log OTP to console
             if (process.env.NODE_ENV === "development") {
                 console.log(`\n🔐 [DEV] OTP Code for testing: ${otp}\n`)
             }
         } catch (error) {
             logError(error, { context: "Failed to send OTP", appointmentId })
             // Don't fail the request, just log the error
-            // In production, you might want to return an error here
         }
 
         return ok({ message: "OTP sent successfully" })
@@ -89,5 +104,3 @@ export async function POST(request: NextRequest) {
         return fail("SERVER_ERROR", "Unable to send OTP", 500)
     }
 }
-
-export { otpStore }

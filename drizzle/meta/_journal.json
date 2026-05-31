@@ -15,6 +15,20 @@
       "when": 1713000100000,
       "tag": "0001_add_user_id_to_staff",
       "contents": "add userId FK to staff"
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1780213403466,
+      "tag": "0002_careful_the_professor",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1780214031547,
+      "tag": "0003_gray_paladin",
+      "breakpoints": true
     }
   ]
 }
