@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { db } from "@/db"
-import { appointments, appointmentServices, services, customers } from "@/db/schema"
+import { appointments, appointmentServices, services, customers, staff, staffServices, staffSchedules } from "@/db/schema"
 import { eq, and, sql, inArray, not } from "drizzle-orm"
 import { addMinutes, format } from "date-fns"
 import { ok, fail } from "@/lib/api-response"
@@ -128,6 +128,59 @@ export async function POST(request: NextRequest) {
 
     const commission = isBusinessHours(appointmentStart) ? 10 : 30
 
+    // --- Bước 1: Xác thực Nhân viên (Staff Validation) ---
+    const staffMember = await db.query.staff.findFirst({
+      where: eq(staff.id, staffId),
+    })
+    if (!staffMember) {
+      logInfo(`POST /api/appointments: STAFF NOT FOUND (ID: ${staffId})`, { staffId })
+      return fail("INVALID_INPUT", "Nhân viên không tồn tại", 400)
+    }
+    if (staffMember.status !== "active") {
+      logInfo(`POST /api/appointments: STAFF INACTIVE (ID: ${staffId})`, { staffId })
+      return fail("INVALID_INPUT", "Nhân viên hiện đang không hoạt động", 400)
+    }
+
+    // --- Bước 2: Kiểm tra Kỹ năng của Nhân viên (Skills Validation) ---
+    const skills = await db.query.staffServices.findMany({
+      where: eq(staffServices.staffId, staffId),
+    })
+    const skilledServiceIds = new Set(skills.map(s => s.serviceId))
+    const lacksSkills = serviceIds.some(id => !skilledServiceIds.has(id))
+    if (lacksSkills) {
+      logInfo(`POST /api/appointments: STAFF LACKS SKILLS (ID: ${staffId}, Services: ${serviceIds})`, { staffId, serviceIds })
+      return fail("INVALID_INPUT", "Nhân viên không có đủ kỹ năng thực hiện các dịch vụ yêu cầu", 400)
+    }
+
+    // --- Bước 3: Kiểm tra Lịch làm việc (Schedule Validation) ---
+    const dayOfWeek = appointmentStart.getDay() // 0=Sun, 1=Mon, ..., 6=Sat
+    const schedule = await db.query.staffSchedules.findFirst({
+      where: and(
+        eq(staffSchedules.staffId, staffId),
+        eq(staffSchedules.dayOfWeek, dayOfWeek)
+      ),
+    })
+    if (!schedule) {
+      logInfo(`POST /api/appointments: STAFF DOES NOT WORK ON THIS DAY (ID: ${staffId}, Day: ${dayOfWeek})`, { staffId, dayOfWeek })
+      return fail("NO_AVAILABILITY", "Nhân viên không làm việc vào ngày này", 400)
+    }
+
+    const timeToMinutes = (timeStr: string): number => {
+      const [h, m, s] = timeStr.split(":").map(Number)
+      return h * 60 + (m || 0)
+    }
+
+    const appStartMin = timeToMinutes(appointmentStartTimeStr)
+    const appEndMin = timeToMinutes(appointmentEndTimeStr)
+    const schedStartMin = timeToMinutes(schedule.startTime)
+    const schedEndMin = timeToMinutes(schedule.endTime)
+
+    if (appEndMin < appStartMin || appStartMin < schedStartMin || appEndMin > schedEndMin) {
+      logInfo(`POST /api/appointments: TIME OUTSIDE SCHEDULE (ID: ${staffId}, App: ${appointmentStartTimeStr}-${appointmentEndTimeStr}, Sched: ${schedule.startTime}-${schedule.endTime})`, { staffId, appStart: appointmentStartTimeStr, appEnd: appointmentEndTimeStr, schedStart: schedule.startTime, schedEnd: schedule.endTime })
+      return fail("NO_AVAILABILITY", "Thời gian hẹn ngoài ca làm việc của nhân viên", 400)
+    }
+
+    // --- Bước 4: Kiểm tra Trùng lịch (Conflict Validation) ---
     const conflicting = await db
       .select({ id: appointments.id })
       .from(appointments)

@@ -31,7 +31,7 @@ export const users = pgTable('users', {
   password: varchar('password', { length: 255 }),
   role: roleEnum('role').default('customer').notNull(),
   createdAt: timestamp('created_at').defaultNow(),
-  updatedAt: timestamp('updated_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow().$onUpdate(() => new Date()),
 })
 
 // --- Bảng Staff (Nhân viên) ---
@@ -46,7 +46,7 @@ export const staff = pgTable('staff', {
   joinDate: date('join_date'),
   rating: numeric('rating', { precision: 3, scale: 2 }).default('0.00'),
   createdAt: timestamp('created_at').defaultNow(),
-  updatedAt: timestamp('updated_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow().$onUpdate(() => new Date()),
 })
 
 // --- Bảng Customers (Khách hàng) ---
@@ -60,7 +60,7 @@ export const customers = pgTable('customers', {
   lastAppointmentDate: date('last_appointment_date'),
   notes: text('notes'),
   createdAt: timestamp('created_at').defaultNow(),
-  updatedAt: timestamp('updated_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow().$onUpdate(() => new Date()),
 })
 
 // --- Bảng Service Categories (Danh mục dịch vụ) ---
@@ -84,7 +84,7 @@ export const services = pgTable('services', {
   status: serviceStatusEnum('status').default('active').notNull(),
   categoryId: integer('category_id').references(() => serviceCategories.id, { onDelete: 'set null' }),
   createdAt: timestamp('created_at').defaultNow(),
-  updatedAt: timestamp('updated_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow().$onUpdate(() => new Date()),
 })
 
 // --- Bảng Staff Services (Kỹ năng của nhân viên) ---
@@ -100,10 +100,10 @@ export const staffSchedules = pgTable('staff_schedules', {
   id: serial('id').primaryKey(),
   staffId: integer('staff_id').references(() => staff.id, { onDelete: 'cascade' }).notNull(),
   dayOfWeek: integer('day_of_week').notNull(), // 0=Chủ nhật, 1=Thứ 2, ..., 6=Thứ 7
-  startTime: varchar('start_time', { length: 5 }).notNull(), // Format: "HH:MM"
-  endTime: varchar('end_time', { length: 5 }).notNull(), // Format: "HH:MM"
+  startTime: time('start_time').notNull(),
+  endTime: time('end_time').notNull(),
   createdAt: timestamp('created_at').defaultNow(),
-  updatedAt: timestamp('updated_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow().$onUpdate(() => new Date()),
 })
 
 // --- Bảng Staff Base Salaries (Lương cứng của nhân viên) ---
@@ -113,7 +113,7 @@ export const staffBaseSalaries = pgTable('staff_base_salaries', {
   baseSalary: numeric('base_salary', { precision: 10, scale: 2 }).notNull(), // Lương cứng (VND)
   notes: text('notes'),
   createdAt: timestamp('created_at').defaultNow(),
-  updatedAt: timestamp('updated_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow().$onUpdate(() => new Date()),
 })
 
 // --- Bảng Payrolls (Bảng lương tổng hợp) ---
@@ -147,8 +147,7 @@ export const appointments = pgTable('appointments', {
   durationAtBooking: integer('duration_at_booking').notNull(),
   isOvertime: boolean('is_overtime').default(false),
   createdAt: timestamp('created_at').defaultNow(),
-  updatedAt: timestamp('updated_at').defaultNow(),
-  payrollId: integer('payroll_id').references(() => payrolls.id, { onDelete: 'set null' }),
+  updatedAt: timestamp('updated_at').defaultNow().$onUpdate(() => new Date()),
 })
 
 // --- Bảng Appointment Services (Chi tiết dịch vụ trong lịch hẹn) ---
@@ -160,6 +159,7 @@ export const appointmentServices = pgTable('appointment_services', {
   priceAtBooking: numeric('price_at_booking', { precision: 10, scale: 2 }).notNull(),
   commissionPercentage: numeric('commission_percentage', { precision: 5, scale: 2 }),
   workShare: numeric('work_share', { precision: 5, scale: 2 }).default('100.00'),
+  payrollId: integer('payroll_id').references(() => payrolls.id, { onDelete: 'set null' }),
 })
 
 // --- Bảng OTP Tokens (Mã xác thực hủy lịch hẹn) ---
@@ -182,7 +182,6 @@ export const adminNotifications = pgTable('admin_notifications', {
 // --- RELATIONS ---
 export const usersRelations = relations(users, ({ one, many }) => ({
   staff: one(staff),
-  appointments: many(appointments),
 }))
 
 export const customersRelations = relations(customers, ({ many }) => ({
@@ -197,7 +196,6 @@ export const staffRelations = relations(staff, ({ many, one }) => ({
   staffServices: many(staffServices),
   staffSchedules: many(staffSchedules),
   staffBaseSalary: one(staffBaseSalaries),
-  appointments: many(appointments),
   payrolls: many(payrolls),
   appointmentServices: many(appointmentServices),
 }))
@@ -245,17 +243,13 @@ export const payrollsRelations = relations(payrolls, ({ one, many }) => ({
     fields: [payrolls.staffId],
     references: [staff.id],
   }),
-  appointments: many(appointments),
+  appointmentServices: many(appointmentServices),
 }))
 
 export const appointmentsRelations = relations(appointments, ({ one, many }) => ({
   customer: one(customers, {
     fields: [appointments.customerId],
     references: [customers.id],
-  }),
-  payroll: one(payrolls, {
-    fields: [appointments.payrollId],
-    references: [payrolls.id],
   }),
   appointmentServices: many(appointmentServices),
   otpToken: one(otpTokens),
@@ -273,6 +267,10 @@ export const appointmentServicesRelations = relations(appointmentServices, ({ on
   staff: one(staff, {
     fields: [appointmentServices.staffId],
     references: [staff.id],
+  }),
+  payroll: one(payrolls, {
+    fields: [appointmentServices.payrollId],
+    references: [payrolls.id],
   }),
 }))
 
