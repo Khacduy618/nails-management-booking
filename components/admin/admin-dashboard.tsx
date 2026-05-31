@@ -23,6 +23,7 @@ interface DashboardStats {
 export function AdminDashboard() {
   const [stats, setStats] = useState<DashboardStats | null>(null)
   const [loading, setLoading] = useState(true)
+  const [lastUpdated, setLastUpdated] = useState<string | null>(null)
 
   const apiBase = (process.env.NEXT_PUBLIC_API_URL || '/api').replace(/\/$/, '')
 
@@ -79,6 +80,11 @@ export function AdminDashboard() {
     fetchDashboardStats()
   }, [apiBase])
 
+  // Set lastUpdated on client only to avoid SSR/hydration mismatch
+  useEffect(() => {
+    setLastUpdated(new Date().toLocaleTimeString("vi-VN"))
+  }, [loading])
+
   const statCards = stats ? [
     {
       title: "Tổng doanh thu hôm nay",
@@ -116,7 +122,8 @@ export function AdminDashboard() {
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end">
           <div className="flex items-center gap-2 text-sm text-muted-foreground sm:ml-auto">
             <Clock className="h-4 w-4" />
-            Cập nhật lần cuối: {new Date().toLocaleTimeString("vi-VN")}
+            Cập nhật lần cuối:{" "}
+            <span suppressHydrationWarning>{lastUpdated ?? "--:--:--"}</span>
           </div>
         </div>
 
@@ -153,7 +160,8 @@ export function AdminDashboard() {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end">
         <div className="flex items-center gap-2 text-sm text-muted-foreground sm:ml-auto">
           <Clock className="h-4 w-4" />
-          Cập nhật lần cuối: {new Date().toLocaleTimeString("vi-VN")}
+          Cập nhật lần cuối:{" "}
+          <span suppressHydrationWarning>{lastUpdated ?? "--:--:--"}</span>
         </div>
       </div>
 
