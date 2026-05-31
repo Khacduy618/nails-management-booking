@@ -20,14 +20,14 @@ export async function GET(request: NextRequest) {
         const totalAmountSql = sql<string>`COALESCE((
             SELECT SUM(price_at_booking)::numeric 
             FROM ${appointments} 
-            WHERE ${appointments.customerId} = ${customers.id} AND ${appointments.status} != 'cancelled'
+            WHERE ${appointments.customerId} = "customers"."id" AND ${appointments.status} != 'cancelled'
         ), '0.00')`
 
         const serviceCountSql = sql<number>`COALESCE((
             SELECT COUNT(asv.id)::int
             FROM ${appointmentServices} asv
             JOIN ${appointments} apt ON asv.appointment_id = apt.id
-            WHERE apt.customer_id = ${customers.id} AND apt.status != 'cancelled'
+            WHERE apt.customer_id = "customers"."id" AND apt.status != 'cancelled'
         ), 0)`
 
         let orderBy: any = desc(customers.createdAt)
@@ -108,9 +108,6 @@ export async function GET(request: NextRequest) {
         console.error('[API] ERROR:', error)
         const errorMsg = error instanceof Error ? error.message : String(error)
         console.error('[API] Stack:', error instanceof Error ? error.stack : '')
-        return NextResponse.json(
-            fail('FETCH_ERROR', errorMsg),
-            { status: 500 }
-        )
+        return fail('FETCH_ERROR', errorMsg, 500)
     }
 }
