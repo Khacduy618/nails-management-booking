@@ -17,6 +17,13 @@ export type ApiErrorCode =
   | "INVALID_OTP"
   | "OTP_EXPIRED"
   | "RATE_LIMITED"
+  | "MISSING_TOKEN"
+  | "APPOINTMENT_NOT_FOUND"
+  | "ALREADY_REVIEWED"
+  | "TIME_RESTRICTION"
+  | "STAFF_NOT_FOUND"
+  | "EMAIL_NOT_FOUND"
+  | "EMAIL_SEND_FAILED"
 
 export function ok<T extends object>(payload: T, status = 200) {
   return NextResponse.json({ success: true, ...payload }, { status })

@@ -145,6 +145,7 @@ export const appointments = pgTable('appointments', {
   priceAtBooking: numeric('price_at_booking', { precision: 10, scale: 2 }).notNull(),
   durationAtBooking: integer('duration_at_booking').notNull(),
   isOvertime: boolean('is_overtime').default(false),
+  reviewToken: varchar('review_token', { length: 255 }),
   createdAt: timestamp('created_at').defaultNow(),
   updatedAt: timestamp('updated_at').defaultNow().$onUpdate(() => new Date()),
 }, (table) => ({
@@ -176,6 +177,16 @@ export const otpTokens = pgTable('otp_tokens', {
   createdAt: timestamp('created_at').defaultNow(),
 })
 
+// --- Bảng Reviews (Đánh giá thợ) ---
+export const reviews = pgTable('reviews', {
+  id: serial('id').primaryKey(),
+  appointmentId: integer('appointment_id').references(() => appointments.id, { onDelete: 'cascade' }).notNull().unique(),
+  staffId: integer('staff_id').references(() => staff.id, { onDelete: 'cascade' }).notNull(),
+  rating: integer('rating').notNull(),
+  comment: text('comment'),
+  createdAt: timestamp('created_at').defaultNow(),
+})
+
 // --- Bảng Admin Notifications (Thông báo quản trị) ---
 export const adminNotifications = pgTable('admin_notifications', {
   id: serial('id').primaryKey(),
@@ -204,6 +215,7 @@ export const staffRelations = relations(staff, ({ many, one }) => ({
   staffBaseSalary: one(staffBaseSalaries),
   payrolls: many(payrolls),
   appointmentServices: many(appointmentServices),
+  reviews: many(reviews),
 }))
 
 export const serviceCategoriesRelations = relations(serviceCategories, ({ many }) => ({
@@ -259,6 +271,7 @@ export const appointmentsRelations = relations(appointments, ({ one, many }) => 
   }),
   appointmentServices: many(appointmentServices),
   otpToken: one(otpTokens),
+  review: one(reviews),
 }))
 
 export const appointmentServicesRelations = relations(appointmentServices, ({ one }) => ({
@@ -284,5 +297,16 @@ export const otpTokensRelations = relations(otpTokens, ({ one }) => ({
   appointment: one(appointments, {
     fields: [otpTokens.appointmentId],
     references: [appointments.id],
+  }),
+}))
+
+export const reviewsRelations = relations(reviews, ({ one }) => ({
+  appointment: one(appointments, {
+    fields: [reviews.appointmentId],
+    references: [appointments.id],
+  }),
+  staff: one(staff, {
+    fields: [reviews.staffId],
+    references: [staff.id],
   }),
 }))
