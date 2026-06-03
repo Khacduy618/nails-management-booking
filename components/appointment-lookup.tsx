@@ -185,6 +185,24 @@ export function AppointmentLookup() {
         </CardContent>
       </Card>
 
+      {/* Help Section */}
+      <Card className="bg-muted/50">
+        <CardContent className="py-2">
+          <div className="flex items-start space-x-3">
+            <AlertCircle className="h-5 w-5 text-muted-foreground mt-0.5" />
+            <div className="space-y-1">
+              <p className="text-sm font-medium">Lưu ý quan trọng</p>
+              <ul className="text-sm text-muted-foreground space-y-1">
+                <li>• Chỉ có thể hủy lịch hẹn trước 2 giờ so với thời gian đặt</li>
+                <li>• Hủy lịch hẹn cần xác thực bằng mã OTP được gửi tới số điện thoại</li>
+                <li>• Liên hệ trực tiếp với cửa hàng nếu cần thay đổi lịch hẹn</li>
+                <li>• Vui lòng đến đúng giờ để đảm bảo chất lượng dịch vụ</li>
+              </ul>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       {hasSearched && (
         <div className="space-y-4">
           {appointments.length === 0 ? (
@@ -331,23 +349,7 @@ export function AppointmentLookup() {
         </div>
       )}
 
-      {/* Help Section */}
-      <Card className="bg-muted/50">
-        <CardContent className="py-6">
-          <div className="flex items-start space-x-3">
-            <AlertCircle className="h-5 w-5 text-muted-foreground mt-0.5" />
-            <div className="space-y-1">
-              <p className="text-sm font-medium">Lưu ý quan trọng</p>
-              <ul className="text-sm text-muted-foreground space-y-1">
-                <li>• Chỉ có thể hủy lịch hẹn trước 2 giờ so với thời gian đặt</li>
-                <li>• Hủy lịch hẹn cần xác thực bằng mã OTP được gửi tới số điện thoại</li>
-                <li>• Liên hệ trực tiếp với cửa hàng nếu cần thay đổi lịch hẹn</li>
-                <li>• Vui lòng đến đúng giờ để đảm bảo chất lượng dịch vụ</li>
-              </ul>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      
 
       {/* OTP Verification Dialog */}
       {selectedAppointmentId && (

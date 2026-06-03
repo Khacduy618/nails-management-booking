@@ -83,8 +83,13 @@ describe("OTP Secure Flow API Routes", () => {
     it("should generate and save secure OTP to DB when inputs are valid", async () => {
       // Giả lập lịch hẹn cách hiện tại 5 giờ (hợp lệ để hủy)
       const dateIn5Hours = new Date(Date.now() + 5 * 60 * 60 * 1000)
-      const appointmentDateStr = dateIn5Hours.toISOString().split("T")[0]
-      const appointmentTimeStr = dateIn5Hours.toTimeString().split(" ")[0].substring(0, 5)
+      const year = dateIn5Hours.getFullYear()
+      const month = String(dateIn5Hours.getMonth() + 1).padStart(2, "0")
+      const day = String(dateIn5Hours.getDate()).padStart(2, "0")
+      const appointmentDateStr = `${year}-${month}-${day}`
+      const hours = String(dateIn5Hours.getHours()).padStart(2, "0")
+      const mins = String(dateIn5Hours.getMinutes()).padStart(2, "0")
+      const appointmentTimeStr = `${hours}:${mins}`
 
       mockFindFirstAppointment.mockResolvedValue({
         id: 1,
@@ -139,8 +144,13 @@ describe("OTP Secure Flow API Routes", () => {
     it("should return 400 when cancellation request is within 2 hours of schedule", async () => {
       // Giả lập lịch hẹn chỉ cách hiện tại 1 giờ (không thể hủy)
       const dateIn1Hour = new Date(Date.now() + 1 * 60 * 60 * 1000)
-      const appointmentDateStr = dateIn1Hour.toISOString().split("T")[0]
-      const appointmentTimeStr = dateIn1Hour.toTimeString().split(" ")[0].substring(0, 5)
+      const year = dateIn1Hour.getFullYear()
+      const month = String(dateIn1Hour.getMonth() + 1).padStart(2, "0")
+      const day = String(dateIn1Hour.getDate()).padStart(2, "0")
+      const appointmentDateStr = `${year}-${month}-${day}`
+      const hours = String(dateIn1Hour.getHours()).padStart(2, "0")
+      const mins = String(dateIn1Hour.getMinutes()).padStart(2, "0")
+      const appointmentTimeStr = `${hours}:${mins}`
 
       mockFindFirstAppointment.mockResolvedValue({
         id: 1,

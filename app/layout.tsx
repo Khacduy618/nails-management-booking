@@ -2,6 +2,20 @@ import type React from "react"
 import type { Metadata } from "next"
 import { GeistSans } from "geist/font/sans"
 import { GeistMono } from "geist/font/mono"
+import { Playfair_Display, Manrope } from "next/font/google"
+
+const playfair = Playfair_Display({
+  subsets: ["vietnamese", "latin"],
+  variable: "--font-playfair",
+  style: ["normal", "italic"],
+  weight: ["400", "500", "600", "700", "800", "900"],
+})
+
+const manrope = Manrope({
+  subsets: ["vietnamese", "latin"],
+  variable: "--font-manrope",
+  weight: ["400", "500", "600", "700", "800"],
+})
 import { Analytics } from "@vercel/analytics/next"
 import { Suspense } from "react"
 import { Toaster } from "@/components/ui/sonner";
@@ -32,9 +46,24 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="vi">
-      <body className={`font-sans ${GeistSans.variable} ${GeistMono.variable} antialiased`} suppressHydrationWarning>
+      <body className={`font-sans ${GeistSans.variable} ${GeistMono.variable} ${playfair.variable} ${manrope.variable} antialiased relative min-h-screen bg-[#f5f4f2] text-neutral-800`} suppressHydrationWarning>
+        {/* Global Background Texture */}
+        <div className="pointer-events-none fixed inset-0 -z-50 bg-[#f5f4f2]" aria-hidden="true">
+          <img
+            src="/cleanstoneimg.webp"
+            alt=""
+            className="w-full h-full object-cover opacity-[0.55]"
+          />
+          {/* Top gradient glow overlay */}
+          <div className="absolute inset-0 bg-gradient-to-b from-[#f5f4f2]/10 via-transparent to-transparent" />
+        </div>
+
         <AuthProvider>
-          <Suspense fallback={null}>{children}</Suspense>
+          <Suspense fallback={null}>
+            <div className="relative z-10">
+              {children}
+            </div>
+          </Suspense>
         </AuthProvider>
         <Analytics />
         <Toaster richColors position="top-right" />

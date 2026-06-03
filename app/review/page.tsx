@@ -358,9 +358,18 @@ function ReviewContent() {
 
 export default function ReviewPage() {
   return (
-    <div className="min-h-screen flex flex-col justify-between">
+    <div className="premium-page-container min-h-screen flex flex-col justify-between">
+      {/* Background decorations */}
+      <div className="premium-page-bg" aria-hidden="true">
+        <img src="/cleanstoneimg.webp" alt="" className="premium-page-texture" />
+        <div className="premium-page-overlay-top" />
+        <div className="premium-page-overlay-bottom" />
+        <div className="hero-blob hero-blob-1" />
+        <div className="hero-blob hero-blob-2" />
+      </div>
+
       <Header />
-      <main className="py-12 bg-gradient-to-b from-background to-muted/20 flex-grow">
+      <main className="relative z-10 pt-24 lg:pt-32 pb-16 flex-grow flex items-center justify-center">
         <div className="container mx-auto px-4">
           <Suspense
             fallback={

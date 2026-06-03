@@ -1,9 +1,8 @@
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
-import { ServicesPageClient } from "@/components/services-page-client"; // Import component client
+import { ServicesPageClient } from "@/components/services-page-client";
 import { Suspense } from "react";
 
-// Component Skeleton cho toàn bộ trang
 function PageSkeleton() {
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -23,21 +22,29 @@ function PageSkeleton() {
 
 export default function ServicesPage() {
   return (
-    <div className="min-h-screen">
+    <div className="premium-page-container min-h-screen">
+      {/* Background decorations */}
+      <div className="premium-page-bg" aria-hidden="true">
+        <img src="/cleanstoneimg.webp" alt="" className="premium-page-texture" />
+        <div className="premium-page-overlay-top" />
+        <div className="premium-page-overlay-bottom" />
+        <div className="hero-blob hero-blob-1" />
+        <div className="hero-blob hero-blob-2" />
+      </div>
+
       <Header />
-      <main className="py-8">
+      <main className="relative z-10 pt-24 lg:pt-32 pb-16">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           {/* Page Header */}
-          <div className="mb-8">
-            <h1 className="text-3xl lg:text-4xl font-bold text-balance mb-4">
-              Dịch vụ <span className="text-primary">làm đẹp</span>
+          <div className="mb-12 text-center lg:text-left">
+            <h1 className="text-4xl lg:text-5xl font-bold tracking-tight leading-[1.05] text-neutral-900 mb-4">
+              Dịch vụ <span className="font-serif italic font-medium text-primary">làm đẹp.</span>
             </h1>
-            <p className="text-xl text-muted-foreground text-pretty">
-              Khám phá đầy đủ các dịch vụ chăm sóc sức khỏe và làm đẹp chuyên nghiệp
+            <p className="text-lg text-neutral-500 font-medium max-w-2xl">
+              Khám phá đầy đủ các dịch vụ chăm sóc sức khỏe và làm móng nghệ thuật cao cấp
             </p>
           </div>
 
-          {/* SỬA Ở ĐÂY: Render ServicesPageClient bên trong Suspense */}
           <Suspense fallback={<PageSkeleton />}>
             <ServicesPageClient />
           </Suspense>
