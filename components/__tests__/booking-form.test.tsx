@@ -76,6 +76,10 @@ describe("BookingForm", () => {
       } as Response)
       .mockResolvedValueOnce({
         ok: true,
+        json: async () => ({ success: true, slots: ["09:00", "09:30"] }),
+      } as Response)
+      .mockResolvedValueOnce({
+        ok: true,
         json: async () => ({ success: true, staff: [{ id: 5, name: "Chuyên viên A" }] }),
       } as Response)
       .mockResolvedValueOnce({
@@ -90,9 +94,12 @@ describe("BookingForm", () => {
     await user.click(serviceCheckboxes[0])
     await user.click(screen.getByRole("button", { name: "Chọn Ngày & Giờ" }))
     await user.click(screen.getByRole("button", { name: "Chọn ngày mock" }))
+
+    // Wait for dynamic slots to load before clicking slot button
+    await screen.findByRole("button", { name: "09:00" })
     await user.click(screen.getByRole("button", { name: "09:00" }))
 
-    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2))
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(3))
 
     await user.click(screen.getByRole("button", { name: "Chọn Nhân viên" }))
     await user.click(screen.getByRole("button", { name: "Điền thông tin" }))
@@ -105,7 +112,7 @@ describe("BookingForm", () => {
 
     await waitFor(() => expect(screen.getByText("Đặt lịch thành công!")).toBeInTheDocument())
 
-    const payload = JSON.parse((fetchMock.mock.calls[2][1] as RequestInit).body as string)
+    const payload = JSON.parse((fetchMock.mock.calls[3][1] as RequestInit).body as string)
     expect(payload).toMatchObject({
       customerName: "Khách Test",
       customerPhone: "0901234567",

@@ -32,6 +32,7 @@ export interface BookingState {
   customerEmail: string;
   notes: string;
   searchTerm: string;
+  availableTimeSlots: string[];
 }
 
 export const initialState: BookingState = {
@@ -52,6 +53,7 @@ export const initialState: BookingState = {
   customerEmail: "",
   notes: "",
   searchTerm: "",
+  availableTimeSlots: [],
 };
 
 export type BookingAction =
@@ -74,6 +76,7 @@ export type BookingAction =
   | { type: "SET_CUSTOMER_EMAIL"; payload: string }
   | { type: "SET_NOTES"; payload: string }
   | { type: "SET_SEARCH_TERM"; payload: string }
+  | { type: "SET_AVAILABLE_TIME_SLOTS"; payload: string[] }
   | { type: "RESET" };
 
 export function bookingReducer(state: BookingState, action: BookingAction): BookingState {
@@ -102,7 +105,14 @@ export function bookingReducer(state: BookingState, action: BookingAction): Book
     case "CLEAR_SELECTED_SERVICES":
       return { ...state, selectedServices: [] };
     case "SET_SELECTED_DATE":
-      return { ...state, selectedDate: action.payload };
+      return {
+        ...state,
+        selectedDate: action.payload,
+        selectedTime: "",
+        availableTimeSlots: [],
+        availableStaff: [],
+        availabilityInfo: null,
+      };
     case "SET_SELECTED_TIME":
       return { ...state, selectedTime: action.payload };
     case "SET_SELECTED_STAFF_ID":
@@ -121,6 +131,8 @@ export function bookingReducer(state: BookingState, action: BookingAction): Book
       return { ...state, notes: action.payload };
     case "SET_SEARCH_TERM":
       return { ...state, searchTerm: action.payload };
+    case "SET_AVAILABLE_TIME_SLOTS":
+      return { ...state, availableTimeSlots: action.payload };
     case "RESET":
       return {
         ...initialState,

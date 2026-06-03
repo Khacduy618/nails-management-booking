@@ -24,7 +24,6 @@ interface ApiService { id: number; name: string; description: string | null; pri
 interface ApiStaff { id: number; name: string; rating?: number; appointmentCount?: number; appointment_count_today?: number; }
 
 const stepLabels = ["Dịch vụ", "Ngày & Giờ", "Nhân viên", "Thông tin"];
-const timeSlots = ["09:00", "09:30", "10:00", "10:30", "11:00", "11:30", "14:00", "14:30", "15:00", "15:30", "16:00", "16:30", "17:00", "17:30"];
 
 interface BookingFormProps {
   onBookingComplete?: () => void; // Thêm prop callback, '?' để nó là optional
@@ -51,6 +50,7 @@ export function BookingForm({ onBookingComplete }: BookingFormProps) {
     customerEmail,
     notes,
     searchTerm,
+    availableTimeSlots,
   } = state;
 
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api/';
@@ -88,6 +88,37 @@ export function BookingForm({ onBookingComplete }: BookingFormProps) {
     }
   }, [allServices]);
 
+  // Fetch available time slots when date or services change
+  useEffect(() => {
+    if (!selectedDate || selectedServices.length === 0) {
+      dispatch({ type: "SET_AVAILABLE_TIME_SLOTS", payload: [] });
+      return;
+    }
+
+    const fetchTimeSlots = async () => {
+      dispatch({ type: "SET_IS_LOADING", payload: true });
+      dispatch({ type: "SET_ERROR", payload: "" });
+      try {
+        const serviceIds = selectedServices.map((s) => s.id).join(",");
+        const dateStr = format(selectedDate, "yyyy-MM-dd");
+        const res = await fetch(`${apiUrl}time-slots?date=${dateStr}&serviceIds=${serviceIds}`);
+        if (!res.ok) throw new Error("Không thể lấy danh sách khung giờ.");
+        const data = await res.json();
+        if (data.success) {
+          dispatch({ type: "SET_AVAILABLE_TIME_SLOTS", payload: data.slots || [] });
+        } else {
+          throw new Error(data.error?.message || "Không thể lấy danh sách khung giờ.");
+        }
+      } catch (e: any) {
+        dispatch({ type: "SET_ERROR", payload: e.message });
+        dispatch({ type: "SET_AVAILABLE_TIME_SLOTS", payload: [] });
+      } finally {
+        dispatch({ type: "SET_IS_LOADING", payload: false });
+      }
+    };
+
+    fetchTimeSlots();
+  }, [selectedDate, selectedServices, apiUrl]);
 
   const filteredServices = useMemo(() => {
     if (!searchTerm) return allServices;
@@ -378,18 +409,36 @@ export function BookingForm({ onBookingComplete }: BookingFormProps) {
             <CalendarComponent mode="single" selected={selectedDate} onSelect={(date) => dispatch({ type: "SET_SELECTED_DATE", payload: date })} disabled={(date) => isBefore(date, startOfToday())} className="rounded-md border" />
             <div className="flex-1 w-full max-h-[300px] overflow-y-auto pr-2">
               <p className="font-medium mb-2 text-center">{selectedDate ? `Các khung giờ cho ${format(selectedDate, "dd/MM/yyyy")}` : "Vui lòng chọn ngày"}</p>
-              {selectedDate && <div className="grid grid-cols-3 gap-2">
-                {timeSlots.map((time) => (
-                  <Button
-                    key={time}
-                    variant={selectedTime === time ? "default" : "outline"}
-                    onClick={() => handleTimeSelect(time)}
-                    disabled={isTimeSlotDisabled(time)}
-                  >
-                    {time}
-                  </Button>
-                ))}
-              </div>}
+              
+              {selectedDate && isLoading && !selectedTime && (
+                <div className="grid grid-cols-3 gap-2">
+                  {[...Array(6)].map((_, i) => (
+                    <Skeleton key={i} className="h-10 w-full" />
+                  ))}
+                </div>
+              )}
+
+              {selectedDate && (!isLoading || selectedTime) && availableTimeSlots.length === 0 && (
+                <p className="text-sm text-red-500 text-center py-4">
+                  Không có khung giờ nào khả dụng cho ngày này. Vui lòng chọn ngày khác.
+                </p>
+              )}
+
+              {selectedDate && (!isLoading || selectedTime) && availableTimeSlots.length > 0 && (
+                <div className="grid grid-cols-3 gap-2">
+                  {availableTimeSlots.map((time) => (
+                    <Button
+                      key={time}
+                      variant={selectedTime === time ? "default" : "outline"}
+                      onClick={() => handleTimeSelect(time)}
+                      disabled={isTimeSlotDisabled(time)}
+                    >
+                      {time}
+                    </Button>
+                  ))}
+                </div>
+              )}
+
               {availabilityInfo && (
                 <p className="text-sm text-muted-foreground mt-3 text-center">{availabilityInfo}</p>
               )}
