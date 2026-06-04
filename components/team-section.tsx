@@ -22,8 +22,7 @@ export function TeamSection() {
   useEffect(() => {
     const fetchStaff = async () => {
       try {
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/api/"
-        const res = await fetch(`${apiUrl}staff?limit=4`)
+        const res = await fetch(`/api/staff?limit=4`)
         if (res.ok) {
           const data = await res.json()
           setTeamMembers(data.data || [])

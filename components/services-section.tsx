@@ -46,8 +46,7 @@ export function ServicesSection() {
   useEffect(() => {
     const fetchPopularServices = async () => {
       try {
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/api/"
-        const res = await fetch(`${apiUrl}services?limit=4`)
+        const res = await fetch(`/api/services?limit=4`)
 
         if (res.ok) {
           const data = await res.json()

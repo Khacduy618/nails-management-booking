@@ -18,7 +18,7 @@ export function proxy(request: NextRequest) {
     default-src 'self';
     script-src 'self' 'nonce-${nonce}' ${isDev ? "'unsafe-eval' 'unsafe-inline'" : "'strict-dynamic'"};
     style-src 'self' 'unsafe-inline';
-    img-src 'self' data: blob: https://*.public.blob.vercel-storage.com;
+    img-src 'self' data: blob: https://*.public.blob.vercel-storage.com https://images.unsplash.com;
     font-src 'self' data:;
     object-src 'none';
     base-uri 'self';
