@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
     if (!token) {
       const limit = Math.max(1, Math.min(20, parseInt(searchParams.get("limit") || "4", 10)))
       const publicReviews = await db.query.reviews.findMany({
-        orderBy: desc(reviews.createdAt),
+        orderBy: [desc(reviews.rating), desc(reviews.createdAt)],
         limit: limit,
         with: {
           appointment: {

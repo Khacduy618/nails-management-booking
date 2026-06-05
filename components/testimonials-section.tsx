@@ -53,7 +53,7 @@ export function TestimonialsSection() {
   useEffect(() => {
     const fetchReviews = async () => {
       try {
-        const res = await fetch("/api/reviews?limit=4")
+        const res = await fetch("/api/reviews?limit=12")
         if (res.ok) {
           const result = await res.json()
           if (result.success && result.data && result.data.length > 0) {
@@ -89,6 +89,15 @@ export function TestimonialsSection() {
     )
   }
 
+  // Ensure we have enough items to loop seamlessly without leaving empty spaces
+  const baseList = [...testimonials]
+  if (baseList.length > 0) {
+    while (baseList.length < 8) {
+      baseList.push(...testimonials)
+    }
+  }
+  const marqueeItems = baseList.length > 0 ? [...baseList, ...baseList] : []
+
   return (
     <section className="py-24 bg-transparent relative overflow-hidden">
       <div className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8">
@@ -102,14 +111,14 @@ export function TestimonialsSection() {
           </p>
         </div>
 
-        {/* Testimonials Grid */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {/* Testimonials Marquee */}
+        <div className="relative w-full overflow-hidden reviews-mask py-4">
           {loading ? (
-            <>
-              {[...Array(4)].map((_, i) => (
+            <div className="flex w-max gap-6 py-4">
+              {[...Array(5)].map((_, i) => (
                 <div
                   key={i}
-                  className="rounded-3xl border border-neutral-200/80 bg-white/50 p-6 flex flex-col justify-between h-full min-h-[220px]"
+                  className="rounded-3xl border border-neutral-200/80 bg-white/50 p-6 flex flex-col justify-between h-full min-h-[220px] w-[300px] sm:w-[350px] shrink-0"
                 >
                   <div className="space-y-4">
                     <div className="flex justify-between">
@@ -128,59 +137,61 @@ export function TestimonialsSection() {
                   </div>
                 </div>
               ))}
-            </>
+            </div>
           ) : (
-            testimonials.map((testimonial, index) => (
-              <div
-                key={index}
-                className="group relative overflow-hidden rounded-3xl border border-neutral-200/80 bg-white/70 p-6 shadow-[0_6px_18px_-6px_rgba(15,15,15,0.1),0_1px_2px_rgba(0,0,0,0.02)] backdrop-blur-md transition-all duration-500 ease-out hover:border-neutral-300 hover:bg-white hover:shadow-[0_14px_30px_-8px_rgba(15,15,15,0.18),0_1px_2px_rgba(0,0,0,0.02)] hover:-translate-y-1.5 flex flex-col justify-between h-full"
-              >
-                <div className="space-y-4">
-                  {/* Rating and Quote Icon */}
-                  <div className="flex items-center justify-between">
-                    <div className="flex space-x-0.5">
-                      {[...Array(5)].map((_, i) => (
-                        <Star
-                          key={i}
-                          className={`h-4 w-4 ${
-                            i < testimonial.rating
-                              ? "fill-amber-400 text-amber-400"
-                              : "text-neutral-200"
-                          }`}
-                        />
-                      ))}
+            <div className="flex w-max gap-6 reviews-marquee will-change-transform py-4">
+              {marqueeItems.map((testimonial, index) => (
+                <div
+                  key={`${testimonial.id || testimonial.name}-${index}`}
+                  className="group relative overflow-hidden rounded-3xl border border-neutral-200/80 bg-white/70 p-6 shadow-[0_6px_18px_-6px_rgba(15,15,15,0.1),0_1px_2px_rgba(0,0,0,0.02)] backdrop-blur-md transition-all duration-500 ease-out hover:border-neutral-300 hover:bg-white hover:shadow-[0_14px_30px_-8px_rgba(15,15,15,0.18),0_1px_2px_rgba(0,0,0,0.02)] hover:-translate-y-1.5 flex flex-col justify-between w-[300px] sm:w-[350px] shrink-0 min-h-[220px]"
+                >
+                  <div className="space-y-4">
+                    {/* Rating and Quote Icon */}
+                    <div className="flex items-center justify-between">
+                      <div className="flex space-x-0.5">
+                        {[...Array(5)].map((_, i) => (
+                          <Star
+                            key={i}
+                            className={`h-4 w-4 ${
+                              i < testimonial.rating
+                                ? "fill-amber-400 text-amber-400"
+                                : "text-neutral-200"
+                            }`}
+                          />
+                        ))}
+                      </div>
+                      <Quote className="h-4 w-4 text-primary/30" />
                     </div>
-                    <Quote className="h-4 w-4 text-primary/30" />
-                  </div>
 
-                  {/* Content */}
-                  <p className="text-sm text-neutral-600 leading-relaxed font-medium line-clamp-4">
-                    "{testimonial.content}"
-                  </p>
-                </div>
-
-                {/* Author */}
-                <div className="flex items-center space-x-3 pt-4 mt-6 border-t border-neutral-100">
-                  {testimonial.avatar ? (
-                    <img
-                      src={testimonial.avatar}
-                      alt={testimonial.name}
-                      className="h-10 w-10 rounded-full object-cover ring-2 ring-primary/10 group-hover:ring-primary/30 transition-all duration-300"
-                    />
-                  ) : (
-                    getAvatarFallback(testimonial.name)
-                  )}
-                  <div className="min-w-0 flex-1">
-                    <p className="font-bold text-sm text-neutral-900 group-hover:text-primary transition-colors duration-300 truncate">
-                      {testimonial.name}
-                    </p>
-                    <p className="text-xs font-semibold text-neutral-400 truncate">
-                      {testimonial.service}
+                    {/* Content */}
+                    <p className="text-sm text-neutral-600 leading-relaxed font-medium line-clamp-4">
+                      "{testimonial.content}"
                     </p>
                   </div>
+
+                  {/* Author */}
+                  <div className="flex items-center space-x-3 pt-4 mt-6 border-t border-neutral-100">
+                    {testimonial.avatar ? (
+                      <img
+                        src={testimonial.avatar}
+                        alt={testimonial.name}
+                        className="h-10 w-10 rounded-full object-cover ring-2 ring-primary/10 group-hover:ring-primary/30 transition-all duration-300"
+                      />
+                    ) : (
+                      getAvatarFallback(testimonial.name)
+                    )}
+                    <div className="min-w-0 flex-1">
+                      <p className="font-bold text-sm text-neutral-900 group-hover:text-primary transition-colors duration-300 truncate">
+                        {testimonial.name}
+                      </p>
+                      <p className="text-xs font-semibold text-neutral-400 truncate">
+                        {testimonial.service}
+                      </p>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            ))
+              ))}
+            </div>
           )}
         </div>
       </div>
