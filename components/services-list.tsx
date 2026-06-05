@@ -93,61 +93,80 @@ export function ServicesList({
           ? "grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6"
           : "space-y-4"}>
           {(isLoading && services.length === 0 ? MOCK_SERVICES : services).map((service) => (
-            <Card key={service.id} className="group hover:shadow-lg transition-all p-0 duration-300 hover:-translate-y-1 overflow-hidden">
-              <div className={viewMode === "list" ? "flex" : ""}>
-                {/* Image */}
-                <div className={`${viewMode === "list" ? "w-48 flex-shrink-0" : "aspect-video"} overflow-hidden bg-muted`}>
-                  {service.imageUrl ? (
-                    <img
-                      src={service.imageUrl}
-                      alt={service.name}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-muted-foreground bg-slate-200 dark:bg-slate-800">
-                      Ảnh dịch vụ
-                    </div>
-                  )}
+            <div 
+              key={service.id} 
+              className={`group rounded-3xl border border-neutral-200/80 bg-white/70 shadow-[0_6px_18px_-6px_rgba(15,15,15,0.1),0_1px_2px_rgba(0,0,0,0.02)] backdrop-blur-md transition-all duration-500 ease-out hover:border-neutral-300 hover:bg-white hover:shadow-[0_14px_30px_-8px_rgba(15,15,15,0.18),0_1px_2px_rgba(0,0,0,0.02)] hover:-translate-y-1.5 overflow-hidden flex ${
+                viewMode === "list" 
+                  ? "flex-col md:flex-row w-full md:h-48 min-h-fit" 
+                  : "flex-col justify-between min-h-[380px]"
+              }`}
+            >
+              {/* Image */}
+              <div className={`${
+                viewMode === "list" 
+                  ? "w-full md:w-56 h-48 md:h-full flex-shrink-0" 
+                  : "aspect-video w-full"
+              } overflow-hidden bg-neutral-100 relative`}>
+                {service.imageUrl ? (
+                  <img
+                    src={service.imageUrl}
+                    alt={service.name}
+                    className="w-full h-full object-cover group-hover:scale-[1.04] transition-transform duration-500 ease-out"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-xs font-bold text-neutral-400 bg-neutral-200/40">
+                    Ảnh dịch vụ
+                  </div>
+                )}
+                {service.popular && (
+                  <span className="absolute top-3 right-3 inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/10 border border-amber-500/20 text-amber-600 backdrop-blur-md">
+                    <Star className="h-2.5 w-2.5 fill-amber-500" />
+                    Phổ biến
+                  </span>
+                )}
+              </div>
+
+              {/* Content */}
+              <div className="flex-1 flex flex-col p-6 h-full justify-between min-w-0">
+                <div className="space-y-2">
+                  <div className="flex items-start justify-between gap-4">
+                    <h3 className="text-lg font-bold text-neutral-900 group-hover:text-primary transition-colors duration-300 line-clamp-2 leading-snug">
+                      {service.name}
+                    </h3>
+                    <p className="text-base font-extrabold text-primary flex-shrink-0">
+                      {Number(service.price).toLocaleString("vi-VN")}đ
+                    </p>
+                  </div>
+                  
+                  <p className="text-xs text-neutral-500 leading-relaxed line-clamp-2 md:line-clamp-3">
+                    {service.description || "Dịch vụ chăm sóc và làm đẹp móng cao cấp được thực hiện bởi các kỹ thuật viên giàu kinh nghiệm."}
+                  </p>
                 </div>
 
-                {/* Content */}
-                <div className="flex-1 flex flex-col">
-                  <CardHeader className="pb-3">
-                    <div className="flex items-center justify-between">
-                      <div className="space-y-1">
-                        <CardTitle className="flex items-center text-lg h-14 group-hover:text-primary transition-colors">
-                          <span className="line-clamp-2 leading-tight">
-                            {service.name}
-                          </span>
-                        </CardTitle>
-                        {service.popular && <Badge variant="secondary">Phổ biến</Badge>}
-                      </div>
-                      <p className="text-lg font-bold text-primary flex-shrink-0 ml-2">{Number(service.price).toLocaleString("vi-VN")}đ</p>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="p-6 pt-0 space-y-4 flex-grow flex flex-col justify-between">
-                    <CardDescription className="text-pretty leading-relaxed line-clamp-2">
-                      {service.description}
-                    </CardDescription>
+                <div className={`mt-4 pt-4 border-t border-neutral-100/60 flex ${
+                  viewMode === "list" 
+                    ? "flex-row items-center justify-between gap-4 mt-2 pt-3" 
+                    : "flex-col gap-4"
+                }`}>
+                  {/* Service Info */}
+                  <div className="flex items-center text-xs font-bold text-neutral-400">
+                    <Clock className="h-3.5 w-3.5 mr-1" />
+                    <span>{service.duration} phút</span>
+                  </div>
 
-                    {/* Service Info */}
-                    <div className="flex flex-wrap gap-x-4 gap-y-2 text-sm text-muted-foreground">
-                      <div className="flex items-center space-x-1">
-                        <Clock className="h-4 w-4" />
-                        <span>{service.duration} phút</span>
-                      </div>
-                      {/* Rating & Staff info có thể được thêm vào đây nếu API trả về */}
-                    </div>
-
-                    {/* Action Button */}
-                    <Button onClick={() => handleBooking(service.id)} className="w-full mt-auto">
-                      <Calendar className="h-4 w-4 mr-2" />
-                      Đặt lịch ngay
-                    </Button>
-                  </CardContent>
+                  {/* Action Button */}
+                  <Button 
+                    onClick={() => handleBooking(service.id)} 
+                    className={`rounded-full bg-primary hover:bg-primary/95 hover:shadow-md transition-all duration-300 font-bold shadow-sm text-white ${
+                      viewMode === "list" ? "w-auto px-6 py-4 h-9" : "w-full py-5"
+                    }`}
+                  >
+                    <Calendar className="h-3.5 w-3.5 mr-1.5" />
+                    Đặt lịch ngay
+                  </Button>
                 </div>
               </div>
-            </Card>
+            </div>
           ))}
         </div>
       </PhantomWrapper>

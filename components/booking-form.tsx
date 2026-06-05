@@ -278,194 +278,264 @@ export function BookingForm({ onBookingComplete }: BookingFormProps) {
   if (success) {
     const staffName = assignedStaff?.name || (autoAssign ? "Đã tự động phân công" : "Chưa chọn");
     return (
-      <Card>
-        <CardContent className="py-8 text-center">
-          <CheckCircle className="h-16 w-16 mx-auto text-green-600 mb-4" />
-          <h2 className="text-2xl font-bold mb-4">Đặt lịch thành công!</h2>
-          <p className="text-muted-foreground mb-6">Lịch hẹn của bạn đã được ghi nhận. Chúng tôi sẽ liên hệ để xác nhận sớm nhất.</p>
-          <div className="space-y-2 text-sm bg-muted p-4 rounded-lg mb-6 text-left">
-            <div><strong>Dịch vụ:</strong> {selectedServices.map(s => s.name).join(', ')}</div>
-            <div><strong>Ngày:</strong> {selectedDate && format(selectedDate, "EEEE, dd/MM/yyyy", { locale: vi })}</div>
-            <div><strong>Giờ:</strong> {selectedTime}</div>
-            <div><strong>Nhân viên:</strong> {staffName}</div>
-            <div><strong>Khách hàng:</strong> {customerName}</div>
-            <div><strong>SĐT:</strong> {customerPhone}</div>
-            {customerEmail && <div><strong>Email:</strong> {customerEmail}</div>}
-            <div><strong>Tổng tiền:</strong> {totalPrice.toLocaleString("vi-VN")}đ</div>
+      <div className="rounded-3xl border border-neutral-200/80 bg-white/70 p-8 text-center shadow-[0_6px_18px_-6px_rgba(15,15,15,0.1),0_1px_2px_rgba(0,0,0,0.02)] backdrop-blur-md transition-all duration-500 hover:border-neutral-300 hover:bg-white hover:shadow-[0_14px_30px_-8px_rgba(15,15,15,0.18)] max-w-lg mx-auto">
+        <div className="mx-auto w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-6">
+          <CheckCircle className="h-10 w-10 text-primary animate-bounce" />
+        </div>
+        <h2 className="text-2xl font-extrabold text-neutral-900 mb-4">Đặt lịch thành công!</h2>
+        <p className="text-sm text-neutral-500 font-medium mb-6">Lịch hẹn của bạn đã được ghi nhận. Chúng tôi sẽ liên hệ để xác nhận sớm nhất.</p>
+        
+        {/* Receipt recipe layout */}
+        <div className="space-y-3.5 text-sm bg-primary/[0.03] border border-primary/10 p-5 rounded-2xl mb-8 text-left shadow-inner">
+          <div className="flex justify-between border-b border-neutral-100 pb-2">
+            <span className="font-semibold text-neutral-500">Dịch vụ:</span>
+            <span className="font-bold text-neutral-900 text-right">{selectedServices.map(s => s.name).join(', ')}</span>
           </div>
-          <Button onClick={resetForm}>
-            {onBookingComplete ? "Đóng" : "Đặt lịch mới"}
-          </Button>
-        </CardContent>
-      </Card>
+          <div className="flex justify-between border-b border-neutral-100 pb-2">
+            <span className="font-semibold text-neutral-500">Ngày hẹn:</span>
+            <span className="font-bold text-neutral-900">{selectedDate && format(selectedDate, "EEEE, dd/MM/yyyy", { locale: vi })}</span>
+          </div>
+          <div className="flex justify-between border-b border-neutral-100 pb-2">
+            <span className="font-semibold text-neutral-500">Khung giờ:</span>
+            <span className="font-bold text-neutral-900">{selectedTime}</span>
+          </div>
+          <div className="flex justify-between border-b border-neutral-100 pb-2">
+            <span className="font-semibold text-neutral-500">Thợ phục vụ:</span>
+            <span className="font-bold text-neutral-900">{staffName}</span>
+          </div>
+          <div className="flex justify-between border-b border-neutral-100 pb-2">
+            <span className="font-semibold text-neutral-500">Khách hàng:</span>
+            <span className="font-bold text-neutral-900">{customerName}</span>
+          </div>
+          <div className="flex justify-between border-b border-neutral-100 pb-2">
+            <span className="font-semibold text-neutral-500">SĐT:</span>
+            <span className="font-bold text-neutral-900">{customerPhone}</span>
+          </div>
+          {customerEmail && (
+            <div className="flex justify-between border-b border-neutral-100 pb-2">
+              <span className="font-semibold text-neutral-500">Email:</span>
+              <span className="font-bold text-neutral-900">{customerEmail}</span>
+            </div>
+          )}
+          <div className="flex justify-between pt-2">
+            <span className="font-bold text-neutral-700 text-base">Tổng tiền:</span>
+            <span className="font-extrabold text-primary text-lg">
+              {totalPrice.toLocaleString("vi-VN")}đ
+            </span>
+          </div>
+        </div>
+
+        <Button 
+          onClick={resetForm} 
+          className="w-full rounded-full bg-primary hover:bg-primary/95 hover:shadow-md transition-all duration-300 font-bold py-6 text-white"
+        >
+          {onBookingComplete ? "Đóng" : "Đặt lịch mới"}
+        </Button>
+      </div>
     );
   }
 
   return (
     <div className="w-full max-w-2xl mx-auto space-y-6">
-      <Card>
-        <CardContent className="p-4">
-          <div className="flex items-center gap-2">
-            {stepLabels.map((_, index) => {
-              const stepNum = index + 1;
-              return (
-                <div key={stepNum} className="flex items-center w-full">
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium shrink-0 ${step >= stepNum ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}>{stepNum}</div>
-                  {stepNum < stepLabels.length && <div className={`h-0.5 w-full ${step > stepNum ? "bg-primary" : "bg-muted"}`} />}
-                </div>
-              );
-            })}
-          </div>
-          <div className="hidden md:flex justify-between mt-2 text-xs text-muted-foreground px-1">
-            {stepLabels.map((label) => (<span key={label} style={{ width: `${100 / stepLabels.length}%` }} className="text-center">{label}</span>))}
-          </div>
-        </CardContent>
-      </Card>
+      {/* Stepper Card */}
+      <div className="rounded-3xl border border-neutral-200/80 bg-white/70 p-5 shadow-[0_6px_18px_-6px_rgba(15,15,15,0.06)] backdrop-blur-md">
+        <div className="flex items-center gap-2">
+          {stepLabels.map((_, index) => {
+            const stepNum = index + 1;
+            return (
+              <div key={stepNum} className="flex items-center w-full">
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0 transition-all duration-300 ${step >= stepNum ? "bg-primary text-white shadow-sm ring-2 ring-primary/20" : "bg-neutral-200/60 text-neutral-400"}`}>{stepNum}</div>
+                {stepNum < stepLabels.length && <div className={`h-0.5 w-full mx-2 transition-all duration-500 ${step > stepNum ? "bg-primary" : "bg-neutral-200/60"}`} />}
+              </div>
+            );
+          })}
+        </div>
+        <div className="hidden md:flex justify-between mt-3 text-[10px] font-extrabold tracking-wider uppercase text-neutral-400 px-1">
+          {stepLabels.map((label) => (<span key={label} style={{ width: `${100 / stepLabels.length}%` }} className="text-center">{label}</span>))}
+        </div>
+      </div>
 
-      {error && <Alert variant="destructive"><AlertCircle className="h-4 w-4" /><AlertDescription>{error}</AlertDescription></Alert>}
+      {error && <Alert variant="destructive" className="rounded-2xl border-destructive/20 bg-destructive/5"><AlertCircle className="h-4 w-4" /><AlertDescription className="font-semibold text-xs">{error}</AlertDescription></Alert>}
 
       {/* Step 1: Chọn Dịch vụ */}
       {step === 1 && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Bước 1: Chọn Dịch vụ</CardTitle>
-            <CardDescription>Bạn có thể chọn một hoặc nhiều dịch vụ.</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
+        <div className="rounded-3xl border border-neutral-200/80 bg-white/70 p-6 shadow-[0_6px_18px_-6px_rgba(15,15,15,0.1),0_1px_2px_rgba(0,0,0,0.02)] backdrop-blur-md transition-all duration-500 hover:border-neutral-300 hover:bg-white hover:shadow-[0_14px_30px_-8px_rgba(15,15,15,0.18)]">
+          <div className="mb-6">
+            <h2 className="text-2xl font-bold text-neutral-900 mb-1">Bước 1: Chọn Dịch vụ</h2>
+            <p className="text-sm text-neutral-500 font-medium">Bạn có thể chọn một hoặc nhiều dịch vụ để phục vụ.</p>
+          </div>
+
+          <div className="space-y-4">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input placeholder="Tìm dịch vụ..." value={searchTerm} onChange={(e) => dispatch({ type: "SET_SEARCH_TERM", payload: e.target.value })} className="pl-10" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-400" />
+              <Input 
+                placeholder="Tìm dịch vụ..." 
+                value={searchTerm} 
+                onChange={(e) => dispatch({ type: "SET_SEARCH_TERM", payload: e.target.value })} 
+                className="pl-10 rounded-xl bg-white/50 border-neutral-200/85 focus-visible:ring-primary/20 focus-visible:border-primary" 
+              />
             </div>
 
             {selectedServices.length > 0 && (
               <div className="flex justify-end">
                 <Button
                   variant="outline"
-                  className="text-sm text-primary px-2 py-4 mr-2"
-                  onClick={() => dispatch({ type: "CLEAR_SELECTED_SERVICES" })} // <-- Logic chính là ở đây
+                  className="text-xs text-primary font-bold px-3 py-1.5 rounded-xl border-neutral-200 bg-white/50 hover:bg-white"
+                  onClick={() => dispatch({ type: "CLEAR_SELECTED_SERVICES" })}
                 >
                   Hủy chọn tất cả
                 </Button>
               </div>
             )}
 
-            <div className="max-h-[400px] overflow-y-auto space-y-3 pr-2">
-              {isLoading && [...Array(5)].map((_, i) => <Skeleton key={i} className="h-16 w-full rounded-lg" />)}
-              {!isLoading && filteredServices.map((service) => (
-                <div key={service.id}>
-                  <Label
-                    htmlFor={`service-${service.id}`}
-                    className={`flex items-center p-4 border rounded-lg cursor-pointer transition-colors hover:bg-muted/50 ${selectedServices.some(s => s.id === service.id) ? 'bg-muted/80 ring-2 ring-primary' : 'bg-card'}`}
-                  >
-                    <Checkbox
-                      id={`service-${service.id}`}
-                      checked={selectedServices.some(s => s.id === service.id)}
-                      onCheckedChange={(checked) => handleServiceToggle(service, checked as boolean)}
-                      className="mr-4"
-                    />
-                    <div className="flex-1">
-                      <p className="font-medium">{service.name}</p>
-                      <p className="text-sm text-muted-foreground">{service.duration} phút</p>
-                    </div>
-                    <p className="font-semibold text-primary text-lg ml-4">
-                      {Number(service.price).toLocaleString("vi-VN")}đ
-                    </p>
-                  </Label>
-                </div>
-              ))}
+            <div className="max-h-[380px] overflow-y-auto space-y-3 p-2 scrollbar-thin">
+              {isLoading && [...Array(4)].map((_, i) => <Skeleton key={i} className="h-16 w-full rounded-2xl" />)}
+              {!isLoading && filteredServices.map((service) => {
+                const isSelected = selectedServices.some(s => s.id === service.id);
+                return (
+                  <div key={service.id}>
+                    <Label
+                      htmlFor={`service-${service.id}`}
+                      className={`flex items-center p-4 sm:p-5 border rounded-2xl cursor-pointer transition-all duration-300 ${isSelected ? 'bg-white border-primary shadow-[0_4px_16px_-4px_rgba(239,68,68,0.15)] ring-1 ring-primary' : 'bg-white/50 border-neutral-200/60 hover:bg-white hover:border-neutral-300'}`}
+                    >
+                      <Checkbox
+                        id={`service-${service.id}`}
+                        checked={isSelected}
+                        onCheckedChange={(checked) => handleServiceToggle(service, checked as boolean)}
+                        className="mr-4 rounded-md border-neutral-300 text-primary focus:ring-primary"
+                      />
+                      <div className="flex-1">
+                        <p className="font-bold text-neutral-800 text-sm sm:text-base capitalize">{service.name}</p>
+                        <p className="text-xs text-neutral-400 font-semibold">{service.duration} phút</p>
+                      </div>
+                      <p className="font-extrabold text-primary text-base sm:text-lg ml-4">
+                        {Number(service.price).toLocaleString("vi-VN")}đ
+                      </p>
+                    </Label>
+                  </div>
+                );
+              })}
             </div>
 
-            <Separator />
+            <Separator className="bg-neutral-200/50" />
 
-            <div className="flex justify-end items-baseline space-x-4">
-              <p className="text-sm text-muted-foreground">
-                Tổng cộng: <span className="font-bold text-foreground">{selectedServices.length} dịch vụ</span>
+            <div className="flex justify-between items-baseline pt-2">
+              <p className="text-xs font-bold text-neutral-400 uppercase tracking-wider">
+                Đã chọn: <span className="text-neutral-700 font-extrabold">{selectedServices.length} dịch vụ</span>
               </p>
               <div className="text-right">
-                <span className="text-sm text-muted-foreground">Thành tiền:</span>
-                <p className="text-2xl font-bold text-primary">
+                <span className="text-xs font-bold text-neutral-400 uppercase tracking-wider">Thành tiền:</span>
+                <p className="text-2xl font-extrabold text-primary">
                   {totalPrice.toLocaleString("vi-VN")}đ
                 </p>
               </div>
             </div>
 
-            <Button onClick={handleNextToDateTime} disabled={isLoading || selectedServices.length === 0} className="w-full">
+            <Button 
+              onClick={handleNextToDateTime} 
+              disabled={isLoading || selectedServices.length === 0} 
+              className="w-full rounded-full bg-primary hover:bg-primary/95 hover:shadow-md transition-all duration-300 font-bold py-6 text-white mt-2"
+            >
               Chọn Ngày & Giờ
             </Button>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       )}
 
       {/* Step 2: Chọn Ngày & Giờ */}
       {step === 2 && (
-        <Card>
-          <CardHeader>
-            <div className="flex justify-between">
-              <div><CardTitle>Bước 2: Chọn Ngày & Giờ</CardTitle></div>
-              <Button variant="ghost" size="icon" onClick={() => goBack(1)}><ArrowLeft /></Button>
+        <div className="rounded-3xl border border-neutral-200/80 bg-white/70 p-6 shadow-[0_6px_18px_-6px_rgba(15,15,15,0.1),0_1px_2px_rgba(0,0,0,0.02)] backdrop-blur-md transition-all duration-500 hover:border-neutral-300 hover:bg-white hover:shadow-[0_14px_30px_-8px_rgba(15,15,15,0.18)]">
+          <div className="flex justify-between items-center mb-6">
+            <div>
+              <h2 className="text-2xl font-bold text-neutral-900 mb-1">Bước 2: Chọn Ngày & Giờ</h2>
             </div>
-          </CardHeader>
-          <CardContent className="flex flex-col md:flex-row gap-4 items-start">
-            <CalendarComponent mode="single" selected={selectedDate} onSelect={(date) => dispatch({ type: "SET_SELECTED_DATE", payload: date })} disabled={(date) => isBefore(date, startOfToday())} className="rounded-md border" />
-            <div className="flex-1 w-full max-h-[300px] overflow-y-auto pr-2">
-              <p className="font-medium mb-2 text-center">{selectedDate ? `Các khung giờ cho ${format(selectedDate, "dd/MM/yyyy")}` : "Vui lòng chọn ngày"}</p>
+            <Button variant="ghost" size="icon" className="rounded-full hover:bg-neutral-100" onClick={() => goBack(1)}><ArrowLeft className="h-5 w-5 text-neutral-500" /></Button>
+          </div>
+
+          <div className="flex flex-col md:flex-row gap-6 items-start">
+            <div className="w-full md:w-auto rounded-2xl border border-neutral-200/60 bg-white/50 p-2 shadow-sm">
+              <CalendarComponent 
+                mode="single" 
+                selected={selectedDate} 
+                onSelect={(date) => dispatch({ type: "SET_SELECTED_DATE", payload: date })} 
+                disabled={(date) => isBefore(date, startOfToday())} 
+                className="rounded-xl border-none bg-transparent"
+              />
+            </div>
+            
+            <div className="flex-1 w-full max-h-[320px] overflow-y-auto pr-2 scrollbar-thin">
+              <p className="text-sm font-bold text-neutral-700 mb-4 text-center">
+                {selectedDate ? `Khung giờ khả dụng cho ${format(selectedDate, "dd/MM/yyyy")}` : "Vui lòng chọn ngày trên lịch"}
+              </p>
               
               {selectedDate && isLoading && !selectedTime && (
                 <div className="grid grid-cols-3 gap-2">
                   {[...Array(6)].map((_, i) => (
-                    <Skeleton key={i} className="h-10 w-full" />
+                    <Skeleton key={i} className="h-10 w-full rounded-xl" />
                   ))}
                 </div>
               )}
 
               {selectedDate && (!isLoading || selectedTime) && availableTimeSlots.length === 0 && (
-                <p className="text-sm text-red-500 text-center py-4">
-                  Không có khung giờ nào khả dụng cho ngày này. Vui lòng chọn ngày khác.
-                </p>
+                <div className="text-center py-8">
+                  <p className="text-sm font-bold text-red-500 mb-1">Cửa hàng đóng cửa hoặc hết lịch</p>
+                  <p className="text-xs text-neutral-400">Vui lòng chọn một ngày hẹn khác.</p>
+                </div>
               )}
 
               {selectedDate && (!isLoading || selectedTime) && availableTimeSlots.length > 0 && (
                 <div className="grid grid-cols-3 gap-2">
-                  {availableTimeSlots.map((time) => (
-                    <Button
-                      key={time}
-                      variant={selectedTime === time ? "default" : "outline"}
-                      onClick={() => handleTimeSelect(time)}
-                      disabled={isTimeSlotDisabled(time)}
-                    >
-                      {time}
-                    </Button>
-                  ))}
+                  {availableTimeSlots.map((time) => {
+                    const isSelected = selectedTime === time;
+                    return (
+                      <Button
+                        key={time}
+                        variant={isSelected ? "default" : "outline"}
+                        onClick={() => handleTimeSelect(time)}
+                        disabled={isTimeSlotDisabled(time)}
+                        className={`rounded-xl font-bold shadow-sm transition-all duration-200 ${isSelected ? 'bg-primary text-white shadow-md' : 'bg-white/60 hover:bg-white hover:border-neutral-300 hover:-translate-y-0.5'}`}
+                      >
+                        {time}
+                      </Button>
+                    );
+                  })}
                 </div>
               )}
 
               {availabilityInfo && (
-                <p className="text-sm text-muted-foreground mt-3 text-center">{availabilityInfo}</p>
+                <p className="text-xs text-neutral-400 font-bold mt-4 text-center">{availabilityInfo}</p>
               )}
             </div>
-          </CardContent>
-          <div className="p-6 pt-0">
-            <Button onClick={handleNextToStaff} disabled={!selectedDate || !selectedTime || isLoading} className="w-full">
+          </div>
+          
+          <div className="pt-6 border-t border-neutral-100/60 mt-6">
+            <Button 
+              onClick={handleNextToStaff} 
+              disabled={!selectedDate || !selectedTime || isLoading} 
+              className="w-full rounded-full bg-primary hover:bg-primary/95 hover:shadow-md transition-all duration-300 font-bold py-6 text-white"
+            >
               {isLoading ? "Đang tìm nhân viên..." : "Chọn Nhân viên"}
             </Button>
           </div>
-        </Card>
+        </div>
       )}
 
       {/* Step 3: Chọn Nhân viên */}
       {step === 3 && (
-        <Card>
-          <CardHeader>
-            <div className="flex justify-between">
-              <div><CardTitle>Bước 3: Chọn Nhân viên</CardTitle><CardDescription>Các nhân viên có sẵn vào lúc {selectedTime} {selectedDate && format(selectedDate, 'dd/MM/yyyy')}</CardDescription></div>
-              <Button variant="ghost" size="icon" onClick={() => goBack(2)}><ArrowLeft /></Button>
+        <div className="rounded-3xl border border-neutral-200/80 bg-white/70 p-6 shadow-[0_6px_18px_-6px_rgba(15,15,15,0.1),0_1px_2px_rgba(0,0,0,0.02)] backdrop-blur-md transition-all duration-500 hover:border-neutral-300 hover:bg-white hover:shadow-[0_14px_30px_-8px_rgba(15,15,15,0.18)]">
+          <div className="flex justify-between items-center mb-6">
+            <div>
+              <h2 className="text-2xl font-bold text-neutral-900 mb-1">Bước 3: Chọn Nhân viên</h2>
+              <p className="text-xs text-neutral-500 font-medium">Lịch trống vào lúc {selectedTime} ngày {selectedDate && format(selectedDate, 'dd/MM/yyyy')}</p>
             </div>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center justify-between rounded-lg border p-3">
+            <Button variant="ghost" size="icon" className="rounded-full hover:bg-neutral-100" onClick={() => goBack(2)}><ArrowLeft className="h-5 w-5 text-neutral-500" /></Button>
+          </div>
+
+          <div className="space-y-4">
+            <div className="flex items-center justify-between rounded-2xl border border-neutral-200/60 bg-white/50 p-4 shadow-sm">
               <div>
-                <p className="font-medium">Tự động phân công nhân viên</p>
-                <p className="text-sm text-muted-foreground">Hệ thống sẽ chọn nhân viên rảnh phù hợp nhất.</p>
+                <p className="font-bold text-neutral-800 text-sm sm:text-base">Tự động phân công nhân viên</p>
+                <p className="text-xs text-neutral-400 font-semibold">Ưu tiên kỹ thuật viên tay nghề tốt nhất.</p>
               </div>
               <Switch
                 checked={autoAssign}
@@ -473,12 +543,15 @@ export function BookingForm({ onBookingComplete }: BookingFormProps) {
                   dispatch({ type: "SET_AUTO_ASSIGN", payload: value });
                   if (value) dispatch({ type: "SET_SELECTED_STAFF_ID", payload: null });
                 }}
+                className="data-[state=checked]:bg-primary"
               />
             </div>
-            {isLoading && <Skeleton className="h-12 w-full" />}
+
+            {isLoading && <Skeleton className="h-16 w-full rounded-2xl" />}
             {!isLoading && availableStaff.length === 0 && (
-              <p className="text-sm text-muted-foreground">Không có nhân viên nào rảnh cho khung giờ này.</p>
+              <p className="text-sm font-bold text-red-500 text-center py-6">Không có nhân viên nào rảnh cho khung giờ này.</p>
             )}
+
             {!isLoading && availableStaff.map((staffMember, index) => {
               const isAssigned = autoAssign ? index === 0 : selectedStaffId === staffMember.id;
               return (
@@ -488,31 +561,33 @@ export function BookingForm({ onBookingComplete }: BookingFormProps) {
                     if (autoAssign) return;
                     dispatch({ type: "SET_SELECTED_STAFF_ID", payload: staffMember.id });
                   }}
-                  className={`p-4 border rounded-lg flex items-center justify-between transition-all ${
+                  className={`p-4 sm:p-5 border rounded-2xl flex items-center justify-between transition-all duration-300 ${
                     autoAssign
                       ? index === 0
-                        ? 'bg-muted ring-2 ring-primary border-primary/50'
-                        : 'opacity-50 cursor-not-allowed'
-                      : 'cursor-pointer hover:bg-muted/50'
+                        ? 'bg-white border-primary shadow-[0_4px_16px_-4px_rgba(239,68,68,0.15)] ring-1 ring-primary'
+                        : 'opacity-40 cursor-not-allowed border-neutral-200/60 bg-white/30'
+                      : 'cursor-pointer hover:bg-white hover:border-neutral-300 bg-white/50 border-neutral-200/60'
                   } ${
                     !autoAssign && selectedStaffId === staffMember.id
-                      ? 'bg-muted ring-2 ring-primary'
+                      ? 'bg-white border-primary shadow-[0_4px_16px_-4px_rgba(239,68,68,0.15)] ring-1 ring-primary'
                       : ''
                   }`}
                 >
                   <div className="flex items-center space-x-3">
-                    <User className="h-5 w-5 text-muted-foreground" />
+                    <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary font-bold shadow-inner">
+                      <User className="h-5 w-5" />
+                    </div>
                     <div className="flex flex-col">
-                      <span className="font-medium text-foreground">{staffMember.name}</span>
+                      <span className="font-bold text-neutral-800 text-sm sm:text-base">{staffMember.name}</span>
                       {autoAssign && index === 0 && (
-                        <span className="text-xs text-primary font-medium mt-0.5">Tự động chọn (Phù hợp nhất)</span>
+                        <span className="text-[10px] text-primary font-extrabold uppercase tracking-wider mt-0.5">Tự động chọn (Phù hợp nhất)</span>
                       )}
                     </div>
                   </div>
                   <div className="flex items-center space-x-2">
                     {staffMember.rating !== undefined && staffMember.rating > 0 && (
-                      <div className="flex items-center space-x-1 px-2.5 py-0.5 rounded-full bg-yellow-50 dark:bg-yellow-950/30 text-yellow-600 dark:text-yellow-400 border border-yellow-200 dark:border-yellow-900/50 text-xs font-semibold">
-                        <Star className="h-3 w-3 fill-current text-yellow-500" />
+                      <div className="flex items-center space-x-1 px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-600 border border-amber-500/20 text-xs font-bold shadow-sm">
+                        <Star className="h-3 w-3 fill-amber-500 text-amber-500" />
                         <span>{staffMember.rating.toFixed(1)}</span>
                       </div>
                     )}
@@ -520,48 +595,113 @@ export function BookingForm({ onBookingComplete }: BookingFormProps) {
                 </div>
               );
             })}
-            <Button onClick={() => dispatch({ type: "SET_STEP", payload: 4 })} disabled={!canProceedToInfo} className="w-full mt-4">
+
+            <Button 
+              onClick={() => dispatch({ type: "SET_STEP", payload: 4 })} 
+              disabled={!canProceedToInfo} 
+              className="w-full rounded-full bg-primary hover:bg-primary/95 hover:shadow-md transition-all duration-300 font-bold py-6 text-white mt-4"
+            >
               Điền thông tin
             </Button>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       )}
 
-      {step === 4 && <Card>
-        <CardHeader><div className="flex justify-between"><div><CardTitle>Bước 4: Thông tin khách hàng</CardTitle></div><Button variant="ghost" size="icon" onClick={() => goBack(3)}><ArrowLeft /></Button></div></CardHeader>
-        <CardContent className="space-y-6">
-          <div className="bg-muted rounded-lg space-y-2">
-            <h3 className="font-bold">Tóm tắt đặt lịch</h3>
-            <div className="text-sm space-y-1">
-              <div><strong>Dịch vụ:</strong> {selectedServices.map(s => s.name).join(', ')}</div>
-              <div><strong>Nhân viên:</strong> {assignedStaff?.name || (autoAssign ? 'Sẽ tự động phân công' : 'Chưa chọn')}</div>
-              <div><strong>Ngày & Giờ:</strong> {selectedDate && `${format(selectedDate, "dd/MM/yyyy")} lúc ${selectedTime}`}</div>
-              <div><strong>Tổng thời gian:</strong> {totalDuration} phút</div>
-              <div><strong>Tổng tiền:</strong> {totalPrice.toLocaleString("vi-VN")}đ</div>
+      {/* Step 4: Điền thông tin */}
+      {step === 4 && (
+        <div className="rounded-3xl border border-neutral-200/80 bg-white/70 p-6 shadow-[0_6px_18px_-6px_rgba(15,15,15,0.1),0_1px_2px_rgba(0,0,0,0.02)] backdrop-blur-md transition-all duration-500 hover:border-neutral-300 hover:bg-white hover:shadow-[0_14px_30px_-8px_rgba(15,15,15,0.18)]">
+          <div className="flex justify-between items-center mb-6">
+            <div>
+              <h2 className="text-2xl font-bold text-neutral-900 mb-1">Bước 4: Thông tin khách hàng</h2>
             </div>
+            <Button variant="ghost" size="icon" className="rounded-full hover:bg-neutral-100" onClick={() => goBack(3)}><ArrowLeft className="h-5 w-5 text-neutral-500" /></Button>
           </div>
-          <Separator />
-          <div className="space-y-4">
-            <div>
-              <Label htmlFor="name">Họ và tên *</Label>
-              <Input className="mt-2" id="name" value={customerName} onChange={(e) => dispatch({ type: "SET_CUSTOMER_NAME", payload: e.target.value })} placeholder="Ví dụ: nguyen khac duy" />
+
+          <div className="space-y-6">
+            {/* Summary card */}
+            <div className="bg-primary/[0.03] border border-primary/10 rounded-2xl p-5 space-y-3.5 shadow-inner">
+              <h3 className="font-extrabold text-neutral-800 text-sm uppercase tracking-wider">Tóm tắt lịch đặt</h3>
+              <div className="text-sm space-y-2 text-neutral-700">
+                <div className="flex justify-between border-b border-neutral-200/30 pb-1.5">
+                  <span className="font-semibold text-neutral-500">Dịch vụ:</span>
+                  <span className="font-bold text-neutral-900 text-right">{selectedServices.map(s => s.name).join(', ')}</span>
+                </div>
+                <div className="flex justify-between border-b border-neutral-200/30 pb-1.5">
+                  <span className="font-semibold text-neutral-500">Nhân viên:</span>
+                  <span className="font-bold text-neutral-900">{assignedStaff?.name || (autoAssign ? 'Sẽ tự động phân công' : 'Chưa chọn')}</span>
+                </div>
+                <div className="flex justify-between border-b border-neutral-200/30 pb-1.5">
+                  <span className="font-semibold text-neutral-500">Thời gian:</span>
+                  <span className="font-bold text-neutral-900">{selectedDate && `${format(selectedDate, "dd/MM/yyyy")} lúc ${selectedTime}`}</span>
+                </div>
+                <div className="flex justify-between border-b border-neutral-200/30 pb-1.5">
+                  <span className="font-semibold text-neutral-500">Tổng thời gian:</span>
+                  <span className="font-bold text-neutral-900">{totalDuration} phút</span>
+                </div>
+                <div className="flex justify-between pt-1">
+                  <span className="font-bold text-neutral-700">Thành tiền:</span>
+                  <span className="font-extrabold text-primary text-base">{totalPrice.toLocaleString("vi-VN")}đ</span>
+                </div>
+              </div>
             </div>
-            <div>
-              <Label htmlFor="phone">Số điện thoại *</Label>
-              <Input className="mt-2" id="phone" type="tel" value={customerPhone} onChange={(e) => dispatch({ type: "SET_CUSTOMER_PHONE", payload: e.target.value })} placeholder="Ví dụ: 0932105214" />
+
+            <Separator className="bg-neutral-200/50" />
+
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="name" className="text-sm font-bold text-neutral-700">Họ và tên *</Label>
+                <Input 
+                  className="mt-2 rounded-xl bg-white/50 border-neutral-200/85 focus-visible:ring-primary/20 focus-visible:border-primary" 
+                  id="name" 
+                  value={customerName} 
+                  onChange={(e) => dispatch({ type: "SET_CUSTOMER_NAME", payload: e.target.value })} 
+                  placeholder="Ví dụ: Nguyễn Văn A" 
+                />
+              </div>
+              <div>
+                <Label htmlFor="phone" className="text-sm font-bold text-neutral-700">Số điện thoại *</Label>
+                <Input 
+                  className="mt-2 rounded-xl bg-white/50 border-neutral-200/85 focus-visible:ring-primary/20 focus-visible:border-primary" 
+                  id="phone" 
+                  type="tel" 
+                  value={customerPhone} 
+                  onChange={(e) => dispatch({ type: "SET_CUSTOMER_PHONE", payload: e.target.value })} 
+                  placeholder="Ví dụ: 0932105214" 
+                />
+              </div>
+              <div>
+                <Label htmlFor="email" className="text-sm font-bold text-neutral-700">Email (để nhận liên kết đánh giá và cập nhật lịch)</Label>
+                <Input 
+                  className="mt-2 rounded-xl bg-white/50 border-neutral-200/85 focus-visible:ring-primary/20 focus-visible:border-primary" 
+                  id="email" 
+                  type="email" 
+                  value={customerEmail} 
+                  onChange={(e) => dispatch({ type: "SET_CUSTOMER_EMAIL", payload: e.target.value })} 
+                  placeholder="Ví dụ: nguyen@example.com" 
+                />
+              </div>
+              <div>
+                <Label htmlFor="notes" className="text-sm font-bold text-neutral-700">Ghi chú</Label>
+                <Textarea 
+                  className="mt-2 rounded-xl bg-white/50 border-neutral-200/85 focus-visible:ring-primary/20 focus-visible:border-primary resize-none h-24" 
+                  id="notes" 
+                  value={notes} 
+                  onChange={(e) => dispatch({ type: "SET_NOTES", payload: e.target.value })} 
+                  placeholder="Ví dụ: đắp vẽ hình hoa mai, cần kỹ thuật viên vẽ móng kỹ..." 
+                />
+              </div>
             </div>
-            <div>
-              <Label htmlFor="email">Email</Label>
-              <Input className="mt-2" id="email" type="email" value={customerEmail} onChange={(e) => dispatch({ type: "SET_CUSTOMER_EMAIL", payload: e.target.value })} placeholder="Ví dụ: email@example.com" />
-            </div>
-            <div>
-              <Label htmlFor="notes">Ghi chú</Label>
-              <Textarea className="mt-2" id="notes" value={notes} onChange={(e) => dispatch({ type: "SET_NOTES", payload: e.target.value })} placeholder="Ví dụ: abc" />
-            </div>
+
+            <Button 
+              onClick={handleSubmit} 
+              disabled={isLoading} 
+              className="w-full rounded-full bg-primary hover:bg-primary/95 hover:shadow-md transition-all duration-300 font-bold py-6 text-white mt-4"
+            >
+              {isLoading ? 'Đang gửi thông tin...' : 'Xác nhận đặt lịch'}
+            </Button>
           </div>
-          <Button onClick={handleSubmit} disabled={isLoading} className="w-full">{isLoading ? 'Đang xử lý...' : 'Xác nhận đặt lịch'}</Button>
-        </CardContent>
-      </Card>}
+        </div>
+      )}
     </div>
-  )
+  );
 }
