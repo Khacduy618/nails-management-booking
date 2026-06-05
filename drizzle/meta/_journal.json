@@ -43,6 +43,13 @@
       "when": 1780217037001,
       "tag": "0005_late_violations",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1780370275886,
+      "tag": "0006_daffy_maximus",
+      "breakpoints": true
     }
   ]
 }

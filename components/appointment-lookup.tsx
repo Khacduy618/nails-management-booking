@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Search, Calendar, Clock, CheckCircle, XCircle, AlertCircle, Trash2, Loader2 } from "lucide-react"
+import { Search, Calendar, Clock, CheckCircle, XCircle, AlertCircle, Trash2, Loader2, Star, Sparkles } from "lucide-react"
 import { useState } from "react"
 import { toast } from "sonner"
 import { ConfirmDialog } from "@/components/ui/confirm-dialog"
@@ -22,6 +22,11 @@ interface Appointment {
   date: string; // "yyyy-MM-dd"
   time: string; // "HH:mm:ss"
   status: AppointmentStatus;
+  durationAtBooking: number;
+  reviewToken: string | null;
+  staffId: number | null;
+  staffName: string;
+  review: { rating: number; comment?: string } | null;
 }
 
 const statusConfig: Record<AppointmentStatus, { label: string; variant: "secondary" | "default" | "outline" | "destructive"; icon: React.ElementType }> = {
@@ -42,6 +47,29 @@ export function AppointmentLookup() {
   const [otpDialogOpen, setOtpDialogOpen] = useState(false)
   const [selectedAppointmentId, setSelectedAppointmentId] = useState<number | null>(null)
   const [isLoadingOTP, setIsLoadingOTP] = useState(false)
+  const [sendingEmailId, setSendingEmailId] = useState<number | null>(null)
+
+  const handleSendReviewEmail = async (appointmentId: number) => {
+    setSendingEmailId(appointmentId)
+    try {
+      const res = await fetch("/api/reviews/send-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ appointmentId }),
+      })
+
+      const result = await res.json()
+      if (!res.ok || !result.success) {
+        throw new Error(result.error?.message || "Không thể gửi email đánh giá.")
+      }
+
+      toast.success("Liên kết đánh giá đã được gửi tới Email của bạn.")
+    } catch (err: any) {
+      toast.error(err.message)
+    } finally {
+      setSendingEmailId(null)
+    }
+  }
 
   const handleSearch = async () => {
     if (!phoneNumber.trim() || !/^[0-9]{10,11}$/.test(phoneNumber.replace(/\s/g, ""))) {
@@ -229,6 +257,69 @@ export function AppointmentLookup() {
                               )}
                             </Button>
                           </ConfirmDialog>
+                        )}
+
+                        {/* Review Section */}
+                        {appointment.status === "completed" && (
+                          <div className="mt-4 pt-4 border-t border-dashed space-y-3">
+                            {appointment.review ? (
+                              <div className="bg-primary/5 p-3 rounded-lg border border-primary/20 space-y-2">
+                                <div className="flex items-center justify-between text-sm">
+                                  <span className="font-semibold text-primary flex items-center gap-1">
+                                    <Sparkles className="h-4 w-4" />
+                                    Đánh giá của bạn:
+                                  </span>
+                                  <div className="flex gap-0.5">
+                                    {[1, 2, 3, 4, 5].map((star) => (
+                                      <Star
+                                        key={star}
+                                        className={`h-4 w-4 ${
+                                          star <= appointment.review!.rating
+                                            ? "fill-amber-400 text-amber-400"
+                                            : "text-muted-foreground/30"
+                                        }`}
+                                      />
+                                    ))}
+                                  </div>
+                                </div>
+                                {appointment.review.comment && (
+                                  <p className="text-xs text-muted-foreground italic bg-background p-2.5 rounded border border-dashed truncate">
+                                    "{appointment.review.comment}"
+                                  </p>
+                                )}
+                              </div>
+                            ) : (
+                              <div className="space-y-2">
+                                <div className="flex items-center justify-between text-sm">
+                                  <span className="text-xs text-muted-foreground">
+                                    Nhân viên: <strong className="text-foreground">{appointment.staffName}</strong>
+                                  </span>
+                                </div>
+                                <p className="text-xs text-muted-foreground">
+                                  Lịch hẹn đã hoàn thành. Hãy đánh giá nhân viên phục vụ của bạn để chúng tôi cải thiện chất lượng dịch vụ.
+                                </p>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="w-full text-primary border-primary/30 hover:bg-primary/5 hover:text-primary transition-all font-semibold"
+                                  onClick={() => handleSendReviewEmail(appointment.id)}
+                                  disabled={sendingEmailId === appointment.id}
+                                >
+                                  {sendingEmailId === appointment.id ? (
+                                    <>
+                                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                      Đang gửi email...
+                                    </>
+                                  ) : (
+                                    <>
+                                      <Sparkles className="h-4 w-4 mr-2" />
+                                      Gửi liên kết đánh giá qua Email
+                                    </>
+                                  )}
+                                </Button>
+                              </div>
+                            )}
+                          </div>
                         )}
                       </div>
                     </CardContent>

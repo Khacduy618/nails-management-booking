@@ -691,3 +691,200 @@ export async function sendAdminCancellationNotification(data: AppointmentEmailDa
     }
 }
 
+interface ReviewEmailData {
+    appointmentId: number
+    customerName: string
+    customerEmail: string
+    appointmentDate: string
+    appointmentTime: string
+    services: Array<{ name: string; price: string }>
+    staffName: string
+    reviewToken: string
+}
+
+export async function sendReviewRequestEmail(data: ReviewEmailData) {
+    try {
+        const {
+            appointmentId,
+            customerName,
+            customerEmail,
+            appointmentDate,
+            appointmentTime,
+            services,
+            staffName,
+            reviewToken,
+        } = data
+
+        const escape = (s: string) => s
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;')
+
+        const dateObj = new Date(`${appointmentDate}T${appointmentTime}`)
+        const formattedDate = format(dateObj, 'EEEE, dd/MM/yyyy', { locale: vi })
+
+        const reviewUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/review?token=${reviewToken}`
+
+        const htmlContent = `
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đánh Gia Dịch Vụ - K-Tay Nails</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f9f9f9;
+        }
+        .email-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+            font-weight: bold;
+        }
+        .content {
+            padding: 30px 20px;
+        }
+        .greeting {
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+        .section {
+            margin-bottom: 25px;
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .info-row:last-child {
+            border-bottom: none;
+        }
+        .label {
+            font-weight: bold;
+            color: #555;
+        }
+        .value {
+            color: #333;
+        }
+        .cta-button {
+            display: inline-block;
+            padding: 12px 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white !important;
+            text-decoration: none;
+            border-radius: 4px;
+            margin-top: 20px;
+            font-weight: bold;
+        }
+        .footer {
+            background-color: #f5f5f5;
+            padding: 20px;
+            text-align: center;
+            font-size: 12px;
+            color: #666;
+            border-top: 1px solid #ddd;
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <div class="header">
+            <h1>✨ Cảm Ơn Quý Khách! ✨</h1>
+        </div>
+        <div class="content">
+            <div class="greeting">
+                <p>Xin chào <strong>${escape(customerName)}</strong>,</p>
+                <p>Cảm ơn bạn đã lựa chọn dịch vụ của K-Tay Nails. Lịch hẹn của bạn đã hoàn thành tốt đẹp. Ý kiến đánh giá của bạn là động lực vô cùng quý giá giúp chúng tôi nâng cao chất lượng dịch vụ!</p>
+            </div>
+
+            <div class="section">
+                <div style="font-weight: bold; margin-bottom: 8px; color: #667eea;">📝 TÓM TẮT LỊCH HẸN</div>
+                <div class="info-row">
+                    <span class="label">Mã lịch hẹn:</span>
+                    <span class="value">#${appointmentId}</span>
+                </div>
+                <div class="info-row">
+                    <span class="label">Ngày làm:</span>
+                    <span class="value">${formattedDate}</span>
+                </div>
+                <div class="info-row">
+                    <span class="label">Nhân viên:</span>
+                    <span class="value">${escape(staffName)}</span>
+                </div>
+                <div class="info-row">
+                    <span class="label">Dịch vụ:</span>
+                    <span class="value">${services.map(s => escape(s.name)).join(', ')}</span>
+                </div>
+            </div>
+
+            <p style="font-size: 15px; text-align: center; font-weight: bold; color: #764ba2; margin-top: 25px;">
+                Đánh giá chất lượng phục vụ của ${escape(staffName)} ngay:
+            </p>
+
+            <center>
+                <a href="${reviewUrl}" class="cta-button">
+                    Đánh Giá Nhân Viên
+                </a>
+            </center>
+
+            <p style="margin-top: 25px; font-size: 13px; color: #888; text-align: center;">
+                * Lưu ý: Đường dẫn đánh giá này là bảo mật và chỉ hoạt động cho lịch hẹn này của bạn. Đường dẫn sẽ có hiệu lực 1 giờ sau khi dịch vụ của bạn kết thúc.
+            </p>
+        </div>
+        <div class="footer">
+            <p style="margin: 0; font-weight: bold;">K-Tay Nails - Dịch Vụ Chăm Sóc Sắc Đẹp</p>
+            <p style="margin-top: 5px; color: #999;">© 2024 K-Tay Nails. Tất cả các quyền được bảo lưu.</p>
+        </div>
+    </div>
+</body>
+</html>
+`
+
+        const transporter = getMailTransporter()
+        if (!transporter) {
+            console.warn('[EMAIL] SMTP config missing, skipped sending review request email.')
+            return false
+        }
+
+        const subject = `Đánh giá dịch vụ của nhân viên ${staffName} tại K-Tay Nails`
+
+        await transporter.sendMail({
+            from: smtpFrom || 'K-Tay Nails <no-reply@ktaynails.com>',
+            to: customerEmail,
+            subject,
+            html: htmlContent,
+        })
+
+        console.log('[EMAIL] Review request email sent to:', customerEmail)
+        return true
+    } catch (error) {
+        console.error('[EMAIL] Error sending review request email:', error)
+        return false
+    }
+}
+
+

@@ -53,23 +53,50 @@ export async function GET(request: NextRequest) {
 
     const userAppointments = await db.query.appointments.findMany({
       where: eq(appointments.customerPhone, cleanedPhone),
+      with: {
+        review: true,
+        appointmentServices: {
+          with: {
+            staff: {
+              with: {
+                user: {
+                  columns: { name: true }
+                }
+              }
+            }
+          }
+        }
+      },
       columns: {
         id: true,
         appointmentDate: true,
         appointmentTime: true,
         status: true,
+        durationAtBooking: true,
+        reviewToken: true,
       },
       orderBy: [desc(appointments.appointmentDate), desc(appointments.appointmentTime)],
     })
 
     logInfo(`GET /api/appointments: Found ${userAppointments.length} appointments for phone ${cleanedPhone}`, { phone: cleanedPhone, count: userAppointments.length })
 
-    const formatted: AppointmentDTO[] = userAppointments.map((apt: any) => {
+    const formatted = userAppointments.map((apt: any) => {
+      const staffMember = apt.appointmentServices?.[0]?.staff;
+      const staffName = staffMember?.user?.name || "Nhân viên";
+      const staffId = staffMember?.id || null;
       return {
         id: apt.id,
         date: apt.appointmentDate,
         time: apt.appointmentTime,
         status: apt.status,
+        durationAtBooking: apt.durationAtBooking,
+        reviewToken: apt.reviewToken,
+        staffId,
+        staffName,
+        review: apt.review ? {
+          rating: apt.review.rating,
+          comment: apt.review.comment,
+        } : null,
       }
     })
 
