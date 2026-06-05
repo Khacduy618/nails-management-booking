@@ -10,10 +10,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
         const customerId = parseInt(id, 10)
 
         if (isNaN(customerId)) {
-            return NextResponse.json(
-                fail('INVALID_INPUT', 'Invalid customer ID'),
-                { status: 400 }
-            )
+            return fail('INVALID_INPUT', 'Invalid customer ID', 400)
         }
 
         console.log('[API] /api/admin/customers/[id] called with id:', customerId)
@@ -26,10 +23,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
             .then((result: any[]) => result[0])
 
         if (!customer) {
-            return NextResponse.json(
-                fail('NOT_FOUND', 'Customer not found'),
-                { status: 404 }
-            )
+            return fail('NOT_FOUND', 'Customer not found', 404)
         }
 
         // Lấy tất cả lịch hẹn của khách hàng
@@ -145,9 +139,6 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
     } catch (error) {
         console.error('[API] ERROR in customer details:', error)
         const errorMsg = error instanceof Error ? error.message : String(error)
-        return NextResponse.json(
-            fail('FETCH_ERROR', errorMsg),
-            { status: 500 }
-        )
+        return fail('FETCH_ERROR', errorMsg, 500)
     }
 }

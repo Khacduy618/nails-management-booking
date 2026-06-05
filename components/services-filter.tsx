@@ -202,12 +202,13 @@ interface ServicesFilterProps {
   onDurationChange: (value: string[]) => void;
   priceRange: number[];
   onPriceRangeChange: (value: number[]) => void;
+  onClearAll: () => void; // Parent xử lý clear để dùng được bounds thực từ API
 
   // Props động từ API meta
   availableCategories?: { id: number; name: string; count: number }[];
   availableDurations?: { id: string; label: string; count: number }[];
   priceBounds?: { min: number; max: number };
-  isLoading: boolean; // Trạng thái loading cho các tùy chọn bộ lọc
+  isLoading: boolean;
 }
 
 export function ServicesFilter({
@@ -219,7 +220,8 @@ export function ServicesFilter({
   onDurationChange,
   priceRange,
   onPriceRangeChange,
-  availableCategories = [], // Gán giá trị mặc định để tránh lỗi
+  onClearAll,
+  availableCategories = [],
   availableDurations = [],
   priceBounds = { min: 0, max: 1000000 },
   isLoading,
@@ -242,19 +244,27 @@ export function ServicesFilter({
     onDurationChange(newDurations);
   };
 
-  const clearAllFilters = () => {
-    onSearchTermChange("");
-    onCategoryChange([]);
-    onDurationChange([]);
-    onPriceRangeChange([priceBounds.min, priceBounds.max]); // Reset về khoảng giá đầy đủ
-  };
-
+  // clearAllFilters được xử lý bởi parent thông qua onClearAll
   const hasActiveFilters =
     searchTerm !== "" ||
     selectedCategories.length > 0 ||
     selectedDurations.length > 0 ||
     priceRange[0] > priceBounds.min ||
     priceRange[1] < priceBounds.max;
+
+  // Slider chỉ render khi priceRange đã được sync với bounds thực từ API
+  const isPriceSynced =
+    priceRange[0] >= priceBounds.min && priceRange[1] <= priceBounds.max;
+
+  // Tính step động: chia range thành ~20 bước, làm tròn đến số đẹp
+  const computedStep = (() => {
+    const range = priceBounds.max - priceBounds.min;
+    if (range <= 0) return 1;
+    const rawStep = range / 20;
+    // Làm tròn đến lũy thừa 10 gần nhất (1, 10, 100, 1000, 10000, 50000...)
+    const magnitude = Math.pow(10, Math.floor(Math.log10(rawStep)));
+    return Math.max(1, Math.round(rawStep / magnitude) * magnitude);
+  })();
 
   return (
     <>
@@ -329,32 +339,41 @@ export function ServicesFilter({
           </CardContent>
         </Card>
 
-        {/* Price Range */}
-        <Card>
-          <CardHeader className="pb-3"><CardTitle>Khoảng giá</CardTitle></CardHeader>
-          <CardContent className="space-y-4 pt-2">
-            {isLoading ? (
+        {/* Price Range — chỉ hiển thị khi có ít nhất 2 mức giá khác nhau */}
+        {isLoading ? (
+          <Card>
+            <CardHeader className="pb-3"><CardTitle>Khoảng giá</CardTitle></CardHeader>
+            <CardContent className="space-y-4 pt-2">
               <Skeleton className="h-12 w-full" />
-            ) : (
-              <>
-                <Slider 
-                  value={priceRange} 
-                  onValueChange={onPriceRangeChange} 
-                  min={priceBounds.min}
-                  max={priceBounds.max}
-                  step={50000} 
-                />
-                <div className="flex justify-between text-sm text-muted-foreground">
-                  <span>{priceRange[0].toLocaleString("vi-VN")}đ</span>
-                  <span>{priceRange[1].toLocaleString("vi-VN")}đ</span>
-                </div>
-              </>
-            )}
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        ) : priceBounds.min < priceBounds.max ? (
+          <Card>
+            <CardHeader className="pb-3"><CardTitle>Khoảng giá</CardTitle></CardHeader>
+            <CardContent className="space-y-4 pt-2">
+              {!isPriceSynced ? (
+                <Skeleton className="h-12 w-full" />
+              ) : (
+                <>
+                  <Slider
+                     value={priceRange}
+                     onValueChange={onPriceRangeChange}
+                     min={priceBounds.min}
+                     max={priceBounds.max}
+                     step={computedStep}
+                  />
+                  <div className="flex justify-between text-sm text-muted-foreground">
+                    <span>{priceRange[0].toLocaleString("vi-VN")}đ</span>
+                    <span>{priceRange[1].toLocaleString("vi-VN")}đ</span>
+                  </div>
+                </>
+              )}
+            </CardContent>
+          </Card>
+        ) : null}
 
         {/* Clear Filters */}
-        {hasActiveFilters && <Button variant="outline" onClick={clearAllFilters} className="w-full"><X className="h-4 w-4 mr-2" />Xóa bộ lọc</Button>}
+        {hasActiveFilters && <Button variant="outline" onClick={onClearAll} className="w-full"><X className="h-4 w-4 mr-2" />Xóa bộ lọc</Button>}
       </div>
     </>
   )

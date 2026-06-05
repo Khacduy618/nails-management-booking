@@ -86,12 +86,18 @@ export async function GET(request: NextRequest) {
         conditions.push(sql.join(durationConditions, sql` OR `));
       }
     }
-    // Condition: Filter by price range
+    // Condition: Filter by price range (cast để tránh so sánh string lexicographic)
     if (minPrice) {
-      conditions.push(gte(services.price, minPrice));
+      const minNum = Number(minPrice);
+      if (!isNaN(minNum) && minNum > 0) {
+        conditions.push(gte(services.price, String(minNum)));
+      }
     }
     if (maxPrice) {
-      conditions.push(lte(services.price, maxPrice));
+      const maxNum = Number(maxPrice);
+      if (!isNaN(maxNum) && maxNum > 0) {
+        conditions.push(lte(services.price, String(maxNum)));
+      }
     }
 
     // Condition: Filter by search term (name or description)
