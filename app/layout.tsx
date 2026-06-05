@@ -7,6 +7,7 @@ import { Suspense } from "react"
 import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider } from "@/components/providers/session-provider"
 import "./globals.css"
+import '@aejkatappaja/phantom-ui/ssr.css';
 
 const siteIcon = "/fav.png"
 

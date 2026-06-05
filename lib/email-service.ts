@@ -236,19 +236,19 @@ export async function sendConfirmationEmail(data: AppointmentEmailData) {
             <div class="section">
                 <div class="section-title">📅 THÔNG TIN LỊCH HẸN</div>
                 <div class="info-row">
-                    <span class="label">Ngày:</span>
+                    <span class="label">Ngày: </span>
                     <span class="value">${formattedDate}</span>
                 </div>
                 <div class="info-row">
-                    <span class="label">Giờ:</span>
+                    <span class="label">Giờ: </span>
                     <span class="value">${appointmentTime}</span>
                 </div>
                 <div class="info-row">
-                    <span class="label">Nhân Viên:</span>
+                    <span class="label">Nhân Viên: </span>
                     <span class="value">${escape(staffName)}</span>
                 </div>
                 <div class="info-row">
-                    <span class="label">Thời Lượng:</span>
+                    <span class="label">Thời Lượng: </span>
                     <span class="value">${totalDuration} phút</span>
                 </div>
             </div>
@@ -258,14 +258,14 @@ export async function sendConfirmationEmail(data: AppointmentEmailData) {
                 <div class="services-list">
                     ${services.map(s => `
                     <div class="service-item">
-                        <span>${escape(s.name)} :</span>
+                        <span>${escape(s.name)}: </span>
                         <span>${Number(s.price).toLocaleString('vi-VN')} ₫</span>
                     </div>
                     `).join('')}
                 </div>
                 <div class="total-section">
                     <div class="total-row">
-                        <span>TỔNG TIỀN:</span>
+                        <span>TỔNG TIỀN: </span>
                         <span>${totalAmount.toLocaleString('vi-VN')} ₫</span>
                     </div>
                 </div>
@@ -274,15 +274,15 @@ export async function sendConfirmationEmail(data: AppointmentEmailData) {
             <div class="section">
                 <div class="section-title">👤 THÔNG TIN LIÊN HỆ</div>
                 <div class="info-row">
-                    <span class="label">Họ và Tên:</span>
+                    <span class="label">Họ và Tên: </span>
                     <span class="value">${escape(customerName)}</span>
                 </div>
                 <div class="info-row">
-                    <span class="label">Số Điện Thoại:</span>
+                    <span class="label">Số Điện Thoại: </span>
                     <span class="value">${escape(customerPhone)}</span>
                 </div>
                 <div class="info-row">
-                    <span class="label">Email:</span>
+                    <span class="label">Email: </span>
                     <span class="value">${escape(customerEmail)}</span>
                 </div>
             </div>
