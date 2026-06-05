@@ -9,7 +9,7 @@
     "lint": "next lint",
     "start": "next start",
     "db:generate": "drizzle-kit generate --config=drizzle.config.ts",
-    "db:migrate": "tsx --env-file .env ./scripts/migrate.ts",
+    "db:migrate": "tsx ./scripts/migrate.ts",
     "db:push": "drizzle-kit push --config=drizzle.config.ts",
     "db:seed": "tsx --env-file .env ./seed.ts",
     "test": "vitest run",
