@@ -98,7 +98,31 @@ export async function GET(request: NextRequest) {
           columns: { name: true },
         },
       },
-      columns: { id: true },
+      columns: { id: true, rating: true },
+    })
+
+    // Truy vấn số lượng lịch hẹn hoạt động trong ngày hẹn yêu cầu của từng nhân viên
+    const appointmentCountsResult = await db
+      .select({
+        staffId: appointmentServices.staffId,
+        count: sql<number>`count(distinct ${appointmentServices.appointmentId})`.mapWith(Number),
+      })
+      .from(appointmentServices)
+      .leftJoin(appointments, eq(appointmentServices.appointmentId, appointments.id))
+      .where(
+        and(
+          inArray(appointmentServices.staffId, availableStaffIds),
+          eq(appointments.appointmentDate, startDateStr),
+          not(eq(appointments.status, "cancelled"))
+        )
+      )
+      .groupBy(appointmentServices.staffId)
+
+    const appointmentCountMap = new Map<number, number>()
+    appointmentCountsResult.forEach((row: { staffId: number | null; count: number }) => {
+      if (row.staffId !== null) {
+        appointmentCountMap.set(row.staffId, row.count)
+      }
     })
 
     // Lọc nhân viên có lịch làm hợp lệ
@@ -125,10 +149,25 @@ export async function GET(request: NextRequest) {
       return requestTime >= scheduleStart && requestTime < scheduleEnd
     })
 
-    const availableStaffDetails = staffWithValidSchedule.map((s: any) => ({
-      id: s.id,
-      name: s.user?.name ?? "", // return empty string if somehow missing, frontend can handle fallback
-    }))
+    const availableStaffDetails = staffWithValidSchedule.map((s: any) => {
+      const count = appointmentCountMap.get(s.id) ?? 0
+      const ratingVal = s.rating ? parseFloat(s.rating) : 0
+      return {
+        id: s.id,
+        name: s.user?.name ?? "",
+        rating: ratingVal,
+        appointmentCount: count,
+        appointment_count_today: count,
+      }
+    })
+
+    // Sắp xếp: rating DESC, sau đó đến appointmentCount ASC
+    availableStaffDetails.sort((a: { rating: number; appointmentCount: number }, b: { rating: number; appointmentCount: number }) => {
+      if (b.rating !== a.rating) {
+        return b.rating - a.rating
+      }
+      return a.appointmentCount - b.appointmentCount
+    })
 
     return ok({ staff: availableStaffDetails })
   } catch (error) {

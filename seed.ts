@@ -72,6 +72,7 @@ async function seed() {
             userId: staffUser1[0].id,
             position: 'Senior Technician',
             status: 'active',
+            rating: '4.80',
             joinDate: new Date().toISOString().split('T')[0],
         }).returning();
         console.log('✅ Staff profile created');
