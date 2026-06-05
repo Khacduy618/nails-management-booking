@@ -162,6 +162,23 @@ export const appointmentServices = pgTable('appointment_services', {
   workShare: numeric('work_share', { precision: 5, scale: 2 }).default('100.00'),
 })
 
+// --- Bảng OTP Tokens (Mã xác thực hủy lịch hẹn) ---
+export const otpTokens = pgTable('otp_tokens', {
+  appointmentId: integer('appointment_id').primaryKey().references(() => appointments.id, { onDelete: 'cascade' }),
+  code: varchar('code', { length: 6 }).notNull(),
+  expiresAt: timestamp('expires_at').notNull(),
+  createdAt: timestamp('created_at').defaultNow(),
+})
+
+// --- Bảng Admin Notifications (Thông báo quản trị) ---
+export const adminNotifications = pgTable('admin_notifications', {
+  id: serial('id').primaryKey(),
+  title: varchar('title', { length: 255 }).notNull(),
+  message: text('message').notNull(),
+  isRead: boolean('is_read').default(false).notNull(),
+  createdAt: timestamp('created_at').defaultNow(),
+})
+
 // --- RELATIONS ---
 export const usersRelations = relations(users, ({ one, many }) => ({
   staff: one(staff),
@@ -241,6 +258,7 @@ export const appointmentsRelations = relations(appointments, ({ one, many }) => 
     references: [payrolls.id],
   }),
   appointmentServices: many(appointmentServices),
+  otpToken: one(otpTokens),
 }))
 
 export const appointmentServicesRelations = relations(appointmentServices, ({ one }) => ({
@@ -255,5 +273,12 @@ export const appointmentServicesRelations = relations(appointmentServices, ({ on
   staff: one(staff, {
     fields: [appointmentServices.staffId],
     references: [staff.id],
+  }),
+}))
+
+export const otpTokensRelations = relations(otpTokens, ({ one }) => ({
+  appointment: one(appointments, {
+    fields: [otpTokens.appointmentId],
+    references: [appointments.id],
   }),
 }))
