@@ -106,7 +106,7 @@ export async function PUT(
             );
         }
 
-        const result = await db.transaction(async (tx) => {
+        const result = await db.transaction(async (tx: any) => {
             // Check if salary record exists
             const existing = await tx.query.staffBaseSalaries.findFirst({
                 where: eq(staffBaseSalaries.staffId, staffId),

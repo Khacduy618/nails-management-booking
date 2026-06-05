@@ -2,7 +2,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { services, serviceCategories } from "@/db/schema";
 // SỬA Ở ĐÂY: Thêm import gte và lte
-import { eq, and, sql, gte, gt, lte, inArray } from "drizzle-orm";
+import { eq, and, sql, gte, gt, lte, inArray, desc } from "drizzle-orm";
 import { getClientKey, rateLimit, LIMITS, rateLimitResponse } from "@/lib/rate-limit";
 
 // Validate and parse query parameters
@@ -29,7 +29,7 @@ function parseQueryParams(searchParams: URLSearchParams) {
 export async function GET(request: NextRequest) {
   try {
     const key = `catalog:${getClientKey(request as unknown as Request)}`
-    const rl = rateLimit(key, LIMITS.catalog)
+    const rl = await rateLimit(key, LIMITS.catalog)
     if (!rl.allowed) {
       return NextResponse.json({ success: false, error: "Too many requests" }, { status: 429, headers: rateLimitResponse(rl.remaining, rl.resetMs) as any })
     }
@@ -57,9 +57,9 @@ export async function GET(request: NextRequest) {
       // Drizzle chưa hỗ trợ join trực tiếp trong `findMany`'s `where`, ta dùng `db.select()...`
       // Tuy nhiên, để đơn giản và giữ `with`, ta sẽ query ID trước.
       const categoriesRecords = await db.query.serviceCategories.findMany({
-        where: (categories, { inArray }) => inArray(categories.name, categoryNames)
+        where: inArray(serviceCategories.name, categoryNames)
       });
-      const categoryIds = categoriesRecords.map(c => c.id);
+      const categoryIds = categoriesRecords.map((c: any) => c.id);
 
       if (categoryIds.length > 0) {
         conditions.push(inArray(services.categoryId, categoryIds));
@@ -126,7 +126,7 @@ export async function GET(request: NextRequest) {
       where: whereClause,
       limit: limit,
       offset: (page - 1) * limit,
-      orderBy: (services, { desc }) => [desc(services.popular), desc(services.id)], // Ưu tiên dịch vụ popular
+      orderBy: [desc(services.popular), desc(services.id)], // Ưu tiên dịch vụ popular
       with: {
         category: {
           columns: {

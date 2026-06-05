@@ -11,7 +11,7 @@ const CACHE_TTL = 5 * 60 * 1000; // Cache 5 phút
 export async function GET(request: NextRequest) {
   try {
     const key = `stats-public:${getClientKey(request as unknown as Request)}`;
-    const rl = rateLimit(key, LIMITS.catalog);
+    const rl = await rateLimit(key, LIMITS.catalog);
     if (!rl.allowed) {
       return NextResponse.json(
         { success: false, error: "Too many requests" },

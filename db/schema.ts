@@ -13,6 +13,7 @@ import {
   primaryKey,
   pgEnum,
   jsonb,
+  index,
 } from 'drizzle-orm/pg-core'
 
 export const roleEnum = pgEnum('role', ['customer', 'staff', 'admin'])
@@ -55,8 +56,6 @@ export const customers = pgTable('customers', {
   phone: varchar('phone', { length: 20 }).notNull().unique(),
   name: varchar('name', { length: 255 }).notNull(),
   email: varchar('email', { length: 255 }),
-  serviceCount: integer('service_count').default(0).notNull(),
-  totalAmount: numeric('total_amount', { precision: 12, scale: 2 }).default('0.00').notNull(),
   lastAppointmentDate: date('last_appointment_date'),
   notes: text('notes'),
   createdAt: timestamp('created_at').defaultNow(),
@@ -148,7 +147,11 @@ export const appointments = pgTable('appointments', {
   isOvertime: boolean('is_overtime').default(false),
   createdAt: timestamp('created_at').defaultNow(),
   updatedAt: timestamp('updated_at').defaultNow().$onUpdate(() => new Date()),
-})
+}, (table) => ({
+  appointmentDateIdx: index('appointments_appointment_date_idx').on(table.appointmentDate),
+  customerPhoneIdx: index('appointments_customer_phone_idx').on(table.customerPhone),
+  statusIdx: index('appointments_status_idx').on(table.status),
+}))
 
 // --- Bảng Appointment Services (Chi tiết dịch vụ trong lịch hẹn) ---
 export const appointmentServices = pgTable('appointment_services', {
@@ -160,7 +163,10 @@ export const appointmentServices = pgTable('appointment_services', {
   commissionPercentage: numeric('commission_percentage', { precision: 5, scale: 2 }),
   workShare: numeric('work_share', { precision: 5, scale: 2 }).default('100.00'),
   payrollId: integer('payroll_id').references(() => payrolls.id, { onDelete: 'set null' }),
-})
+}, (table) => ({
+  staffIdIdx: index('appointment_services_staff_id_idx').on(table.staffId),
+  appointmentIdIdx: index('appointment_services_appointment_id_idx').on(table.appointmentId),
+}))
 
 // --- Bảng OTP Tokens (Mã xác thực hủy lịch hẹn) ---
 export const otpTokens = pgTable('otp_tokens', {

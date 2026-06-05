@@ -13,6 +13,8 @@ const isAppRole = (role: unknown): role is AppRole =>
 export const authOptions: NextAuthOptions = {
   session: {
     strategy: "jwt",
+    maxAge: 8 * 60 * 60, // 8 hours activity limit
+    updateAge: 2 * 60 * 60, // 2 hours update interval
   },
   pages: {
     signIn: "/admin/login",
@@ -73,10 +75,26 @@ export const authOptions: NextAuthOptions = {
         if (isAppRole(role)) {
           token.role = role
         }
+        token.createdAt = Math.floor(Date.now() / 1000)
+      }
+      // Absolute session expiration check (24 hours)
+      const now = Math.floor(Date.now() / 1000)
+      if (token.createdAt && typeof token.createdAt === "number") {
+        const age = now - token.createdAt
+        if (age > 24 * 60 * 60) {
+          // Token exceeded absolute lifetime, invalidate it
+          return {}
+        }
       }
       return token
     },
     async session({ session, token }) {
+      if (!token.id || !token.role) {
+        return {
+          ...session,
+          user: undefined,
+        } as any
+      }
       if (session.user) {
         if (typeof token.id === "string") {
           session.user.id = token.id

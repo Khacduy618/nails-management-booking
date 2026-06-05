@@ -14,7 +14,7 @@ async function seed() {
         await db.delete(services);
         await db.delete(serviceCategories);
 
-        const hashedPassword = await bcrypt.hash('password123', 10);
+        const hashedPassword = await bcrypt.hash('password123', 12);
 
         // 1. Create Categories
         const categories = await db.insert(serviceCategories).values([
@@ -81,7 +81,7 @@ async function seed() {
 
         // 6. Link Staff to Services (Skills) so availability matches
         await db.insert(staffServices).values(
-            createdServices.map(service => ({
+            createdServices.map((service: any) => ({
                 staffId: staffMember[0].id,
                 serviceId: service.id,
             }))

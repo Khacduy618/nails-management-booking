@@ -79,7 +79,7 @@ export async function GET(request: NextRequest) {
 
         // Tính chi tiết hoa hồng - Xác định OT dựa trên thời gian hoàn thành
         let totalCommission = 0
-        const commissions = commissionDetails.map((item) => {
+        const commissions = commissionDetails.map((item: any) => {
             const workShare = Number(item.workShare) || 100
             const price = Number(item.priceAtBooking) || 0
             const appointmentTime = item.appointmentTime as unknown as string
@@ -261,7 +261,7 @@ export async function PUT(request: NextRequest) {
                 )
 
             let totalCommission = 0
-            commissionDetails.forEach((item) => {
+            commissionDetails.forEach((item: any) => {
                 const workShare = Number(item.workShare) || 100
                 const price = Number(item.priceAtBooking) || 0
                 const appointmentTime = item.appointmentTime as unknown as string

@@ -42,7 +42,7 @@ export async function GET(request: NextRequest) {
       return fail("INVALID_INPUT", "Invalid date or time", 400)
     }
 
-    const totalDuration = servicesInfo.reduce((sum, svc) => sum + svc.duration, 0)
+    const totalDuration = servicesInfo.reduce((sum: number, svc: any) => sum + svc.duration, 0)
     const end = addMinutes(start, totalDuration)
     const startDateStr = format(start, "yyyy-MM-dd")
     const startTimeStr = format(start, "HH:mm:ss")
@@ -57,7 +57,7 @@ export async function GET(request: NextRequest) {
       .as("capable_staff")
 
     const capableStaffIdsResult = await db.select({ id: capableStaffSubquery.staffId }).from(capableStaffSubquery)
-    const capableStaffIds = capableStaffIdsResult.map((record) => record.id)
+    const capableStaffIds = capableStaffIdsResult.map((record: any) => record.id)
 
     if (!capableStaffIds.length) {
       return ok({ staff: [] })
@@ -78,9 +78,9 @@ export async function GET(request: NextRequest) {
       )
 
     const busyStaff = await busyStaffQuery
-    const busyStaffIds = new Set(busyStaff.map((item) => item.staffId).filter((id): id is number => id !== null))
+    const busyStaffIds = new Set(busyStaff.map((item: any) => item.staffId).filter((id: any): id is number => id !== null))
 
-    const availableStaffIds = capableStaffIds.filter((id) => !busyStaffIds.has(id))
+    const availableStaffIds = capableStaffIds.filter((id: any) => !busyStaffIds.has(id))
     if (!availableStaffIds.length) {
       return ok({ staff: [] })
     }
@@ -102,7 +102,7 @@ export async function GET(request: NextRequest) {
     })
 
     // Lọc nhân viên có lịch làm hợp lệ
-    const staffWithValidSchedule = staffWithSchedules.filter((s) => {
+    const staffWithValidSchedule = staffWithSchedules.filter((s: any) => {
       if (s.staffSchedules.length === 0) {
         // Không có schedule cho ngày này - coi là không làm
         return false
@@ -125,7 +125,7 @@ export async function GET(request: NextRequest) {
       return requestTime >= scheduleStart && requestTime < scheduleEnd
     })
 
-    const availableStaffDetails = staffWithValidSchedule.map((s) => ({
+    const availableStaffDetails = staffWithValidSchedule.map((s: any) => ({
       id: s.id,
       name: s.user?.name ?? "", // return empty string if somehow missing, frontend can handle fallback
     }))

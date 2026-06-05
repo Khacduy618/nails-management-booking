@@ -1,19 +1,18 @@
-declare module "@aejkatappaja/phantom-ui/ssr.css";
-declare module "*.css";
+import type { HTMLAttributes, DetailedHTMLProps } from 'react'
 
-declare global {
+type PhantomUIProps = DetailedHTMLProps<HTMLAttributes<HTMLElement>, HTMLElement> & {
+  loading?: string
+  'data-shimmer-ignore'?: string
+  'data-shimmer-no-children'?: string
+  'data-shimmer-width'?: string
+  'data-shimmer-height'?: string
+  class?: string
+}
+
+declare module 'react' {
   namespace JSX {
     interface IntrinsicElements {
-      "phantom-ui": React.DetailedHTMLProps<
-        React.HTMLAttributes<HTMLElement> & {
-          loading?: string;
-          "data-shimmer-ignore"?: string;
-          "data-shimmer-no-children"?: string;
-          "data-shimmer-width"?: string;
-          "data-shimmer-height"?: string;
-        },
-        HTMLElement
-      >
+      'phantom-ui': PhantomUIProps
     }
   }
 }

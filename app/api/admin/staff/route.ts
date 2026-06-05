@@ -89,7 +89,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(
       {
         success: true,
-        data: rows.map((row) => ({
+        data: rows.map((row: any) => ({
           id: row.id,
           name: row.userName,
           email: row.userEmail ?? '',
@@ -281,7 +281,7 @@ export async function POST(request: NextRequest) {
     const normalizedEmail = body.email.trim().toLowerCase()
     const normalizedPhone = phoneDigits
 
-    const result = await db.transaction(async (tx) => {
+    const result = await db.transaction(async (tx: any) => {
       // 1. Create user first
       const userResult = await tx.insert(users).values({
         name: normalizedName,

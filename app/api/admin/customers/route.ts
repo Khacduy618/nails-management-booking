@@ -1,6 +1,6 @@
 import { db } from '@/db'
-import { customers } from '@/db/schema'
-import { desc, asc, like, or, count } from 'drizzle-orm'
+import { customers, appointments, appointmentServices } from '@/db/schema'
+import { desc, asc, like, or, count, sql } from 'drizzle-orm'
 import { NextRequest, NextResponse } from 'next/server'
 import { ok, fail } from '@/lib/api-response'
 import { getToken } from 'next-auth/jwt'
@@ -17,9 +17,22 @@ export async function GET(request: NextRequest) {
 
         console.log('[API] Params:', { page, limit, search, sort })
 
+        const totalAmountSql = sql<string>`COALESCE((
+            SELECT SUM(price_at_booking)::numeric 
+            FROM ${appointments} 
+            WHERE ${appointments.customerId} = ${customers.id} AND ${appointments.status} != 'cancelled'
+        ), '0.00')`
+
+        const serviceCountSql = sql<number>`COALESCE((
+            SELECT COUNT(asv.id)::int
+            FROM ${appointmentServices} asv
+            JOIN ${appointments} apt ON asv.appointment_id = apt.id
+            WHERE apt.customer_id = ${customers.id} AND apt.status != 'cancelled'
+        ), 0)`
+
         let orderBy: any = desc(customers.createdAt)
-        if (sort === 'serviceCount') orderBy = desc(customers.serviceCount)
-        else if (sort === 'totalAmount') orderBy = desc(customers.totalAmount)
+        if (sort === 'serviceCount') orderBy = desc(serviceCountSql)
+        else if (sort === 'totalAmount') orderBy = desc(totalAmountSql)
         else if (sort === 'name') orderBy = asc(customers.name)
 
         // Build WHERE clause - search in name, phone, or email
@@ -50,7 +63,21 @@ export async function GET(request: NextRequest) {
         const offset = (page - 1) * limit
         console.log('[API] Fetching with offset:', offset, 'limit:', limit)
 
-        let dataQuery = db.select().from(customers).orderBy(orderBy)
+        let dataQuery = db
+            .select({
+                id: customers.id,
+                name: customers.name,
+                phone: customers.phone,
+                email: customers.email,
+                notes: customers.notes,
+                lastAppointmentDate: customers.lastAppointmentDate,
+                createdAt: customers.createdAt,
+                updatedAt: customers.updatedAt,
+                totalAmount: totalAmountSql,
+                serviceCount: serviceCountSql,
+            })
+            .from(customers)
+            .orderBy(orderBy)
         if (whereConditions) {
             dataQuery = dataQuery.where(whereConditions) as any
         }

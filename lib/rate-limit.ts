@@ -1,3 +1,6 @@
+import { Redis } from '@upstash/redis'
+import { Ratelimit } from '@upstash/ratelimit'
+
 type WindowConfig = {
     windowMs: number
     max: number
@@ -5,6 +8,16 @@ type WindowConfig = {
 
 type Hit = {
     time: number
+}
+
+let redis: Redis | null = null
+const ratelimitCache = new Map<string, Ratelimit>()
+
+if (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN) {
+    redis = new Redis({
+        url: process.env.UPSTASH_REDIS_REST_URL,
+        token: process.env.UPSTASH_REDIS_REST_TOKEN,
+    })
 }
 
 const buckets = new Map<string, Hit[]>()
@@ -17,14 +30,34 @@ function prune(list: Hit[], now: number, windowMs: number) {
 }
 
 export function getClientKey(req: Request): string {
-    // Prefer forwarded for, fallback to client IP if available via headers (behind proxies)
     const forwarded = req.headers.get('x-forwarded-for') || ''
     const ip = forwarded.split(',')[0].trim() || req.headers.get('x-real-ip') || 'unknown'
     const ua = req.headers.get('user-agent') || ''
     return `${ip}|${ua}`
 }
 
-export function rateLimit(key: string, cfg: WindowConfig) {
+export async function rateLimit(key: string, cfg: WindowConfig) {
+    if (redis) {
+        const cacheKey = `${cfg.windowMs}:${cfg.max}`
+        let limiter = ratelimitCache.get(cacheKey)
+        if (!limiter) {
+            const seconds = Math.ceil(cfg.windowMs / 1000)
+            limiter = new Ratelimit({
+                redis,
+                limiter: Ratelimit.slidingWindow(cfg.max, `${seconds} s`),
+                analytics: true,
+            })
+            ratelimitCache.set(cacheKey, limiter)
+        }
+        const result = await limiter.limit(key)
+        return {
+            allowed: result.success,
+            remaining: result.remaining,
+            resetMs: result.reset - Date.now(),
+        }
+    }
+
+    // Fallback to in-memory for dev/testing
     const now = Date.now()
     const list = buckets.get(key) ?? []
     const pruned = prune(list, now, cfg.windowMs)
@@ -37,9 +70,9 @@ export function rateLimit(key: string, cfg: WindowConfig) {
 }
 
 export const LIMITS = {
-    lookupTight: { windowMs: 5 * 60 * 1000, max: 10 }, // 10 req / 5m per client
-    booking: { windowMs: 10 * 60 * 1000, max: 6 }, // 6 bookings / 10m
-    catalog: { windowMs: 60 * 1000, max: 60 }, // 60 req / 1m
+    lookupTight: { windowMs: 5 * 60 * 1000, max: 10 },
+    booking: { windowMs: 10 * 60 * 1000, max: 6 },
+    catalog: { windowMs: 60 * 1000, max: 60 },
 }
 
 export function rateLimitResponse(remaining: number, resetMs: number) {
@@ -48,3 +81,4 @@ export function rateLimitResponse(remaining: number, resetMs: number) {
         'X-RateLimit-Reset': String(Math.ceil(resetMs / 1000)),
     }
 }
+
