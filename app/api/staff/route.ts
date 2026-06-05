@@ -35,13 +35,16 @@ export async function GET(request: NextRequest) {
     const transformed = staffList.map((s: typeof staffList[number]) => {
       const email = s.user?.email || 'unknown@example.com'
       const phone = s.user?.phone || ''
-      const namePrefix = email.split('@')[0]
+      const fullName = s.user?.name || email.split('@')[0]
+      const nameParts = fullName.trim().split(/\s+/)
+      const firstName = nameParts[0] || fullName
+      const lastName = nameParts.slice(1).join(' ') || ''
 
       return {
         id: s.id,
-        firstName: namePrefix,
-        lastName: '',
-        name: namePrefix,
+        firstName: firstName,
+        lastName: lastName,
+        name: fullName,
         role: s.position || 'Staff',
         position: s.position || 'Staff',
         bio: s.experience,

@@ -1,7 +1,7 @@
 import { type NextRequest } from "next/server"
 import { db } from "@/db"
 import { appointments, reviews, staff, appointmentServices } from "@/db/schema"
-import { eq, and, sql } from "drizzle-orm"
+import { eq, and, sql, desc } from "drizzle-orm"
 import { addMinutes, format } from "date-fns"
 import { ok, fail } from "@/lib/api-response"
 import { logError, logInfo } from "@/lib/logger"
@@ -12,7 +12,54 @@ export async function GET(request: NextRequest) {
     const token = searchParams.get("token")
 
     if (!token) {
-      return fail("MISSING_TOKEN", "Review token is required", 400)
+      const limit = Math.max(1, Math.min(20, parseInt(searchParams.get("limit") || "4", 10)))
+      const publicReviews = await db.query.reviews.findMany({
+        orderBy: desc(reviews.createdAt),
+        limit: limit,
+        with: {
+          appointment: {
+            columns: {
+              customerName: true,
+              appointmentDate: true,
+            },
+            with: {
+              appointmentServices: {
+                with: {
+                  service: {
+                    columns: {
+                      name: true,
+                    }
+                  }
+                }
+              }
+            }
+          },
+          staff: {
+            with: {
+              user: {
+                columns: {
+                  name: true,
+                }
+              }
+            }
+          }
+        }
+      })
+
+      const transformed = publicReviews.map((r: any) => {
+        const serviceNames = r.appointment?.appointmentServices?.map((as: any) => as.service?.name) || [];
+        return {
+          id: r.id,
+          name: r.appointment?.customerName || "Khách hàng",
+          service: serviceNames.join(" & ") || "Dịch vụ làm móng",
+          content: r.comment || "Dịch vụ rất tốt, nhân viên thân thiện!",
+          rating: r.rating,
+          createdAt: r.createdAt,
+          staffName: r.staff?.user?.name || "Nhân viên",
+        }
+      })
+
+      return ok({ data: transformed })
     }
 
     const appointment = await db.query.appointments.findFirst({
