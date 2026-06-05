@@ -4,7 +4,7 @@ import type { ComponentType } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
-import { LayoutDashboard, Scissors, Calendar, Users, BarChart3, Settings, Menu, DollarSign } from "lucide-react"
+import { LayoutDashboard, Scissors, Calendar, Users, BarChart3, Settings, Menu, DollarSign, PieChart } from "lucide-react"
 import { useSession } from "next-auth/react"
 
 type NavItem = {
@@ -23,6 +23,7 @@ export const adminNavigation: NavItem[] = [
   { name: "Nhân viên", href: "/admin/staff", icon: Users, roles: ["admin"] },
   { name: "Lương", href: "/admin/payroll", icon: DollarSign, roles: ["admin"] },
   { name: "Thống kê doanh thu", href: "/admin/revenue", icon: BarChart3, roles: ["admin"] },
+  { name: "Thống kê & Phân tích", href: "/admin/statistics", icon: PieChart, roles: ["admin"] },
   // { name: "Cài đặt", href: "/admin/settings", icon: Settings, roles: ["admin"] },
 ]
 

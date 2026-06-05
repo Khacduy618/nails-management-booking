@@ -187,6 +187,32 @@ describe('Business Logic Tests', () => {
             expect(getCompletedAppointments('1')).toBe(2)
             expect(getCompletedAppointments('2')).toBe(1)
         })
+
+        it('should sort staff by rating DESC and appointmentCount ASC', () => {
+            const availableStaff = [
+                { id: 1, name: 'Sarah', rating: 4.5, appointmentCount: 2 },
+                { id: 2, name: 'John', rating: 4.8, appointmentCount: 3 },
+                { id: 3, name: 'Emma', rating: 4.5, appointmentCount: 1 },
+                { id: 4, name: 'David', rating: 4.8, appointmentCount: 1 },
+            ]
+
+            const sorted = [...availableStaff].sort((a, b) => {
+                if (b.rating !== a.rating) {
+                    return b.rating - a.rating
+                }
+                return a.appointmentCount - b.appointmentCount
+            })
+
+            // Expected order:
+            // 1. David (rating 4.8, appointmentCount 1)
+            // 2. John (rating 4.8, appointmentCount 3)
+            // 3. Emma (rating 4.5, appointmentCount 1)
+            // 4. Sarah (rating 4.5, appointmentCount 2)
+            expect(sorted[0].id).toBe(4)
+            expect(sorted[1].id).toBe(2)
+            expect(sorted[2].id).toBe(3)
+            expect(sorted[3].id).toBe(1)
+        })
     })
 
     describe('Category and Service Organization', () => {
