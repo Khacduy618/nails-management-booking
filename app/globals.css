@@ -484,7 +484,7 @@
 .premium-page-container {
   background-color: var(--hero-bg);
   position: relative;
-  overflow: hidden;
+  overflow-x: clip;
 }
 
 .premium-page-bg {

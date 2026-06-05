@@ -4,7 +4,7 @@ import { Bell, User, LogOut, Loader2, Menu, Check } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useSession, signOut } from "next-auth/react"
 import { useState, useEffect, useRef } from "react"
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
+import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet"
 import { AdminSidebar, adminNavigation } from "@/components/admin/admin-sidebar"
 import { usePathname } from "next/navigation"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
@@ -15,6 +15,7 @@ const PAGE_TITLE_MAP: Record<string, string> = {
   "/admin/categories": "Danh mục dịch vụ",
   "/admin/services": "Dịch vụ",
   "/admin/appointments": "Lịch hẹn",
+  "/admin/schedule": "Lịch cửa hàng",
   "/admin/customers": "Khách hàng",
   "/admin/staff": "Nhân viên",
   "/admin/payroll": "Bảng lương",
@@ -150,57 +151,58 @@ export function AdminHeader() {
   const headerTitle = matchFromMap ? PAGE_TITLE_MAP[matchFromMap] : navMatch?.name || "Bảng điều khiển"
 
   return (
-    <header className="flex h-16 items-center justify-between border-b border-border bg-background px-4 sm:px-6">
+    <header className="flex h-16 items-center justify-between border-b border-neutral-200/40 bg-white/65 backdrop-blur-md px-4 sm:px-6">
       <div className="flex items-center gap-3">
         <Sheet open={isMobileNavOpen} onOpenChange={setIsMobileNavOpen}>
           <SheetTrigger asChild>
             <Button
               variant="ghost"
               size="icon"
-              className="lg:hidden"
+              className="lg:hidden hover:bg-neutral-100/60"
               aria-label="Mở menu điều hướng"
             >
               <Menu className="h-5 w-5" />
             </Button>
           </SheetTrigger>
-          <SheetContent side="left" className="w-72 p-0 sm:max-w-none">
+          <SheetContent side="left" className="w-72 p-0 sm:max-w-none border-none">
+            <span className="sr-only"><SheetTitle>Menu điều hướng</SheetTitle></span>
             <AdminSidebar variant="mobile" onNavigate={() => setIsMobileNavOpen(false)} />
           </SheetContent>
         </Sheet>
-        <h2 className="text-base font-semibold text-foreground sm:text-lg">{headerTitle}</h2>
+        <h2 className="text-base font-extrabold text-neutral-800 tracking-tight sm:text-lg">{headerTitle}</h2>
       </div>
 
       <div className="flex items-center gap-3 sm:gap-4">
         {/* Chuông thông báo dạng Popover */}
         <Popover>
           <PopoverTrigger asChild>
-            <Button variant="ghost" size="icon" title="Thông báo" className="relative">
-              <Bell className="h-5 w-5" />
+            <Button variant="ghost" size="icon" title="Thông báo" className="relative hover:bg-neutral-100/60 rounded-xl transition-all active:scale-95">
+              <Bell className="h-5 w-5 text-neutral-650" />
               {unreadCount > 0 && (
-                <span className="absolute right-1.5 top-1.5 flex h-2 w-2 rounded-full bg-red-500 ring-2 ring-background animate-pulse" />
+                <span className="absolute right-2 top-2 flex h-2 w-2 rounded-full bg-red-505 ring-2 ring-white animate-pulse animate-duration-1000" />
               )}
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-80 p-0" align="end">
-            <div className="flex items-center justify-between border-b px-4 py-2.5 bg-muted/30">
-              <h3 className="font-semibold text-sm text-foreground">Thông báo ({unreadCount})</h3>
+          <PopoverContent className="w-80 p-0 rounded-2xl border border-neutral-200/50 bg-white/95 backdrop-blur-md shadow-xl overflow-hidden" align="end">
+            <div className="flex items-center justify-between border-b border-neutral-200/40 px-4 py-3 bg-neutral-50/50">
+              <h3 className="font-bold text-sm text-neutral-800">Thông báo ({unreadCount})</h3>
               {unreadCount > 0 && (
-                <Button variant="ghost" className="text-xs h-auto p-1 text-primary hover:bg-transparent" onClick={handleMarkAllAsRead}>
+                <Button variant="ghost" className="text-xs h-auto py-1 px-2 text-primary hover:bg-neutral-100/60 rounded-lg" onClick={handleMarkAllAsRead}>
                   Đọc tất cả
                 </Button>
               )}
             </div>
-            <div className="max-h-72 overflow-y-auto divide-y divide-border">
+            <div className="max-h-72 overflow-y-auto divide-y divide-neutral-100">
               {notifications.length === 0 ? (
                 <div className="py-8 text-center text-xs text-muted-foreground">
                   Không có thông báo mới nào
                 </div>
               ) : (
                 notifications.map((item) => (
-                  <div key={item.id} className="p-3.5 text-xs hover:bg-muted/30 transition-colors flex justify-between items-start gap-2.5">
-                    <div className="space-y-1 flex-1">
-                      <p className="font-semibold text-foreground">{item.title}</p>
-                      <p className="text-muted-foreground leading-relaxed">{item.message}</p>
+                  <div key={item.id} className="p-4 text-xs hover:bg-neutral-50/50 transition-colors flex justify-between items-start gap-2.5">
+                    <div className="space-y-1 flex-1 min-w-0">
+                      <p className="font-bold text-neutral-800 leading-tight">{item.title}</p>
+                      <p className="text-neutral-500 leading-relaxed">{item.message}</p>
                       <p className="text-[10px] text-muted-foreground">
                         {new Date(item.createdAt).toLocaleTimeString("vi-VN", { hour: '2-digit', minute: '2-digit' })} - {new Date(item.createdAt).toLocaleDateString("vi-VN")}
                       </p>
@@ -208,11 +210,11 @@ export function AdminHeader() {
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-6 w-6 text-muted-foreground hover:text-primary shrink-0 hover:bg-muted"
+                      className="h-6 w-6 text-neutral-400 hover:text-primary hover:bg-neutral-100 rounded-md shrink-0"
                       onClick={() => handleMarkAsRead(item.id)}
                       title="Đánh dấu đã đọc"
                     >
-                      <Check className="h-3 w-3" />
+                      <Check className="h-3.5 w-3.5" />
                     </Button>
                   </div>
                 ))
@@ -220,20 +222,21 @@ export function AdminHeader() {
             </div>
           </PopoverContent>
         </Popover>
-
-        <div className="hidden items-center gap-3 rounded-full border px-3 py-1 sm:flex">
-          <div className="rounded-full bg-muted p-2 text-muted-foreground">
+ 
+        <div className="hidden items-center gap-2.5 rounded-2xl border border-neutral-200/60 bg-white/80 px-3 py-1 sm:flex shadow-[0_2px_8px_-2px_rgba(15,15,15,0.05)]">
+          <div className="rounded-xl bg-neutral-100 p-1.5 text-neutral-600">
             <User className="h-4 w-4" aria-hidden="true" />
           </div>
-          <div className="text-sm leading-tight">
-            <p className="font-medium">{userDisplay}</p>
-            <p className="text-muted-foreground text-xs capitalize">{roleLabel}</p>
+          <div className="text-xs leading-tight min-w-0">
+            <p className="font-bold text-neutral-800 truncate">{userDisplay}</p>
+            <p className="text-muted-foreground text-[10px] uppercase font-semibold tracking-wider mt-0.5">{roleLabel}</p>
           </div>
         </div>
 
         <Button
           variant="ghost"
           size="icon"
+          className="hover:bg-neutral-100/60 rounded-xl transition-all active:scale-95 text-neutral-600"
           onClick={handleSignOut}
           disabled={isSigningOut}
           title="Đăng xuất"

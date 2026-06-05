@@ -54,6 +54,7 @@ export function CustomerDetailsDialog({
         return (
             <Dialog open={isOpen} onOpenChange={onOpenChange}>
                 <DialogContent className="max-w-4xl max-h-[90vh]">
+                    <DialogTitle className="sr-only">Đang tải chi tiết khách hàng</DialogTitle>
                     <div className="flex items-center justify-center py-8">
                         <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
                     </div>
@@ -107,7 +108,7 @@ export function CustomerDetailsDialog({
 
                     {/* Tab: Thông tin khách hàng */}
                     <TabsContent value="info" className="space-y-4 mt-4">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
                                 <h3 className="font-semibold text-sm text-gray-600">Tên khách hàng</h3>
                                 <p className="text-lg font-medium">{customer.name}</p>
@@ -137,7 +138,7 @@ export function CustomerDetailsDialog({
 
                         <div className="border-t pt-4 mt-4">
                             <h3 className="font-semibold mb-3">Thống kê</h3>
-                            <div className="grid grid-cols-4 gap-4">
+                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                                 <div className="bg-blue-50 p-3 rounded-lg">
                                     <p className="text-gray-600 text-sm">Tổng lịch hẹn</p>
                                     <p className="text-2xl font-bold text-blue-600">

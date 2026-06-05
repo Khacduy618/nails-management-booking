@@ -3,10 +3,9 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
-import { Search, ChevronLeft, ChevronRight, Eye } from 'lucide-react'
+import { Search, ChevronLeft, ChevronRight, Eye, Users } from 'lucide-react'
 import { toast } from 'sonner'
 import { ApiCustomer, PaginationInfo } from '@/types'
 import { CustomerDetailsDialog } from './customer-details-dialog'
@@ -83,11 +82,7 @@ export function CustomersManagement() {
                 signal: abortControllerRef.current.signal,
             })
 
-            console.log('[Component] Response status:', res.status)
-
             const result = await res.json()
-
-            console.log('[Component] Response data:', result)
 
             // Check if request was aborted BEFORE calling setState
             if (abortControllerRef.current.signal.aborted) {
@@ -96,7 +91,6 @@ export function CustomersManagement() {
             }
 
             if (result.success) {
-                console.log('[Component] Setting customers:', result.data.length)
                 setCustomers(result.data)
                 setPagination(result.meta)
                 setLoading(false)
@@ -127,7 +121,6 @@ export function CustomersManagement() {
     // Initial fetch when component mounts
     useEffect(() => {
         if (isMounted) {
-            console.log('[Component] Component mounted, fetching customers...')
             fetchCustomers(1)
         }
     }, [isMounted, fetchCustomers])
@@ -135,7 +128,6 @@ export function CustomersManagement() {
     // Re-fetch when search or sort changes
     useEffect(() => {
         if (isMounted && debouncedSearch) {
-            console.log('[Component] Search changed, refetching...', { debouncedSearch, sortBy })
             fetchCustomers(1)
         }
     }, [debouncedSearch, isMounted, fetchCustomers])
@@ -143,7 +135,6 @@ export function CustomersManagement() {
     // Re-fetch when sort changes
     useEffect(() => {
         if (isMounted && sortBy !== 'createdAt') {
-            console.log('[Component] Sort changed, refetching...', { sortBy })
             fetchCustomers(1)
         }
     }, [sortBy, isMounted, fetchCustomers])
@@ -181,13 +172,11 @@ export function CustomersManagement() {
     if (!isMounted) {
         return (
             <div className="w-full space-y-4">
-                <Card>
-                    <CardContent className="p-[10px] sm:p-6">
-                        <div className="flex justify-center items-center py-8">
-                            <p className="text-muted-foreground">Đang tải...</p>
-                        </div>
-                    </CardContent>
-                </Card>
+                <div className="rounded-3xl border border-neutral-200/50 bg-white/70 p-6 shadow-sm backdrop-blur-md">
+                    <div className="flex justify-center items-center py-8">
+                        <p className="text-sm font-semibold text-neutral-500">Đang tải...</p>
+                    </div>
+                </div>
             </div>
         )
     }
@@ -195,97 +184,111 @@ export function CustomersManagement() {
     return (
         <div className="w-full space-y-4">
             {/* Search and Filter Section */}
-            <Card>
-                <CardContent className="px-6 sm:px-4">
-                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                        {/* Search Input */}
-                        <div className="relative">
-                            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-                            <Input
-                                placeholder="Tìm kiếm theo tên, số điện thoại hoặc email..."
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                                className="pl-10"
-                            />
-                        </div>
-
-                        {/* Sort Select */}
-                        <Select value={sortBy} onValueChange={setSortBy}>
-                            <SelectTrigger className="w-full">
-                                <SelectValue placeholder="Sắp xếp theo..." />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="createdAt">Mới Nhất</SelectItem>
-                                <SelectItem value="serviceCount">Số Dịch Vụ (Cao Nhất)</SelectItem>
-                                <SelectItem value="totalAmount">Tổng Tiêu Xài (Cao Nhất)</SelectItem>
-                                <SelectItem value="name">Tên A-Z</SelectItem>
-                            </SelectContent>
-                        </Select>
+            <div className="rounded-3xl border border-neutral-200/50 bg-white/70 p-5 shadow-[0_8px_30px_-6px_rgba(15,15,15,0.06)] backdrop-blur-md">
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                    {/* Search Input */}
+                    <div className="relative">
+                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                        <Input
+                            placeholder="Tìm kiếm theo tên, số điện thoại hoặc email..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="pl-10 h-10 rounded-xl border-neutral-200/80 bg-white/50 focus:ring-primary/20"
+                        />
                     </div>
-                </CardContent>
-            </Card>
+
+                    {/* Sort Select */}
+                    <Select value={sortBy} onValueChange={setSortBy}>
+                        <SelectTrigger className="w-full h-10 rounded-xl border-neutral-200/80 bg-white/50 focus:ring-primary/20">
+                            <SelectValue placeholder="Sắp xếp theo..." />
+                        </SelectTrigger>
+                        <SelectContent className="rounded-xl border-neutral-200/80">
+                            <SelectItem value="createdAt" className="rounded-lg">Mới Nhất</SelectItem>
+                            <SelectItem value="serviceCount" className="rounded-lg">Số Dịch Vụ (Cao Nhất)</SelectItem>
+                            <SelectItem value="totalAmount" className="rounded-lg">Tổng Tiêu Xài (Cao Nhất)</SelectItem>
+                            <SelectItem value="name" className="rounded-lg">Tên A-Z</SelectItem>
+                        </SelectContent>
+                    </Select>
+                </div>
+            </div>
 
             {/* Customers Table/Grid */}
-            <Card>
-                <CardHeader className="p-[10px] sm:p-6">
-                    <CardTitle>Danh Sách Khách Hàng</CardTitle>
-                    <CardDescription>
-                        Tổng số khách hàng: {pagination.total}
-                    </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-3 p-[10px] sm:p-6">
+            <div className="rounded-3xl border border-neutral-200/50 bg-white/70 p-6 shadow-[0_8px_30px_-6px_rgba(15,15,15,0.06)] backdrop-blur-md">
+                <div className="mb-4 flex items-center gap-3">
+                    <div className="rounded-2xl bg-primary/10 p-2.5">
+                        <Users className="h-5 w-5 text-primary" />
+                    </div>
+                    <div>
+                        <h2 className="text-lg font-bold text-neutral-800 tracking-tight">Danh Sách Khách Hàng</h2>
+                        <p className="text-[10px] text-muted-foreground font-semibold mt-0.5 uppercase tracking-wider">
+                            Tổng số khách hàng: {pagination.total}
+                        </p>
+                    </div>
+                </div>
+
+                <div className="space-y-3 mt-4">
                     {loading ? (
                         <div className="flex justify-center items-center py-8">
-                            <p className="text-muted-foreground">Đang tải...</p>
+                            <p className="text-sm font-semibold text-neutral-500">Đang tải...</p>
                         </div>
                     ) : customers.length === 0 ? (
-                        <div className="flex justify-center items-center py-8">
-                            <p className="text-muted-foreground">Chưa có khách hàng nào</p>
+                        <div className="flex justify-center items-center py-8 border border-dashed border-neutral-200 rounded-2xl bg-white/40">
+                            <p className="text-sm font-semibold text-neutral-500">Chưa có khách hàng nào</p>
                         </div>
                     ) : (
-                        <div className="max-h-[600px] space-y-3 overflow-y-auto">
+                        <div className="max-h-[600px] space-y-3 overflow-y-auto pr-1">
                             {customers.map((customer) => {
                                 const rank = getRankBadge(customer.serviceCount)
                                 return (
                                     <div
                                         key={customer.id}
-                                        className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors"
+                                        className="flex items-center justify-between p-4 border border-neutral-200/40 rounded-2xl hover:bg-neutral-50/50 hover:border-neutral-300/60 bg-white/50 transition-all duration-300 shadow-sm"
                                     >
-                                        <div className="flex-1">
+                                        <div className="flex-1 min-w-0">
                                             <div className="flex items-center gap-3">
-                                                <div>
-                                                    <p className="font-medium">{customer.name}</p>
-                                                    <p className="text-sm text-muted-foreground">{customer.phone}</p>
-                                                    {customer.email && (
-                                                        <p className="text-sm text-muted-foreground">{customer.email}</p>
-                                                    )}
+                                                <div className="min-w-0">
+                                                    <p className="font-bold text-neutral-800 truncate text-sm sm:text-base capitalize">{customer.name}</p>
+                                                    <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 text-xs text-neutral-500 font-semibold mt-1">
+                                                        <span>📱 {customer.phone}</span>
+                                                        {customer.email && (
+                                                            <span className="hidden sm:inline">|</span>
+                                                        )}
+                                                        {customer.email && (
+                                                            <span className="truncate">📧 {customer.email}</span>
+                                                        )}
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
 
-                                        <div className="flex items-center gap-4 text-right">
+                                        <div className="flex items-center gap-4 text-right shrink-0">
                                             <div>
-                                                <p className="text-sm font-medium">{customer.serviceCount} dịch vụ</p>
-                                                <p className="text-sm text-muted-foreground">
+                                                <p className="text-xs font-bold text-neutral-500 uppercase tracking-wider">{customer.serviceCount} dịch vụ</p>
+                                                <p className="text-sm font-black text-orange-600 mt-0.5">
                                                     {formatCurrency(customer.totalAmount)} ₫
                                                 </p>
                                             </div>
 
                                             {rank && (
-                                                <Badge variant={rank.variant} className="whitespace-nowrap">
+                                                <Badge className={
+                                                    rank.label === 'VIP' ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white font-extrabold px-3.5 py-1 rounded-full' :
+                                                    rank.label === 'Gold' ? 'bg-gradient-to-r from-amber-500 to-yellow-500 text-white font-extrabold px-3 py-1 rounded-full' :
+                                                    'bg-neutral-100 border-neutral-300 text-neutral-600 font-bold px-3 py-1 rounded-full'
+                                                }>
                                                     {rank.label}
                                                 </Badge>
                                             )}
 
                                             <Button
                                                 size="sm"
-                                                variant="ghost"
+                                                variant="outline"
+                                                className="h-9 w-9 rounded-xl p-0 hover:bg-neutral-50 border-neutral-200"
                                                 onClick={() => {
                                                     setSelectedCustomerId(customer.id)
                                                     setDetailsDialogOpen(true)
                                                 }}
                                             >
-                                                <Eye className="w-4 h-4" />
+                                                <Eye className="w-4 h-4 text-neutral-500" />
                                             </Button>
                                         </div>
                                     </div>
@@ -296,9 +299,9 @@ export function CustomersManagement() {
 
                     {/* Pagination */}
                     {!loading && customers.length > 0 && (
-                        <div className="flex items-center justify-between mt-6 px-2 pt-4 border-t">
-                            <div className="text-sm text-muted-foreground">
-                                Trang {pagination.page} / {pagination.totalPages} | Tổng: {pagination.total} khách hàng
+                        <div className="flex items-center justify-between mt-6 pt-4 border-t border-neutral-200/60">
+                            <div className="text-xs font-bold text-neutral-500">
+                                Trang {pagination.page} / {pagination.totalPages} | Tổng số {pagination.total} khách hàng
                             </div>
                             <div className="flex gap-2">
                                 <Button
@@ -306,6 +309,7 @@ export function CustomersManagement() {
                                     disabled={pagination.page === 1}
                                     variant="outline"
                                     size="sm"
+                                    className="h-8 rounded-lg"
                                 >
                                     <ChevronLeft className="w-4 h-4" />
                                 </Button>
@@ -314,14 +318,15 @@ export function CustomersManagement() {
                                     disabled={pagination.page === pagination.totalPages}
                                     variant="outline"
                                     size="sm"
+                                    className="h-8 rounded-lg"
                                 >
                                     <ChevronRight className="w-4 h-4" />
                                 </Button>
                             </div>
                         </div>
                     )}
-                </CardContent>
-            </Card>
+                </div>
+            </div>
 
             {selectedCustomerId && (
                 <CustomerDetailsDialog

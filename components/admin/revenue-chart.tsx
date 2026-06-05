@@ -1,13 +1,12 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceDot } from "recharts"
 import { Skeleton } from "@/components/ui/skeleton"
 import { subDays, format, eachDayOfInterval } from "date-fns"
-import { vi } from "date-fns/locale"
 import type { DateRange } from "react-day-picker"
 import { DetailModal } from "./detail-modal"
+import { Activity } from "lucide-react"
 
 interface ChartData {
   name: string
@@ -29,6 +28,32 @@ const formatCurrency = (value: number): string => {
   } else {
     return `${value}₫`
   }
+}
+
+function GlassCard({ children, className = "" }: { children: React.ReactNode; className?: string }) {
+  return (
+    <div
+      className={`rounded-3xl border border-neutral-200/50 bg-white/70 p-6 shadow-[0_8px_30px_-6px_rgba(15,15,15,0.06),0_1px_2px_rgba(0,0,0,0.02)] backdrop-blur-md transition-all duration-300 hover:shadow-[0_12px_40px_-8px_rgba(15,15,15,0.12),0_1px_2px_rgba(0,0,0,0.02)] ${className}`}
+    >
+      {children}
+    </div>
+  )
+}
+
+function SectionTitle({ icon: Icon, title, subtitle }: {
+  icon: React.ElementType; title: string; subtitle?: string
+}) {
+  return (
+    <div className="mb-6 flex items-center gap-3">
+      <div className="rounded-2xl bg-primary/10 p-2.5">
+        <Icon className="h-5 w-5 text-primary" />
+      </div>
+      <div>
+        <h2 className="font-sans font-bold text-neutral-800 text-lg tracking-tight leading-tight">{title}</h2>
+        {subtitle && <p className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider mt-0.5">{subtitle}</p>}
+      </div>
+    </div>
+  )
 }
 
 export function RevenueChart({ dateRange }: RevenueChartProps) {
@@ -130,89 +155,90 @@ export function RevenueChart({ dateRange }: RevenueChartProps) {
 
   if (loading) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-foreground">Doanh thu theo ngày</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Skeleton className="h-[300px] w-full" />
-        </CardContent>
-      </Card>
+      <GlassCard>
+        <SectionTitle icon={Activity} title="Doanh thu theo ngày" />
+        <Skeleton className="h-[300px] w-full rounded-2xl" />
+      </GlassCard>
     )
+  }
+
+  // Custom tooltip to show different styling
+  const CustomTooltip = ({ active, payload, label }: any) => {
+    if (active && payload && payload.length) {
+      return (
+        <div className="bg-card border border-border rounded-xl p-3 shadow-lg backdrop-blur-md bg-white/95">
+          <p className="font-semibold text-foreground text-sm mb-1">{label}</p>
+          {payload.map((entry: any, index: number) => (
+            <p
+              key={index}
+              style={{ color: "#f97316" }}
+              className="font-bold text-xs"
+            >
+              Doanh thu: {formatCurrency(entry.value)}
+            </p>
+          ))}
+        </div>
+      )
+    }
+    return null
   }
 
   return (
     <>
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-foreground">Doanh thu theo ngày</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={data} onClick={(state: any) => {
-              if (state && state.activeTooltipIndex !== undefined) {
-                const chartDataItem = data[state.activeTooltipIndex]
-                if (chartDataItem && chartDataItem.revenue > 0) {
-                  handleDotClick(chartDataItem)
-                }
+      <GlassCard>
+        <SectionTitle icon={Activity} title="Doanh thu theo ngày" subtitle="Biểu đồ trực quan doanh thu theo thời gian" />
+        <ResponsiveContainer width="100%" height={300}>
+          <LineChart data={data} onClick={(state: any) => {
+            if (state && state.activeTooltipIndex !== undefined) {
+              const chartDataItem = data[state.activeTooltipIndex]
+              if (chartDataItem && chartDataItem.revenue > 0) {
+                handleDotClick(chartDataItem)
               }
-            }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-              <XAxis
-                dataKey="name"
-                stroke="hsl(var(--muted-foreground))"
-                fontSize={12}
-                height={80}
-                interval={0}
-                angle={-45}
-                textAnchor="end"
-                tick={{ dy: 10 }}
-              />
-              <YAxis
-                stroke="hsl(var(--muted-foreground))"
-                fontSize={12}
-                tickFormatter={(value) => formatCurrency(value)}
-              />
-              <Tooltip
-                formatter={(value: number) => [formatCurrency(value), "Doanh thu"]}
-                labelFormatter={(label) => label}
-                contentStyle={{
-                  backgroundColor: "hsl(var(--card))",
-                  border: "2px solid hsl(var(--primary))",
-                  borderRadius: "8px",
-                  padding: "12px",
-                  zIndex: 1000,
-                  boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
-                }}
-                wrapperStyle={{ zIndex: 1000 }}
-                cursor={{ strokeDasharray: '3 3', stroke: 'hsl(var(--primary))' }}
-                labelStyle={{ color: "hsl(var(--foreground))", fontWeight: 600 }}
-              />
-              <Line
-                type="monotone"
-                dataKey="revenue"
-                stroke="hsl(var(--primary))"
-                strokeWidth={3}
-                dot={{ fill: "hsl(var(--primary))", strokeWidth: 2, r: 5, cursor: 'pointer' }}
-                activeDot={{ r: 7, fill: "hsl(var(--primary))" }}
-              />
-              {data.map((item, index) => (
-                item.revenue > 0 && (
-                  <ReferenceDot
-                    key={`dot-${index}`}
-                    x={item.name}
-                    y={item.revenue}
-                    onClick={() => handleDotClick(item)}
-                    r={5}
-                    fill="hsl(var(--primary))"
-                    cursor="pointer"
-                  />
-                )
-              ))}
-            </LineChart>
-          </ResponsiveContainer>
-        </CardContent>
-      </Card>
+            }
+          }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" strokeOpacity={0.6} />
+            <XAxis
+              dataKey="name"
+              stroke="hsl(var(--muted-foreground))"
+              fontSize={11}
+              height={data.length > 14 ? 50 : 32}
+              interval={data.length > 14 ? Math.floor(data.length / 8) : 0}
+              angle={data.length > 14 ? -30 : 0}
+              textAnchor={data.length > 14 ? "end" : "middle"}
+              tick={{ dy: 6 }}
+            />
+            <YAxis
+              stroke="hsl(var(--muted-foreground))"
+              fontSize={11}
+              tickFormatter={(value) => formatCurrency(value)}
+            />
+            <Tooltip content={<CustomTooltip />} />
+            <Line
+              type="monotone"
+              dataKey="revenue"
+              stroke="#f97316"
+              strokeWidth={3}
+              dot={{ fill: "#f97316", stroke: "#fff", strokeWidth: 2, r: 5, cursor: 'pointer' }}
+              activeDot={{ r: 7, fill: "#f97316", stroke: "#fff", strokeWidth: 2 }}
+            />
+            {data.map((item, index) => (
+              item.revenue > 0 && (
+                <ReferenceDot
+                  key={`dot-${index}`}
+                  x={item.name}
+                  y={item.revenue}
+                  onClick={() => handleDotClick(item)}
+                  r={5}
+                  fill="#f97316"
+                  stroke="#fff"
+                  strokeWidth={1.5}
+                  cursor="pointer"
+                />
+              )
+            ))}
+          </LineChart>
+        </ResponsiveContainer>
+      </GlassCard>
 
       <DetailModal
         open={modalOpen}

@@ -119,7 +119,14 @@ import { X, Edit, Clock, DollarSign, Users } from "lucide-react"
 
 // --- Định nghĩa kiểu dữ liệu ---
 // Lấy lại các kiểu đã định nghĩa ở các component khác cho nhất quán
-interface ApiStaff { id: number; name: string; }
+interface ApiStaff {
+  id: number;
+  name?: string;
+  user?: {
+    name: string;
+    email: string;
+  } | null;
+}
 interface ApiService {
   id: number;
   name: string;
@@ -146,7 +153,7 @@ export function ServiceDetails({ service, onClose, onEdit }: ServiceDetailsProps
   }
 
   // Trích xuất danh sách tên nhân viên từ prop
-  const staffList = service.staffServices?.map(ss => ss.staff.name) || [];
+  const staffList = service.staffServices?.map(ss => ss.staff.user?.name || ss.staff.name || "N/A") || [];
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
@@ -220,8 +227,8 @@ export function ServiceDetails({ service, onClose, onEdit }: ServiceDetailsProps
               <div>
                 <h3 className="font-semibold text-foreground mb-2">Nhân viên có thể thực hiện</h3>
                 <div className="flex flex-wrap gap-2">
-                  {staffList.map((staffName: string) => (
-                    <Badge key={staffName} variant="secondary">
+                  {staffList.map((staffName: string, index: number) => (
+                    <Badge key={`${staffName}-${index}`} variant="secondary">
                       {staffName}
                     </Badge>
                   ))}

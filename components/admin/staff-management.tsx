@@ -193,57 +193,55 @@ export function StaffManagement() {
   return (
     <div className="w-full space-y-4">
       {/* Search and Filter Section */}
-      <Card>
-        <CardContent className="px-6 sm:px-4">
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
-            {/* Search Input */}
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-              <Input
-                placeholder="Tìm kiếm theo tên, số điện thoại..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-
-            {/* Sort Select */}
-            <Select value={sortBy} onValueChange={setSortBy}>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Sắp xếp theo..." />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="createdAt">Mới Nhất</SelectItem>
-                <SelectItem value="name">Tên A-Z</SelectItem>
-                <SelectItem value="joinDate">Ngày Vào (Mới Nhất)</SelectItem>
-              </SelectContent>
-            </Select>
-
-            {/* Status Filter */}
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Lọc theo trạng thái..." />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Tất Cả</SelectItem>
-                <SelectItem value="active">Đang Hoạt Động</SelectItem>
-                <SelectItem value="inactive">Không Hoạt Động</SelectItem>
-              </SelectContent>
-            </Select>
-
-            <Button
-              onClick={() => {
-                setEditingStaff(null)
-                setFormDialogOpen(true)
-              }}
-              className="gap-2 w-full"
-            >
-              <Plus className="w-4 h-4" />
-              Thêm Nhân Viên
-            </Button>
+      <div className="rounded-3xl border border-neutral-200/50 bg-white/70 p-5 shadow-[0_8px_30px_-6px_rgba(15,15,15,0.06)] backdrop-blur-md">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
+          {/* Search Input */}
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+            <Input
+              placeholder="Tìm kiếm nhân viên..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10 h-10 rounded-xl border-neutral-200/80 bg-white/50 focus:ring-primary/20"
+            />
           </div>
-        </CardContent>
-      </Card>
+
+          {/* Sort Select */}
+          <Select value={sortBy} onValueChange={setSortBy}>
+            <SelectTrigger className="w-full h-10 rounded-xl border-neutral-200/80 bg-white/50 focus:ring-primary/20">
+              <SelectValue placeholder="Sắp xếp theo..." />
+            </SelectTrigger>
+            <SelectContent className="rounded-xl border-neutral-200/80">
+              <SelectItem value="createdAt" className="rounded-lg">Mới Nhất</SelectItem>
+              <SelectItem value="name" className="rounded-lg">Tên A-Z</SelectItem>
+              <SelectItem value="joinDate" className="rounded-lg">Ngày Vào (Mới Nhất)</SelectItem>
+            </SelectContent>
+          </Select>
+
+          {/* Status Filter */}
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <SelectTrigger className="w-full h-10 rounded-xl border-neutral-200/80 bg-white/50 focus:ring-primary/20">
+              <SelectValue placeholder="Lọc trạng thái..." />
+            </SelectTrigger>
+            <SelectContent className="rounded-xl border-neutral-200/80">
+              <SelectItem value="all" className="rounded-lg">Tất Cả</SelectItem>
+              <SelectItem value="active" className="rounded-lg">Đang Hoạt Động</SelectItem>
+              <SelectItem value="inactive" className="rounded-lg">Không Hoạt Động</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <Button
+            onClick={() => {
+              setEditingStaff(null)
+              setFormDialogOpen(true)
+            }}
+            className="gap-2 w-full h-10 rounded-xl bg-gradient-to-r from-orange-500 to-pink-500 text-white font-bold hover:brightness-105 transition-all shadow-md shadow-orange-500/10"
+          >
+            <Plus className="w-4 h-4" />
+            Thêm Nhân Viên
+          </Button>
+        </div>
+      </div>
 
       {/* Staff Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -256,151 +254,145 @@ export function StaffManagement() {
             </CardContent>
           </Card>
         ) : staffList.length === 0 ? (
-          <Card className="col-span-full">
-            <CardContent className="p-[10px] sm:p-6">
-              <div className="flex justify-center items-center py-8">
-                <p className="text-muted-foreground">Chưa có nhân viên nào</p>
-              </div>
-            </CardContent>
-          </Card>
+          <div className="col-span-full rounded-3xl border border-dashed border-neutral-200 bg-white/40 p-8 text-center text-neutral-500 font-medium">
+            Chưa có nhân viên nào
+          </div>
         ) : (
           staffList.map((member) => (
-            <Card key={member.id} className="overflow-hidden">
-              <CardContent className="p-[10px] sm:p-6">
-                <div className="space-y-4">
-                  {/* Avatar and Basic Info */}
-                  <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-                    <Avatar className="h-16 w-16">
-                      <AvatarImage src={member.avatarUrl || undefined} alt={member.name} />
-                      <AvatarFallback className="bg-primary text-primary-foreground">
-                        {member.name
-                          .split(' ')
-                          .map((n) => n[0])
-                          .join('')}
-                      </AvatarFallback>
-                    </Avatar>
+            <div key={member.id} className="overflow-hidden border border-neutral-200/50 bg-white/70 hover:shadow-lg hover:shadow-orange-500/5 transition-all duration-500 hover:-translate-y-1.5 rounded-3xl p-6 backdrop-blur-md flex flex-col justify-between">
+              <div className="space-y-4">
+                {/* Avatar and Basic Info */}
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+                  <Avatar className="h-16 w-16 border-2 border-primary/10 ring-4 ring-neutral-100">
+                    <AvatarImage src={member.avatarUrl || undefined} alt={member.name} />
+                    <AvatarFallback className="bg-gradient-to-tr from-orange-400 to-pink-500 text-white font-extrabold">
+                      {(member.name || 'Staff')
+                        .split(' ')
+                        .map((n) => n[0] || '')
+                        .join('')}
+                    </AvatarFallback>
+                  </Avatar>
 
-                    <div className="flex-1 w-full space-y-1">
-                      <div className="flex flex-wrap items-center justify-between gap-2">
-                        <h3 className="font-semibold">{member.name}</h3>
-                        <Badge variant={member.status === 'active' ? 'default' : 'secondary'}>
-                          {member.status === 'active' ? 'Hoạt Động' : 'Không Hoạt Động'}
-                        </Badge>
-                      </div>
-                      <p className="text-sm text-muted-foreground">{member.position || 'N/A'}</p>
+                  <div className="flex-1 w-full space-y-1">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <h3 className="font-extrabold text-neutral-800 tracking-tight">{member.name}</h3>
+                      <Badge className={member.status === 'active' ? 'bg-emerald-500 hover:bg-emerald-600 text-white' : 'bg-neutral-300 text-neutral-600'}>
+                        {member.status === 'active' ? 'Hoạt Động' : 'Vô Hiệu'}
+                      </Badge>
                     </div>
-                  </div>
-
-                  {/* Contact Info */}
-                  <div className="space-y-1 text-sm">
-                    {member.email && (
-                      <p className="text-muted-foreground truncate">📧 {member.email}</p>
-                    )}
-                    {member.phone && (
-                      <p className="text-muted-foreground">📱 {member.phone}</p>
-                    )}
-                    {member.joinDate && (
-                      <p className="text-muted-foreground">
-                        📅 Vào: {new Date(new Date(member.joinDate).toLocaleString('en-US', { timeZone: 'Asia/Ho_Chi_Minh' })).toLocaleDateString('vi-VN')}
-                      </p>
-                    )}
-                  </div>
-
-                  {/* Specialties */}
-                  {member.specialties && (
-                    <div>
-                      <p className="text-xs text-muted-foreground mb-2">Chuyên môn:</p>
-                      <div className="flex flex-wrap gap-1">
-                        {member.specialties.slice(0, 3).map((specialty) => (
-                          <Badge key={specialty} variant="outline" className="text-xs">
-                            {specialty}
-                          </Badge>
-                        ))}
-                        {member.specialties.length > 3 && (
-                          <Badge variant="outline" className="text-xs">
-                            +{member.specialties.length - 3}
-                          </Badge>
-                        )}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Actions */}
-                  <div className="grid gap-2 border-t pt-3 sm:grid-cols-3">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="w-full justify-center gap-2 border-primary/30 text-primary hover:bg-primary/5"
-                      onClick={() => {
-                        setSelectedStaffId(member.id)
-                        setDetailsDialogOpen(true)
-                      }}
-                    >
-                      <Eye className="h-3 w-3" />
-                      Xem hồ sơ
-                    </Button>
-
-                    <Button
-                      size="sm"
-                      className="w-full justify-center gap-2 bg-secondary text-secondary-foreground hover:bg-secondary/90"
-                      onClick={() => {
-                        setEditingStaff(member)
-                        setFormDialogOpen(true)
-                      }}
-                    >
-                      <Pencil className="h-3 w-3" />
-                      Chỉnh sửa
-                    </Button>
-
-                    <ConfirmDialog
-                      title="Vô hiệu hóa nhân viên?"
-                      description={`Bạn có chắc muốn vô hiệu hóa ${member.name}? Nhân viên này sẽ không thể được gán lịch hẹn mới.`}
-                      onConfirm={() => handleDeleteStaff(member.id)}
-                    >
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        className="w-full justify-center gap-2 text-destructive hover:bg-destructive/10"
-                      >
-                        <Trash2 className="h-3 w-3" />
-                        Vô hiệu hóa
-                      </Button>
-                    </ConfirmDialog>
+                    <p className="text-xs font-bold text-neutral-500 uppercase tracking-wider">{member.position || 'Nhân viên'}</p>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
+
+                {/* Contact Info */}
+                <div className="space-y-1 text-xs font-medium text-neutral-500 border-t border-neutral-100 pt-3">
+                  {member.email && (
+                    <p className="truncate">📧 {member.email}</p>
+                  )}
+                  {member.phone && (
+                    <p>📱 {member.phone}</p>
+                  )}
+                  {member.joinDate && (
+                    <p>
+                      📅 Vào làm: {new Date(new Date(member.joinDate).toLocaleString('en-US', { timeZone: 'Asia/Ho_Chi_Minh' })).toLocaleDateString('vi-VN')}
+                    </p>
+                  )}
+                </div>
+
+                {/* Specialties */}
+                {member.specialties && member.specialties.length > 0 && (
+                  <div className="pt-2">
+                    <p className="text-[10px] font-bold text-neutral-400 uppercase tracking-wider mb-2">Chuyên môn:</p>
+                    <div className="flex flex-wrap gap-1">
+                      {member.specialties.slice(0, 3).map((specialty) => (
+                        <Badge key={specialty} variant="outline" className="text-[10px] border-neutral-200 bg-neutral-50/50 text-neutral-600 font-semibold px-2 py-0.5 rounded-md">
+                          {specialty}
+                        </Badge>
+                      ))}
+                      {member.specialties.length > 3 && (
+                        <Badge variant="outline" className="text-[10px] border-neutral-200 bg-neutral-50/50 text-neutral-600 font-semibold px-2 py-0.5 rounded-md">
+                          +{member.specialties.length - 3}
+                        </Badge>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Actions Grid */}
+              <div className="grid gap-2 border-t border-neutral-100 pt-4 mt-4 sm:grid-cols-3">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="w-full justify-center gap-1.5 border-neutral-200 text-neutral-600 hover:bg-neutral-50 rounded-xl text-xs h-9 font-bold"
+                  onClick={() => {
+                    setSelectedStaffId(member.id)
+                    setDetailsDialogOpen(true)
+                  }}
+                >
+                  <Eye className="h-3.5 w-3.5" />
+                  Hồ sơ
+                </Button>
+
+                <Button
+                  size="sm"
+                  className="w-full justify-center gap-1.5 bg-neutral-100 text-neutral-800 hover:bg-neutral-200 rounded-xl text-xs h-9 font-bold"
+                  onClick={() => {
+                    setEditingStaff(member)
+                    setFormDialogOpen(true)
+                  }}
+                >
+                  <Pencil className="h-3.5 w-3.5" />
+                  Sửa
+                </Button>
+
+                <ConfirmDialog
+                  title="Vô hiệu hóa nhân viên?"
+                  description={`Bạn có chắc muốn vô hiệu hóa ${member.name}? Nhân viên này sẽ không thể được gán lịch hẹn mới.`}
+                  onConfirm={() => handleDeleteStaff(member.id)}
+                >
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="w-full justify-center gap-1.5 text-rose-600 hover:bg-rose-50 rounded-xl text-xs h-9 font-bold"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                    Khóa
+                  </Button>
+                </ConfirmDialog>
+              </div>
+            </div>
           ))
         )}
       </div>
 
       {/* Pagination */}
       {!loading && staffList.length > 0 && (
-        <Card>
-          <CardContent className="flex flex-col items-center justify-between gap-3 p-[10px] sm:flex-row sm:p-6">
-            <div className="text-sm text-muted-foreground text-center sm:text-left">
-              Trang {pagination.page} / {pagination.totalPages} | Tổng: {pagination.total} nhân viên
-            </div>
-            <div className="flex gap-2">
-              <Button
-                onClick={handlePreviousPage}
-                disabled={pagination.page === 1}
-                variant="outline"
-                size="sm"
-              >
-                <ChevronLeft className="w-4 h-4" />
-              </Button>
-              <Button
-                onClick={handleNextPage}
-                disabled={pagination.page === pagination.totalPages}
-                variant="outline"
-                size="sm"
-              >
-                <ChevronRight className="w-4 h-4" />
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+        <div className="rounded-3xl border border-neutral-200/50 bg-white/70 p-5 shadow-[0_8px_30px_-6px_rgba(15,15,15,0.06)] backdrop-blur-md flex flex-col items-center justify-between gap-3 sm:flex-row">
+          <div className="text-xs font-bold text-neutral-500">
+            Trang {pagination.page} / {pagination.totalPages} | Tổng cộng {pagination.total} nhân sự
+          </div>
+          <div className="flex gap-2">
+            <Button
+              onClick={handlePreviousPage}
+              disabled={pagination.page === 1}
+              variant="outline"
+              size="sm"
+              className="h-8 rounded-lg"
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </Button>
+            <Button
+              onClick={handleNextPage}
+              disabled={pagination.page === pagination.totalPages}
+              variant="outline"
+              size="sm"
+              className="h-8 rounded-lg"
+            >
+              <ChevronRight className="w-4 h-4" />
+            </Button>
+          </div>
+        </div>
       )}
 
       {/* Dialogs */}

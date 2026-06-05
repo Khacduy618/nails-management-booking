@@ -124,25 +124,25 @@ function KpiCard({ title, value, subtitle, icon: Icon, trend, gradient, delay = 
   const isPositive = (trend ?? 0) >= 0
   return (
     <RevealCard delay={delay}>
-      <div className={`relative overflow-hidden rounded-2xl p-6 text-white shadow-lg ${gradient}`}
+      <div className={`relative overflow-hidden rounded-3xl p-6 text-white shadow-[0_10px_25px_-5px_rgba(0,0,0,0.1),0_8px_10px_-6px_rgba(0,0,0,0.05)] border border-white/10 transition-all duration-500 hover:-translate-y-1 hover:shadow-[0_20px_35px_-10px_rgba(0,0,0,0.15)] ${gradient}`}
         style={{ minHeight: 140 }}>
-        {/* decorative circle */}
-        <div className="absolute -right-6 -top-6 h-28 w-28 rounded-full bg-white/10" />
-        <div className="absolute -bottom-8 -right-2 h-20 w-20 rounded-full bg-white/5" />
+        {/* decorative circles */}
+        <div className="absolute -right-6 -top-6 h-28 w-28 rounded-full bg-white/[0.08] blur-sm" />
+        <div className="absolute -bottom-8 -right-2 h-20 w-20 rounded-full bg-white/[0.04] blur-xs" />
 
         <div className="relative z-10 flex items-start justify-between">
           <div>
-            <p className="text-sm font-medium text-white/80">{title}</p>
-            <p className="mt-2 text-3xl font-bold tracking-tight">{value}</p>
-            <p className="mt-1 text-xs text-white/70">{subtitle}</p>
+            <p className="text-xs font-bold uppercase tracking-wider text-white/80">{title}</p>
+            <p className="mt-2 text-3xl font-extrabold tracking-tight">{value}</p>
+            <p className="mt-1 text-xs text-white/70 font-medium">{subtitle}</p>
           </div>
-          <div className="rounded-xl bg-white/20 p-2.5">
-            <Icon className="h-6 w-6 text-white" />
+          <div className="rounded-2xl bg-white/15 p-3 backdrop-blur-xs ring-1 ring-white/10">
+            <Icon className="h-5.5 w-5.5 text-white" />
           </div>
         </div>
 
         {trend !== undefined && (
-          <div className="relative z-10 mt-4 flex items-center gap-1 text-xs font-medium">
+          <div className="relative z-10 mt-4 flex items-center gap-1 text-[11px] font-bold">
             {isPositive ? (
               <ArrowUpRight className="h-3.5 w-3.5" />
             ) : (
@@ -161,12 +161,12 @@ function SectionTitle({ icon: Icon, title, subtitle }: {
 }) {
   return (
     <div className="mb-6 flex items-center gap-3">
-      <div className="rounded-xl bg-orange-100 p-2 dark:bg-orange-900/30">
-        <Icon className="h-5 w-5 text-orange-500" />
+      <div className="rounded-2xl bg-primary/10 p-2.5">
+        <Icon className="h-5 w-5 text-primary" />
       </div>
       <div>
-        <h2 className="text-lg font-semibold text-foreground">{title}</h2>
-        {subtitle && <p className="text-xs text-muted-foreground">{subtitle}</p>}
+        <h2 className="font-sans font-bold text-neutral-800 tracking-tight leading-tight">{title}</h2>
+        {subtitle && <p className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider mt-0.5">{subtitle}</p>}
       </div>
     </div>
   )
@@ -176,7 +176,7 @@ function SectionTitle({ icon: Icon, title, subtitle }: {
 function GlassCard({ children, className = "" }: { children: React.ReactNode; className?: string }) {
   return (
     <div
-      className={`rounded-2xl border border-border/60 bg-card/80 p-6 shadow-sm backdrop-blur-sm ${className}`}
+      className={`rounded-3xl border border-neutral-200/50 bg-white/70 p-6 shadow-[0_8px_30px_-6px_rgba(15,15,15,0.06),0_1px_2px_rgba(0,0,0,0.02)] backdrop-blur-md transition-all duration-300 hover:shadow-[0_12px_40px_-8px_rgba(15,15,15,0.12),0_1px_2px_rgba(0,0,0,0.02)] ${className}`}
     >
       {children}
     </div>
@@ -344,23 +344,25 @@ export function StatisticsDashboard() {
       {/* ── Header ── */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Thống kê & Phân tích</h1>
-          <p className="text-sm text-muted-foreground">
+          <h1 className="text-3xl font-extrabold text-neutral-800 tracking-tight leading-[1.15]">
+            Thống kê & <span className="font-serif italic font-medium text-primary">phân tích.</span>
+          </h1>
+          <p className="text-sm text-neutral-500 font-medium mt-1">
             Tổng quan dữ liệu kinh doanh K.Tay Nails
           </p>
         </div>
 
-        <div className="flex items-center gap-2 flex-wrap">
+        <div className="flex items-center gap-3 flex-wrap">
           {/* Period selector */}
-          <div className="flex overflow-hidden rounded-xl border border-border bg-card shadow-sm">
+          <div className="flex overflow-hidden rounded-2xl border border-neutral-200 bg-white/80 p-1 shadow-sm backdrop-blur-md">
             {PERIOD_OPTIONS.map((opt) => (
               <button
                 key={opt.days}
                 onClick={() => setPeriod(opt.days)}
-                className={`px-4 py-2 text-sm font-medium transition-colors ${
+                className={`px-4 py-2 text-xs font-bold rounded-xl transition-all duration-300 ${
                   period === opt.days
-                    ? "bg-orange-500 text-white"
-                    : "text-muted-foreground hover:bg-muted"
+                    ? "bg-primary text-primary-foreground shadow-sm"
+                    : "text-neutral-500 hover:bg-neutral-100 hover:text-neutral-800"
                 }`}
               >
                 {opt.label}
@@ -372,9 +374,9 @@ export function StatisticsDashboard() {
           <button
             onClick={() => fetchData(period, true)}
             disabled={refreshing}
-            className="flex items-center gap-1.5 rounded-xl border border-border bg-card px-3 py-2 text-sm text-muted-foreground shadow-sm hover:bg-muted transition-colors"
+            className="flex items-center gap-2 rounded-2xl border border-neutral-200 bg-white/80 px-4 py-2.5 text-xs font-bold text-neutral-600 shadow-sm hover:bg-neutral-50 active:scale-95 transition-all cursor-pointer backdrop-blur-md"
           >
-            <RefreshCw className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`} />
+            <RefreshCw className={`h-3.5 w-3.5 ${refreshing ? "animate-spin" : ""}`} />
             <span className="hidden sm:inline">Làm mới</span>
           </button>
         </div>
@@ -582,19 +584,19 @@ export function StatisticsDashboard() {
                 </thead>
                 <tbody className="divide-y divide-border/40">
                   {serviceRevenue.map((s, i) => (
-                    <tr key={s.serviceId ?? i} className="group hover:bg-muted/40 transition-colors">
+                    <tr key={s.serviceId ?? i} className="group hover:bg-neutral-50/50 transition-colors">
                       <td className="py-3 pr-4">
-                        <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-orange-100 text-xs font-bold text-orange-600 dark:bg-orange-900/30">
+                        <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary">
                           {i + 1}
                         </span>
                       </td>
-                      <td className="py-3 pr-4 font-medium text-foreground">{s.serviceName}</td>
+                      <td className="py-3 pr-4 font-medium text-neutral-800">{s.serviceName}</td>
                       <td className="py-3 pr-4 text-right text-muted-foreground">
-                        <span className="rounded-full bg-violet-100 px-2 py-0.5 text-xs font-semibold text-violet-700 dark:bg-violet-900/30 dark:text-violet-300">
+                        <span className="rounded-full bg-violet-50 px-2.5 py-0.5 text-xs font-semibold text-violet-600">
                           {s.count}
                         </span>
                       </td>
-                      <td className="py-3 pr-4 text-right font-semibold text-foreground">
+                      <td className="py-3 pr-4 text-right font-bold text-neutral-800">
                         {formatCurrencyFull(s.totalRevenue)}
                       </td>
                       <td className="py-3 text-right text-muted-foreground">
@@ -604,12 +606,12 @@ export function StatisticsDashboard() {
                   ))}
                 </tbody>
                 <tfoot>
-                  <tr className="border-t-2 border-orange-200 dark:border-orange-900/40">
-                    <td colSpan={2} className="py-3 pr-4 text-sm font-semibold text-foreground">Tổng cộng</td>
-                    <td className="py-3 pr-4 text-right text-sm font-semibold text-foreground">
+                  <tr className="border-t-2 border-primary/20">
+                    <td colSpan={2} className="py-3 pr-4 text-sm font-bold text-neutral-800">Tổng cộng</td>
+                    <td className="py-3 pr-4 text-right text-sm font-semibold text-neutral-800">
                       {serviceRevenue.reduce((a, s) => a + s.count, 0)} lần
                     </td>
-                    <td className="py-3 pr-4 text-right text-sm font-bold text-orange-500">
+                    <td className="py-3 pr-4 text-right text-sm font-extrabold text-primary">
                       {formatCurrencyFull(serviceRevenue.reduce((a, s) => a + s.totalRevenue, 0))}
                     </td>
                     <td />

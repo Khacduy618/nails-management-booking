@@ -16,6 +16,7 @@ interface StaffData {
 
 interface ChartData {
   name: string
+  rawName?: string
   "Doanh thu": number
   "Lịch hẹn": number
 }
@@ -24,10 +25,19 @@ interface StaffPerformanceChartProps {
   dateRange?: DateRange
 }
 
-// Helper function to format currency
 const formatCurrency = (value: number): string => {
   // Format as VND without rounding, show full amount
   return `${Math.round(value).toLocaleString('vi-VN')}₫`
+}
+
+const formatCurrencyShort = (value: number): string => {
+  if (value >= 1000000) {
+    return `${(value / 1000000).toFixed(1)}M₫`
+  } else if (value >= 1000) {
+    return `${(value / 1000).toFixed(0)}K₫`
+  } else {
+    return `${value}₫`
+  }
 }
 
 export function StaffPerformanceChart({ dateRange }: StaffPerformanceChartProps) {
@@ -88,9 +98,12 @@ export function StaffPerformanceChart({ dateRange }: StaffPerformanceChartProps)
 
         // Transform data for bar chart with both metrics
         const chartData = staffPerformance.map((item: any) => {
-          console.log(`Staff: ${item.staffName}, Revenue: ${item.revenue}`)
+          const rawName = item.staffName || 'Unknown'
+          const name = rawName.includes("@") ? rawName.split("@")[0] : rawName
+          console.log(`Staff: ${rawName}, Revenue: ${item.revenue}`)
           return {
-            name: item.staffName || 'Unknown',
+            name: name,
+            rawName: rawName,
             "Doanh thu": Math.round((item.revenue || 0) * 100) / 100, // Ensure 2 decimal places
             "Lịch hẹn": item.appointments || 0,
           }
@@ -204,29 +217,31 @@ export function StaffPerformanceChart({ dateRange }: StaffPerformanceChartProps)
           <div className="w-full overflow-x-auto">
             <div style={{ minWidth: Math.max(data.length * 120, 600) }}>
               <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={data} onClick={(state: any) => {
+                <BarChart data={data} margin={{ top: 10, right: 10, left: 15, bottom: 5 }} onClick={(state: any) => {
                   if (state && state.activeTooltipIndex !== undefined) {
-                    const staffName = data[state.activeTooltipIndex]?.name
-                    if (staffName) {
-                      handleBarClick(staffName)
+                    const chartDataItem = data[state.activeTooltipIndex]
+                    if (chartDataItem && chartDataItem.rawName) {
+                      handleBarClick(chartDataItem.rawName)
                     }
                   }
                 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                  <XAxis dataKey="name" stroke="hsl(var(--muted-foreground))" fontSize={12} cursor="pointer" />
+                  <XAxis dataKey="name" stroke="hsl(var(--muted-foreground))" fontSize={11} cursor="pointer" />
                   <YAxis
                     stroke="hsl(var(--muted-foreground))"
-                    fontSize={12}
+                    fontSize={11}
                     yAxisId="left"
-                    label={{ value: 'Doanh thu (VND)', angle: -90, position: 'insideLeft' }}
-                    tickFormatter={(value) => formatCurrency(value)}
+                    label={{ value: 'Doanh thu', angle: -90, position: 'insideLeft', offset: 0 }}
+                    tickFormatter={(value) => formatCurrencyShort(value)}
+                    width={55}
                   />
                   <YAxis
                     stroke="hsl(var(--muted-foreground))"
-                    fontSize={12}
+                    fontSize={11}
                     orientation="right"
                     yAxisId="right"
-                    label={{ value: 'Lịch hẹn', angle: 90, position: 'insideRight' }}
+                    label={{ value: 'Lịch hẹn', angle: 90, position: 'insideRight', offset: 0 }}
+                    width={40}
                   />
                   <Tooltip content={<CustomTooltip />} />
                   <Legend />

@@ -197,9 +197,9 @@ export function StaffDetailsDialog({
                                         alt={data.staff.name}
                                     />
                                     <AvatarFallback className="bg-primary text-primary-foreground">
-                                        {data.staff.name
+                                        {(data?.staff?.name || 'Staff')
                                             .split(' ')
-                                            .map((n) => n[0])
+                                            .map((n) => n[0] || '')
                                             .join('')}
                                     </AvatarFallback>
                                 </Avatar>
