@@ -98,7 +98,8 @@ export function AppointmentLookup() {
   }
 
   const handleSearch = async () => {
-    if (!phoneNumber.trim() || !/^[0-9]{10,11}$/.test(phoneNumber.replace(/\s/g, ""))) {
+    const cleanedPhone = phoneNumber.replace(/[\s\-\(\)]/g, "")
+    if (!phoneNumber.trim() || !/^\+?[0-9]{9,15}$/.test(cleanedPhone)) {
       setError("Số điện thoại không hợp lệ.");
       return;
     }
@@ -109,7 +110,7 @@ export function AppointmentLookup() {
 
     try {
       const apiBase = (process.env.NEXT_PUBLIC_API_URL || '/api').replace(/\/$/, '')
-      const res = await fetch(`${apiBase}/appointments?phone=${phoneNumber.replace(/\s/g, '')}`)
+      const res = await fetch(`${apiBase}/appointments?phone=${encodeURIComponent(cleanedPhone)}`)
 
       const result = await res.json();
       if (!res.ok || !result.success) {
