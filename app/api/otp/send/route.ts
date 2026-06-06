@@ -126,9 +126,9 @@ export async function POST(request: NextRequest) {
             if (process.env.NODE_ENV === "development") {
                 console.log(`\n🔐 [DEV] OTP Code for testing: ${otp}\n`)
             }
-        } catch (error) {
+        } catch (error: any) {
             logError(error, { context: "Failed to send OTP", appointmentId })
-            // Don't fail the request, just log the error
+            return fail("SMS_SEND_FAILED", `Không thể gửi SMS OTP: ${error.message || "Lỗi dịch vụ gửi tin"}`, 500)
         }
 
         return ok({ message: "OTP sent successfully" })
