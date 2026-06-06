@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - main
+    paths:
+      - 'drizzle/**'
+      - 'scripts/migrate.ts'
   workflow_dispatch: # Cho phép bấm nút "Run workflow" để chạy tay
     inputs:
       run_seed:
