@@ -51,8 +51,19 @@ export async function GET(request: NextRequest) {
     const cleanedPhone = sanitizePhone(phone)
     logDebug('GET /api/appointments request', { phone: cleanedPhone })
 
+    const phoneVariants = [cleanedPhone]
+    if (cleanedPhone.startsWith('0')) {
+        phoneVariants.push('+84' + cleanedPhone.slice(1))
+    } else if (cleanedPhone.startsWith('+84')) {
+        phoneVariants.push('0' + cleanedPhone.slice(3))
+    } else if (cleanedPhone.startsWith('+')) {
+        phoneVariants.push(cleanedPhone.slice(1))
+    } else {
+        phoneVariants.push('+' + cleanedPhone)
+    }
+
     const userAppointments = await db.query.appointments.findMany({
-      where: eq(appointments.customerPhone, cleanedPhone),
+      where: inArray(appointments.customerPhone, phoneVariants),
       with: {
         review: true,
         appointmentServices: {
