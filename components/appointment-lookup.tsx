@@ -292,7 +292,7 @@ export function AppointmentLookup() {
                               disabled={isLoadingOTP}
                               className="w-full"
                             >
-                              {isLoadingOTP ? (
+                              {isLoadingOTP && selectedAppointmentId === appointment.id ? (
                                 <>
                                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                                   Đang gửi OTP...
