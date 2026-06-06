@@ -27,7 +27,6 @@ const nextConfig = {
           { key: 'X-Content-Type-Options', value: 'nosniff' },
           { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
           { key: 'Permissions-Policy', value: 'geolocation=(), microphone=(), camera=()' },
-          // HSTS for production (adjust max-age and includeSubDomains if you serve HTTPS)
           { key: 'Strict-Transport-Security', value: 'max-age=15552000; includeSubDomains; preload' },
         ],
       },
@@ -39,6 +38,13 @@ const sentryWebpackPluginOptions = {
   org: process.env.SENTRY_ORG || undefined,
   project: process.env.SENTRY_PROJECT || undefined,
   silent: true,
+  // Tắt các tính năng tự động inject CSP headers gây block toàn bộ JS
+  autoInstrumentServerFunctions: false,
+  disableLogger: true,
+  widenClientFileUpload: false,
+  hideSourceMaps: true,
+  // Không tự động thêm Content-Security-Policy header
+  autoInstrumentMiddleware: false,
 }
 
 export default withSentryConfig(nextConfig, sentryWebpackPluginOptions)
