@@ -37,6 +37,32 @@ const statusConfig: Record<AppointmentStatus, { label: string; variant: "seconda
   'in-progress': { label: "Đang thực hiện", variant: "default", icon: Clock }, // Thêm trạng thái mới
 };
 
+const getRecaptchaToken = async (): Promise<string | null> => {
+  if (typeof window === "undefined" || !(window as any).grecaptcha) {
+    console.warn("reCAPTCHA not loaded yet")
+    return null
+  }
+  return new Promise((resolve) => {
+    (window as any).grecaptcha.ready(async () => {
+      try {
+        const siteKey = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY
+        if (!siteKey) {
+          console.warn("NEXT_PUBLIC_RECAPTCHA_SITE_KEY is not configured")
+          resolve(null)
+          return
+        }
+        const token = await (window as any).grecaptcha.execute(siteKey, {
+          action: "cancel_appointment",
+        })
+        resolve(token)
+      } catch (err) {
+        console.error("Error executing reCAPTCHA:", err)
+        resolve(null)
+      }
+    })
+  })
+}
+
 export function AppointmentLookup() {
   const [phoneNumber, setPhoneNumber] = useState("")
   const [appointments, setAppointments] = useState<Appointment[]>([])
@@ -109,12 +135,15 @@ export function AppointmentLookup() {
     setError("")
 
     try {
+      const recaptchaToken = await getRecaptchaToken()
+
       const res = await fetch("/api/otp/send", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           appointmentId,
           phone: phoneNumber,
+          recaptchaToken,
         }),
       })
 

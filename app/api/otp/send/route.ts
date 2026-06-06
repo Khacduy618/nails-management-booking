@@ -23,10 +23,43 @@ export async function POST(request: NextRequest) {
         }
 
         const body = await request.json()
-        const { appointmentId, phone } = body
+        const { appointmentId, phone, recaptchaToken } = body
 
         if (!appointmentId || !phone) {
             return fail("MISSING_FIELDS", "Appointment ID and phone are required", 400)
+        }
+
+        // Verify reCAPTCHA token if secret key is configured
+        const recaptchaSecret = process.env.RECAPTCHA_SECRET_KEY
+        if (recaptchaSecret) {
+            if (!recaptchaToken) {
+                return fail("RECAPTCHA_REQUIRED", "reCAPTCHA verification is required to prevent spam", 400)
+            }
+
+            try {
+                const verifyUrl = `https://www.google.com/recaptcha/api/siteverify`
+                const verifyRes = await fetch(verifyUrl, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                    body: new URLSearchParams({
+                        secret: recaptchaSecret,
+                        response: recaptchaToken,
+                    }).toString(),
+                })
+
+                if (!verifyRes.ok) {
+                    throw new Error(`Google reCAPTCHA responded with status ${verifyRes.status}`)
+                }
+
+                const verifyData = await verifyRes.json()
+                if (!verifyData.success || (verifyData.score !== undefined && verifyData.score < 0.5)) {
+                    logError(new Error("reCAPTCHA validation failed"), { verifyData })
+                    return fail("RECAPTCHA_INVALID", "reCAPTCHA verification failed, please try again", 400)
+                }
+            } catch (error) {
+                logError(error, { context: "reCAPTCHA verification error" })
+                return fail("RECAPTCHA_ERROR", "Error verifying reCAPTCHA", 500)
+            }
         }
 
         const sanitizedPhone = sanitizePhone(phone)

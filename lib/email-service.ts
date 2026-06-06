@@ -347,21 +347,61 @@ export async function sendConfirmationEmail(data: AppointmentEmailData) {
 
 export async function sendOTP(phone: string, code: string, customerName: string) {
     try {
-        const message = `Mã OTP của bạn để hủy lịch hẹn: ${code}. Mã này có hiệu lực trong 5 phút. Đừng chia sẻ mã này với bất kỳ ai.`
+        const message = `Ma OTP cua ban de huy lich hen tai K-Tay Nails la: ${code}. Ma co hieu luc trong 5 phut.`
 
         console.log('[OTP] Sending OTP:', {
             to: phone,
             code,
             customerName,
-            message,
         })
 
-        // For now, just log it (development only)
-        console.log('[OTP] OTP would be sent to:', phone, 'Code:', code)
+        const accountSid = process.env.TWILIO_ACCOUNT_SID
+        const authToken = process.env.TWILIO_AUTH_TOKEN
+        const fromNumber = process.env.TWILIO_PHONE_NUMBER
 
+        if (!accountSid || !authToken || !fromNumber) {
+            console.warn('[OTP] Twilio configuration is missing. Logging OTP code to console instead:')
+            console.log(`🔐 [DEV] OTP Code for ${phone}: ${code}`)
+            return true
+        }
+
+        // Format to E.164 for Twilio (e.g., +84...)
+        let formattedPhone = phone.trim().replace(/\s+/g, '')
+        if (formattedPhone.startsWith('0')) {
+            formattedPhone = '+84' + formattedPhone.slice(1)
+        } else if (formattedPhone.startsWith('84') && !formattedPhone.startsWith('+')) {
+            formattedPhone = '+' + formattedPhone
+        } else if (!formattedPhone.startsWith('+')) {
+            formattedPhone = '+' + formattedPhone
+        }
+
+        const url = `https://api.twilio.com/2010-04-01/Accounts/${accountSid}/Messages.json`
+        const auth = Buffer.from(`${accountSid}:${authToken}`).toString('base64')
+
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Basic ${auth}`,
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: new URLSearchParams({
+                To: formattedPhone,
+                From: fromNumber,
+                Body: message,
+            }).toString(),
+        })
+
+        if (!response.ok) {
+            const errData = await response.json()
+            console.error('[OTP] Twilio error response:', errData)
+            throw new Error(`Twilio API responded with status ${response.status}: ${errData.message || response.statusText}`)
+        }
+
+        const resData = await response.json()
+        console.log('[OTP] Twilio message sent successfully, SID:', resData.sid)
         return true
     } catch (error) {
-        console.error('[OTP] Error sending OTP:', error)
+        console.error('[OTP] Error sending OTP via Twilio:', error)
         throw error
     }
 }
