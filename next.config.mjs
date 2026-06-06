@@ -23,6 +23,7 @@ const nextConfig = {
       {
         source: '/:path*',
         headers: [
+          // CSP được xử lý bởi middleware.ts (nonce-based, per-request)
           { key: 'X-Frame-Options', value: 'DENY' },
           { key: 'X-Content-Type-Options', value: 'nosniff' },
           { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
@@ -38,13 +39,12 @@ const sentryWebpackPluginOptions = {
   org: process.env.SENTRY_ORG || undefined,
   project: process.env.SENTRY_PROJECT || undefined,
   silent: true,
-  // Tắt các tính năng tự động inject CSP headers gây block toàn bộ JS
+  // Tắt auto-instrument để Sentry không tự inject CSP headers (middleware.ts đã xử lý)
   autoInstrumentServerFunctions: false,
+  autoInstrumentMiddleware: false,
   disableLogger: true,
   widenClientFileUpload: false,
   hideSourceMaps: true,
-  // Không tự động thêm Content-Security-Policy header
-  autoInstrumentMiddleware: false,
 }
 
 export default withSentryConfig(nextConfig, sentryWebpackPluginOptions)

@@ -3,6 +3,7 @@ import type { Metadata } from "next"
 import { GeistSans } from "geist/font/sans"
 import { GeistMono } from "geist/font/mono"
 import { Playfair_Display, Manrope } from "next/font/google"
+import { headers } from "next/headers"
 
 const playfair = Playfair_Display({
   subsets: ["vietnamese", "latin"],
@@ -39,11 +40,12 @@ export const metadata: Metadata = {
   },
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode
 }>) {
+  const nonce = (await headers()).get('x-nonce') ?? undefined
   return (
     <html lang="vi">
       <body className={`font-sans ${GeistSans.variable} ${GeistMono.variable} ${playfair.variable} ${manrope.variable} antialiased relative min-h-screen bg-[#f5f4f2] text-neutral-800`} suppressHydrationWarning>
