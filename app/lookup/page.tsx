@@ -1,6 +1,7 @@
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
 import { AppointmentLookup } from "@/components/appointment-lookup"
+import Script from "next/script"
 
 export default function LookupPage() {
   return (
@@ -15,6 +16,12 @@ export default function LookupPage() {
       </div>
 
       <Header />
+      {process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY && (
+        <Script
+          src={`https://www.google.com/recaptcha/api.js?render=${process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY}`}
+          strategy="afterInteractive"
+        />
+      )}
       <main className="relative z-10 pt-24 lg:pt-32 pb-16">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           {/* Page Header */}
