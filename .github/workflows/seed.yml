@@ -1,0 +1,30 @@
+name: 🌱 Seed Database (One-time)
+
+on:
+  workflow_dispatch: # Chỉ chạy khi bấm tay — KHÔNG tự động
+
+jobs:
+  seed:
+    name: Seed Database
+    runs-on: ubuntu-latest
+
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Setup PNPM
+        uses: pnpm/action-setup@v4
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: ⚠️ Seed Database
+        run: pnpm db:seed
