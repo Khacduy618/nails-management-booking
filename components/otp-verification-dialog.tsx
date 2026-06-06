@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -29,6 +29,51 @@ export function OTPVerificationDialog({
     const [isVerifying, setIsVerifying] = useState(false)
     const [error, setError] = useState("")
     const [resendCountdown, setResendCountdown] = useState(0)
+    const [recaptchaToken, setRecaptchaToken] = useState<string | null>(null)
+    const [isRecaptchaLoaded, setIsRecaptchaLoaded] = useState(false)
+
+    // Poll for window.grecaptcha
+    useEffect(() => {
+        if (typeof window === "undefined") return;
+        const interval = setInterval(() => {
+            if ((window as any).grecaptcha) {
+                setIsRecaptchaLoaded(true);
+                clearInterval(interval);
+            }
+        }, 500);
+        return () => clearInterval(interval);
+    }, []);
+
+    // Render reCAPTCHA v2 for resend container when open and countdown is 0
+    useEffect(() => {
+        if (open && resendCountdown === 0 && isRecaptchaLoaded && (window as any).grecaptcha) {
+            const timer = setTimeout(() => {
+                const container = document.getElementById("recaptcha-resend-container");
+                if (container) {
+                    container.innerHTML = "";
+                    try {
+                        (window as any).grecaptcha.render(container, {
+                            sitekey: process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY,
+                            callback: (token: string) => {
+                                setRecaptchaToken(token);
+                            },
+                            'expired-callback': () => {
+                                setRecaptchaToken(null);
+                            },
+                            'error-callback': () => {
+                                setRecaptchaToken(null);
+                            }
+                        });
+                    } catch (error) {
+                        console.error("grecaptcha render error (resend):", error);
+                    }
+                }
+            }, 150);
+            return () => clearTimeout(timer);
+        } else {
+            setRecaptchaToken(null);
+        }
+    }, [open, resendCountdown, isRecaptchaLoaded]);
 
     const handleVerifyOTP = async () => {
         if (!otp.trim()) {
@@ -74,6 +119,12 @@ export function OTPVerificationDialog({
     }
 
     const handleResendOTP = async () => {
+        const hasSiteKey = !!process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY
+        if (hasSiteKey && !recaptchaToken) {
+            setError("Vui lòng xác thực reCAPTCHA để gửi lại OTP")
+            return
+        }
+
         setResendCountdown(60)
         setError("")
         setOtp("")
@@ -85,6 +136,7 @@ export function OTPVerificationDialog({
                 body: JSON.stringify({
                     appointmentId,
                     phone,
+                    recaptchaToken,
                 }),
             })
 
@@ -95,6 +147,7 @@ export function OTPVerificationDialog({
             }
 
             toast.success("Mã OTP đã được gửi lại")
+            setRecaptchaToken(null) // Reset token
 
             // Countdown timer
             const interval = setInterval(() => {
@@ -160,7 +213,13 @@ export function OTPVerificationDialog({
                         <p className="text-xs text-muted-foreground">
                             Mã OTP có hiệu lực trong 5 phút
                         </p>
-                    </div>                    <div className="flex gap-2">
+                    </div>
+
+                    {resendCountdown === 0 && process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY && (
+                        <div className="py-2 flex justify-center min-h-[78px]">
+                            <div id="recaptcha-resend-container" />
+                        </div>
+                    )}                    <div className="flex gap-2">
                         <Button
                             onClick={handleVerifyOTP}
                             disabled={isVerifying || isLoadingOTP || otp.length !== 6}
@@ -179,7 +238,7 @@ export function OTPVerificationDialog({
                         <Button
                             variant="outline"
                             onClick={handleResendOTP}
-                            disabled={resendCountdown > 0 || isLoadingOTP}
+                            disabled={resendCountdown > 0 || isLoadingOTP || (!!process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY && !recaptchaToken)}
                             className="flex-1"
                         >
                             {resendCountdown > 0

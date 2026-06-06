@@ -8,10 +8,10 @@ import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Search, Calendar, Clock, CheckCircle, XCircle, AlertCircle, Trash2, Loader2, Star, Sparkles } from "lucide-react"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { toast } from "sonner"
-import { ConfirmDialog } from "@/components/ui/confirm-dialog"
 import { OTPVerificationDialog } from "@/components/otp-verification-dialog"
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 
 // --- Định nghĩa kiểu dữ liệu ---
 type AppointmentStatus = "pending" | "confirmed" | "completed" | "cancelled" | "in-progress";
@@ -37,31 +37,6 @@ const statusConfig: Record<AppointmentStatus, { label: string; variant: "seconda
   'in-progress': { label: "Đang thực hiện", variant: "default", icon: Clock }, // Thêm trạng thái mới
 };
 
-const getRecaptchaToken = async (): Promise<string | null> => {
-  if (typeof window === "undefined" || !(window as any).grecaptcha) {
-    console.warn("reCAPTCHA not loaded yet")
-    return null
-  }
-  return new Promise((resolve) => {
-    (window as any).grecaptcha.ready(async () => {
-      try {
-        const siteKey = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY
-        if (!siteKey) {
-          console.warn("NEXT_PUBLIC_RECAPTCHA_SITE_KEY is not configured")
-          resolve(null)
-          return
-        }
-        const token = await (window as any).grecaptcha.execute(siteKey, {
-          action: "cancel_appointment",
-        })
-        resolve(token)
-      } catch (err) {
-        console.error("Error executing reCAPTCHA:", err)
-        resolve(null)
-      }
-    })
-  })
-}
 
 export function AppointmentLookup() {
   const [phoneNumber, setPhoneNumber] = useState("")
@@ -74,6 +49,52 @@ export function AppointmentLookup() {
   const [selectedAppointmentId, setSelectedAppointmentId] = useState<number | null>(null)
   const [isLoadingOTP, setIsLoadingOTP] = useState(false)
   const [sendingEmailId, setSendingEmailId] = useState<number | null>(null)
+  const [cancellingAppointmentId, setCancellingAppointmentId] = useState<number | null>(null)
+  const [recaptchaToken, setRecaptchaToken] = useState<string | null>(null)
+  const [isRecaptchaLoaded, setIsRecaptchaLoaded] = useState(false)
+
+  // Poll for window.grecaptcha
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const interval = setInterval(() => {
+      if ((window as any).grecaptcha) {
+        setIsRecaptchaLoaded(true);
+        clearInterval(interval);
+      }
+    }, 500);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Render reCAPTCHA v2 when the confirmation dialog is opened
+  useEffect(() => {
+    if (cancellingAppointmentId !== null && isRecaptchaLoaded && (window as any).grecaptcha) {
+      const timer = setTimeout(() => {
+        const container = document.getElementById("recaptcha-v2-container");
+        if (container) {
+          container.innerHTML = "";
+          try {
+            (window as any).grecaptcha.render(container, {
+              sitekey: process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY,
+              callback: (token: string) => {
+                setRecaptchaToken(token);
+              },
+              'expired-callback': () => {
+                setRecaptchaToken(null);
+              },
+              'error-callback': () => {
+                setRecaptchaToken(null);
+              }
+            });
+          } catch (error) {
+            console.error("grecaptcha render error:", error);
+          }
+        }
+      }, 150);
+      return () => clearTimeout(timer);
+    } else {
+      setRecaptchaToken(null);
+    }
+  }, [cancellingAppointmentId, isRecaptchaLoaded]);
 
   const handleSendReviewEmail = async (appointmentId: number) => {
     setSendingEmailId(appointmentId)
@@ -130,13 +151,16 @@ export function AppointmentLookup() {
   }
 
   const handleCancelAppointment = async (appointmentId: number) => {
+    if (!recaptchaToken) {
+      toast.error("Vui lòng xác thực reCAPTCHA")
+      return
+    }
+
     setSelectedAppointmentId(appointmentId)
     setIsLoadingOTP(true)
     setError("")
 
     try {
-      const recaptchaToken = await getRecaptchaToken()
-
       const res = await fetch("/api/otp/send", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -155,6 +179,7 @@ export function AppointmentLookup() {
 
       toast.success("Mã OTP đã được gửi đến số điện thoại của bạn")
       setOtpDialogOpen(true)
+      setCancellingAppointmentId(null)
     } catch (err: any) {
       setError(err.message)
       toast.error(err.message)
@@ -280,30 +305,19 @@ export function AppointmentLookup() {
 
                         {/* Cancel Button */}
                         {canCancelAppointment(appointment) && (
-                          <ConfirmDialog
-                            title="Xác nhận hủy lịch hẹn?"
-                            description="Bạn sẽ nhận được mã OTP để xác thực hủy lịch hẹn này. Hành động không thể hoàn tác."
-                            onConfirm={() => handleCancelAppointment(appointment.id)}
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            disabled={isLoadingOTP || cancellingAppointmentId !== null}
+                            className="w-full"
+                            onClick={() => {
+                              setCancellingAppointmentId(appointment.id)
+                              setRecaptchaToken(null)
+                            }}
                           >
-                            <Button
-                              variant="destructive"
-                              size="sm"
-                              disabled={isLoadingOTP}
-                              className="w-full"
-                            >
-                              {isLoadingOTP ? (
-                                <>
-                                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                                  Đang gửi OTP...
-                                </>
-                              ) : (
-                                <>
-                                  <Trash2 className="h-4 w-4 mr-2" />
-                                  Hủy lịch hẹn
-                                </>
-                              )}
-                            </Button>
-                          </ConfirmDialog>
+                            <Trash2 className="h-4 w-4 mr-2" />
+                            Hủy lịch hẹn
+                          </Button>
                         )}
 
                         {/* Review Section */}
@@ -379,6 +393,64 @@ export function AppointmentLookup() {
       )}
 
       
+
+      {/* Custom Confirmation Dialog with reCAPTCHA v2 Checkbox */}
+      <Dialog open={cancellingAppointmentId !== null} onOpenChange={(open) => {
+        if (!open) {
+          setCancellingAppointmentId(null)
+          setRecaptchaToken(null)
+        }
+      }}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Xác nhận hủy lịch hẹn?</DialogTitle>
+            <DialogDescription>
+              Bạn sẽ nhận được mã OTP để xác thực hủy lịch hẹn này. Hành động không thể hoàn tác.
+            </DialogDescription>
+          </DialogHeader>
+
+          {/* reCAPTCHA Checkbox Container */}
+          <div className="py-4 flex justify-center min-h-[78px]">
+            {process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY ? (
+              <div id="recaptcha-v2-container" />
+            ) : (
+              <p className="text-sm text-destructive font-medium">Chưa cấu hình NEXT_PUBLIC_RECAPTCHA_SITE_KEY</p>
+            )}
+          </div>
+
+          <DialogFooter className="flex gap-2 sm:gap-0">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setCancellingAppointmentId(null)
+                setRecaptchaToken(null)
+              }}
+              className="flex-1 sm:flex-none"
+            >
+              Hủy
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => {
+                if (cancellingAppointmentId !== null) {
+                  handleCancelAppointment(cancellingAppointmentId)
+                }
+              }}
+              disabled={!recaptchaToken || isLoadingOTP}
+              className="flex-1 sm:flex-none"
+            >
+              {isLoadingOTP ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Đang gửi OTP...
+                </>
+              ) : (
+                "Đồng ý & Gửi OTP"
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* OTP Verification Dialog */}
       {selectedAppointmentId && (
