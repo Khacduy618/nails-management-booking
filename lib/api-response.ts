@@ -24,6 +24,9 @@ export type ApiErrorCode =
   | "STAFF_NOT_FOUND"
   | "EMAIL_NOT_FOUND"
   | "EMAIL_SEND_FAILED"
+  | "RECAPTCHA_REQUIRED"
+  | "RECAPTCHA_INVALID"
+  | "RECAPTCHA_ERROR"
 
 export function ok<T extends object>(payload: T, status = 200) {
   return NextResponse.json({ success: true, ...payload }, { status })
