@@ -72,8 +72,21 @@ export async function POST(request: NextRequest) {
             return fail("NOT_FOUND", "Appointment not found", 404)
         }
 
-        const ownerPhone = sanitizePhone(appointment.customerPhone)
-        if (ownerPhone !== sanitizedPhone) {
+        const isPhoneMatch = (p1: string, p2: string): boolean => {
+            const clean = (p: string) => p.replace(/\D/g, "")
+            const c1 = clean(p1)
+            const c2 = clean(p2)
+            if (c1 === c2) return true
+            
+            const normalize = (c: string) => {
+                if (c.startsWith("84")) return c.slice(2)
+                if (c.startsWith("0")) return c.slice(1)
+                return c
+            }
+            return normalize(c1) === normalize(c2)
+        }
+
+        if (!isPhoneMatch(appointment.customerPhone, phone)) {
             return fail("UNAUTHORIZED", "Phone number does not match appointment", 403)
         }
 
