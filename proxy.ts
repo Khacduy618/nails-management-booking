@@ -20,7 +20,7 @@ export function proxy(request: NextRequest) {
 
   const cspHeader = `
     default-src 'self';
-    script-src 'self' 'nonce-${nonce}' ${isDev ? "'unsafe-eval' 'unsafe-inline'" : "'strict-dynamic'"};
+    script-src 'self' 'nonce-${nonce}' https://www.google.com/recaptcha/ https://www.gstatic.com/recaptcha/ ${isDev ? "'unsafe-eval' 'unsafe-inline'" : "'strict-dynamic'"};
     style-src 'self' 'unsafe-inline';
     img-src 'self' data: blob: https:;
     font-src 'self' data:;
@@ -28,7 +28,8 @@ export function proxy(request: NextRequest) {
     base-uri 'self';
     form-action 'self';
     frame-ancestors 'none';
-    connect-src ${connectSrc};
+    frame-src 'self' https://www.google.com/recaptcha/ https://recaptcha.google.com/ https://www.google.com/;
+    connect-src ${connectSrc} https://www.google.com/recaptcha/;
     worker-src 'self' blob:;
   `.replace(/\s{2,}/g, ' ').trim()
 
