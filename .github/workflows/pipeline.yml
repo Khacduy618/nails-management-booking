@@ -4,9 +4,6 @@ on:
   push:
     branches:
       - main
-    paths:
-      - 'drizzle/**'
-      - 'scripts/migrate.ts'
   workflow_dispatch: # Cho phép bấm nút "Run workflow" để chạy tay
     inputs:
       run_seed:
@@ -19,9 +16,30 @@ on:
           - 'true'
 
 jobs:
-  # JOB 1: CHẠY MIGRATION
+  # JOB 1: KIỂM TRA XEM CÓ THAY ĐỔI CƠ SỞ DỮ LIỆU KHÔNG
+  changes:
+    name: Check Database Changes
+    runs-on: ubuntu-latest
+    outputs:
+      database: ${{ steps.filter.outputs.database }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check for database changes
+        uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            database:
+              - 'drizzle/**'
+              - 'scripts/migrate.ts'
+
+  # JOB 2: CHẠY MIGRATION (CHỈ CHẠY KHI CÓ THAY ĐỔI HOẶC CHẠY THỦ CÔNG)
   migrate:
     name: Run Database Migration
+    needs: changes
+    if: ${{ needs.changes.outputs.database == 'true' || github.event_name == 'workflow_dispatch' }}
     runs-on: ubuntu-latest
 
     env:
@@ -45,7 +63,7 @@ jobs:
       - name: Run Drizzle Migrate
         run: pnpm db:migrate
 
-  # JOB 2: SEED DATABASE (CHỈ CHẠY KHI ĐƯỢC BẬT THỦ CÔNG)
+  # JOB 3: SEED DATABASE (CHỈ CHẠY KHI ĐƯỢC BẬT THỦ CÔNG)
   seed:
     name: Seed Database (One-time)
     needs: migrate
@@ -74,10 +92,14 @@ jobs:
       - name: ⚠️ Seed Database (XÓA và tạo lại dữ liệu mẫu)
         run: pnpm db:seed
 
-  # JOB 3: TRIGGER DEPLOY (CHỈ CHẠY KHI MIGRATE XONG)
+  # JOB 4: TRIGGER DEPLOY (CHẠY KHI MIGRATE THÀNH CÔNG HOẶC ĐƯỢC BỎ QUA)
   deploy:
     name: Trigger Vercel Deploy
-    needs: migrate # QUAN TRỌNG: Bắt buộc job migrate phải thành công mới chạy tiếp
+    needs: [changes, migrate]
+    # Chỉ deploy nếu Job migrate thành công HOẶC Job migrate bị bỏ qua (không có thay đổi database)
+    if: |
+      always() &&
+      (needs.migrate.result == 'success' || needs.migrate.result == 'skipped')
     runs-on: ubuntu-latest
     
     steps:
