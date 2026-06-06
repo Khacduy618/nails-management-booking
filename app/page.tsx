@@ -6,6 +6,7 @@ import { TeamSection } from "@/components/team-section"
 import { Footer } from "@/components/footer"
 
 export default function HomePage() {
+  // Test comment to verify GitHub Actions and Vercel Deploy Hook pipeline flow
   return (
     <div className="min-h-screen">
       <Header />
