@@ -1,4 +1,4 @@
-CREATE TABLE "admin_notifications" (
+CREATE TABLE IF NOT EXISTS "admin_notifications" (
 	"id" serial PRIMARY KEY NOT NULL,
 	"title" varchar(255) NOT NULL,
 	"message" text NOT NULL,
