@@ -5,6 +5,15 @@ on:
     branches:
       - main
   workflow_dispatch: # Cho phép bấm nút "Run workflow" để chạy tay
+    inputs:
+      run_seed:
+        description: '🌱 Chạy seed dữ liệu vào database? (XÓA TOÀN BỘ DỮ LIỆU CŨ)'
+        required: false
+        default: 'false'
+        type: choice
+        options:
+          - 'false'
+          - 'true'
 
 jobs:
   # JOB 1: CHẠY MIGRATION
@@ -31,11 +40,38 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Run Drizzle Migrate
-        # Drizzle-kit sẽ tự kiểm tra, nếu không có thay đổi file .sql 
-        # hoặc schema thì nó sẽ báo "No changes" và kết thúc rất nhanh.
         run: pnpm db:migrate
 
-  # JOB 2: TRIGGER DEPLOY (CHỈ CHẠY KHI JOB 1 XONG)
+  # JOB 2: SEED DATABASE (CHỈ CHẠY KHI ĐƯỢC BẬT THỦ CÔNG)
+  seed:
+    name: Seed Database (One-time)
+    needs: migrate
+    runs-on: ubuntu-latest
+    # Chỉ chạy khi người dùng bấm "Run workflow" VÀ chọn run_seed = true
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.run_seed == 'true' }}
+
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Setup PNPM
+        uses: pnpm/action-setup@v4
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: ⚠️ Seed Database (XÓA và tạo lại dữ liệu mẫu)
+        run: pnpm db:seed
+
+  # JOB 3: TRIGGER DEPLOY (CHỈ CHẠY KHI MIGRATE XONG)
   deploy:
     name: Trigger Vercel Deploy
     needs: migrate # QUAN TRỌNG: Bắt buộc job migrate phải thành công mới chạy tiếp

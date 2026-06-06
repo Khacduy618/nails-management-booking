@@ -1,16 +1,34 @@
-CREATE TYPE "role" AS ENUM('customer', 'staff', 'admin');
+DO $$ BEGIN
+  CREATE TYPE "role" AS ENUM('customer', 'staff', 'admin');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 --> statement-breakpoint
-CREATE TYPE "staff_status" AS ENUM('active', 'inactive');
+DO $$ BEGIN
+  CREATE TYPE "staff_status" AS ENUM('active', 'inactive');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 --> statement-breakpoint
-CREATE TYPE "category_status" AS ENUM('active', 'deleted', 'inactive');
+DO $$ BEGIN
+  CREATE TYPE "category_status" AS ENUM('active', 'deleted', 'inactive');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 --> statement-breakpoint
-CREATE TYPE "service_status" AS ENUM('active', 'archived');
+DO $$ BEGIN
+  CREATE TYPE "service_status" AS ENUM('active', 'archived');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 --> statement-breakpoint
-CREATE TYPE "payroll_status" AS ENUM('pending', 'calculated', 'paid', 'cancelled');
+DO $$ BEGIN
+  CREATE TYPE "payroll_status" AS ENUM('pending', 'calculated', 'paid', 'cancelled');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 --> statement-breakpoint
-CREATE TYPE "appointment_status" AS ENUM('pending', 'confirmed', 'completed', 'cancelled', 'in-progress');
+DO $$ BEGIN
+  CREATE TYPE "appointment_status" AS ENUM('pending', 'confirmed', 'completed', 'cancelled', 'in-progress');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 --> statement-breakpoint
-CREATE TABLE "appointment_services" (
+CREATE TABLE IF NOT EXISTS "appointment_services" (
 	"id" serial PRIMARY KEY NOT NULL,
 	"appointment_id" integer NOT NULL,
 	"service_id" integer NOT NULL,
@@ -20,7 +38,7 @@ CREATE TABLE "appointment_services" (
 	"work_share" numeric(5, 2) DEFAULT '100.00'
 );
 --> statement-breakpoint
-CREATE TABLE "appointments" (
+CREATE TABLE IF NOT EXISTS "appointments" (
 	"id" serial PRIMARY KEY NOT NULL,
 	"customer_id" integer,
 	"customer_name" varchar(255) NOT NULL,
@@ -37,7 +55,7 @@ CREATE TABLE "appointments" (
 	"payroll_id" integer
 );
 --> statement-breakpoint
-CREATE TABLE "customers" (
+CREATE TABLE IF NOT EXISTS "customers" (
 	"id" serial PRIMARY KEY NOT NULL,
 	"phone" varchar(20) NOT NULL,
 	"name" varchar(255) NOT NULL,
@@ -51,7 +69,7 @@ CREATE TABLE "customers" (
 	CONSTRAINT "customers_phone_unique" UNIQUE("phone")
 );
 --> statement-breakpoint
-CREATE TABLE "payrolls" (
+CREATE TABLE IF NOT EXISTS "payrolls" (
 	"id" serial PRIMARY KEY NOT NULL,
 	"staff_id" integer NOT NULL,
 	"pay_period_start" date NOT NULL,
@@ -67,7 +85,7 @@ CREATE TABLE "payrolls" (
 	"created_at" timestamp DEFAULT now()
 );
 --> statement-breakpoint
-CREATE TABLE "service_categories" (
+CREATE TABLE IF NOT EXISTS "service_categories" (
 	"id" serial PRIMARY KEY NOT NULL,
 	"name" varchar(100) NOT NULL,
 	"description" text,
@@ -76,7 +94,7 @@ CREATE TABLE "service_categories" (
 	CONSTRAINT "service_categories_name_unique" UNIQUE("name")
 );
 --> statement-breakpoint
-CREATE TABLE "services" (
+CREATE TABLE IF NOT EXISTS "services" (
 	"id" serial PRIMARY KEY NOT NULL,
 	"name" varchar(255) NOT NULL,
 	"description" text,
@@ -90,7 +108,7 @@ CREATE TABLE "services" (
 	"updated_at" timestamp DEFAULT now()
 );
 --> statement-breakpoint
-CREATE TABLE "staff" (
+CREATE TABLE IF NOT EXISTS "staff" (
 	"id" serial PRIMARY KEY NOT NULL,
 	"name" varchar(255) NOT NULL,
 	"email" varchar(255),
@@ -107,7 +125,7 @@ CREATE TABLE "staff" (
 	CONSTRAINT "staff_email_unique" UNIQUE("email")
 );
 --> statement-breakpoint
-CREATE TABLE "staff_base_salaries" (
+CREATE TABLE IF NOT EXISTS "staff_base_salaries" (
 	"id" serial PRIMARY KEY NOT NULL,
 	"staff_id" integer NOT NULL,
 	"base_salary" numeric(10, 2) NOT NULL,
@@ -117,7 +135,7 @@ CREATE TABLE "staff_base_salaries" (
 	CONSTRAINT "staff_base_salaries_staff_id_unique" UNIQUE("staff_id")
 );
 --> statement-breakpoint
-CREATE TABLE "staff_schedules" (
+CREATE TABLE IF NOT EXISTS "staff_schedules" (
 	"id" serial PRIMARY KEY NOT NULL,
 	"staff_id" integer NOT NULL,
 	"day_of_week" integer NOT NULL,
@@ -127,13 +145,13 @@ CREATE TABLE "staff_schedules" (
 	"updated_at" timestamp DEFAULT now()
 );
 --> statement-breakpoint
-CREATE TABLE "staff_services" (
+CREATE TABLE IF NOT EXISTS "staff_services" (
 	"staff_id" integer NOT NULL,
 	"service_id" integer NOT NULL,
 	CONSTRAINT "staff_services_staff_id_service_id_pk" PRIMARY KEY("staff_id","service_id")
 );
 --> statement-breakpoint
-CREATE TABLE "users" (
+CREATE TABLE IF NOT EXISTS "users" (
 	"id" serial PRIMARY KEY NOT NULL,
 	"name" varchar(255) NOT NULL,
 	"email" varchar(255),
@@ -146,14 +164,57 @@ CREATE TABLE "users" (
 	CONSTRAINT "users_phone_unique" UNIQUE("phone")
 );
 --> statement-breakpoint
-ALTER TABLE "appointment_services" ADD CONSTRAINT "appointment_services_appointment_id_appointments_id_fk" FOREIGN KEY ("appointment_id") REFERENCES "public"."appointments"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "appointment_services" ADD CONSTRAINT "appointment_services_service_id_services_id_fk" FOREIGN KEY ("service_id") REFERENCES "public"."services"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "appointment_services" ADD CONSTRAINT "appointment_services_staff_id_staff_id_fk" FOREIGN KEY ("staff_id") REFERENCES "public"."staff"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "appointments" ADD CONSTRAINT "appointments_customer_id_customers_id_fk" FOREIGN KEY ("customer_id") REFERENCES "public"."customers"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "appointments" ADD CONSTRAINT "appointments_payroll_id_payrolls_id_fk" FOREIGN KEY ("payroll_id") REFERENCES "public"."payrolls"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "payrolls" ADD CONSTRAINT "payrolls_staff_id_staff_id_fk" FOREIGN KEY ("staff_id") REFERENCES "public"."staff"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "services" ADD CONSTRAINT "services_category_id_service_categories_id_fk" FOREIGN KEY ("category_id") REFERENCES "public"."service_categories"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "staff_base_salaries" ADD CONSTRAINT "staff_base_salaries_staff_id_staff_id_fk" FOREIGN KEY ("staff_id") REFERENCES "public"."staff"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "staff_schedules" ADD CONSTRAINT "staff_schedules_staff_id_staff_id_fk" FOREIGN KEY ("staff_id") REFERENCES "public"."staff"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "staff_services" ADD CONSTRAINT "staff_services_staff_id_staff_id_fk" FOREIGN KEY ("staff_id") REFERENCES "public"."staff"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "staff_services" ADD CONSTRAINT "staff_services_service_id_services_id_fk" FOREIGN KEY ("service_id") REFERENCES "public"."services"("id") ON DELETE cascade ON UPDATE no action;
+DO $$ BEGIN
+  ALTER TABLE "appointment_services" ADD CONSTRAINT "appointment_services_appointment_id_appointments_id_fk" FOREIGN KEY ("appointment_id") REFERENCES "public"."appointments"("id") ON DELETE cascade ON UPDATE no action;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+  ALTER TABLE "appointment_services" ADD CONSTRAINT "appointment_services_service_id_services_id_fk" FOREIGN KEY ("service_id") REFERENCES "public"."services"("id") ON DELETE cascade ON UPDATE no action;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+  ALTER TABLE "appointment_services" ADD CONSTRAINT "appointment_services_staff_id_staff_id_fk" FOREIGN KEY ("staff_id") REFERENCES "public"."staff"("id") ON DELETE set null ON UPDATE no action;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+  ALTER TABLE "appointments" ADD CONSTRAINT "appointments_customer_id_customers_id_fk" FOREIGN KEY ("customer_id") REFERENCES "public"."customers"("id") ON DELETE cascade ON UPDATE no action;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+  ALTER TABLE "appointments" ADD CONSTRAINT "appointments_payroll_id_payrolls_id_fk" FOREIGN KEY ("payroll_id") REFERENCES "public"."payrolls"("id") ON DELETE set null ON UPDATE no action;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+  ALTER TABLE "payrolls" ADD CONSTRAINT "payrolls_staff_id_staff_id_fk" FOREIGN KEY ("staff_id") REFERENCES "public"."staff"("id") ON DELETE cascade ON UPDATE no action;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+  ALTER TABLE "services" ADD CONSTRAINT "services_category_id_service_categories_id_fk" FOREIGN KEY ("category_id") REFERENCES "public"."service_categories"("id") ON DELETE set null ON UPDATE no action;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+  ALTER TABLE "staff_base_salaries" ADD CONSTRAINT "staff_base_salaries_staff_id_staff_id_fk" FOREIGN KEY ("staff_id") REFERENCES "public"."staff"("id") ON DELETE cascade ON UPDATE no action;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+  ALTER TABLE "staff_schedules" ADD CONSTRAINT "staff_schedules_staff_id_staff_id_fk" FOREIGN KEY ("staff_id") REFERENCES "public"."staff"("id") ON DELETE cascade ON UPDATE no action;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+  ALTER TABLE "staff_services" ADD CONSTRAINT "staff_services_staff_id_staff_id_fk" FOREIGN KEY ("staff_id") REFERENCES "public"."staff"("id") ON DELETE cascade ON UPDATE no action;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+  ALTER TABLE "staff_services" ADD CONSTRAINT "staff_services_service_id_services_id_fk" FOREIGN KEY ("service_id") REFERENCES "public"."services"("id") ON DELETE cascade ON UPDATE no action;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
