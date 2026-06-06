@@ -121,9 +121,9 @@ export function RecentAppointments() {
               <div className="flex items-center gap-4">
                 <Avatar>
                   <AvatarFallback className="bg-muted text-muted-foreground">
-                    {appointment.customerName
+                    {(appointment.customerName || "Khách Hàng")
                       .split(" ")
-                      .map((n) => n[0])
+                      .map((n) => n[0] || "")
                       .join("")
                       .slice(0, 2)}
                   </AvatarFallback>

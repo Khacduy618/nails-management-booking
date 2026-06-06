@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { DatePickerWithRange } from "@/components/ui/date-range-picker"
-import { DollarSign, Users, Calendar, Download, BarChart3 } from "lucide-react"
+import { DollarSign, Users, Calendar, Download, BarChart3, ArrowUpRight, ArrowDownRight } from "lucide-react"
 import { RevenueChart } from "./revenue-chart"
 import { ServiceRevenueChart } from "./service-revenue-chart"
 import { StaffPerformanceChart } from "./staff-performance-chart"
@@ -64,6 +64,55 @@ const getPeriodDates = (period: string): { startDate: Date; endDate: Date } => {
   startDate.setHours(0, 0, 0, 0)
 
   return { startDate, endDate }
+}
+
+interface KpiCardProps {
+  title: string
+  value: string
+  subtitle: string
+  icon: React.ElementType
+  trend?: number
+  gradient: string
+  onClick?: () => void
+}
+
+function KpiCard({ title, value, subtitle, icon: Icon, trend, gradient, onClick }: KpiCardProps) {
+  const isPositive = (trend ?? 0) >= 0
+  return (
+    <div 
+      onClick={onClick}
+      className={`relative overflow-hidden rounded-3xl p-6 text-white shadow-[0_10px_25px_-5px_rgba(0,0,0,0.1),0_8px_10px_-6px_rgba(0,0,0,0.05)] border border-white/10 transition-all duration-500 hover:-translate-y-1 hover:shadow-[0_20px_35px_-10px_rgba(0,0,0,0.15)] ${gradient} ${onClick ? 'cursor-pointer' : ''}`}
+      style={{ minHeight: 140 }}
+    >
+      {/* decorative circles */}
+      <div className="absolute -right-6 -top-6 h-28 w-28 rounded-full bg-white/[0.08] blur-sm" />
+      <div className="absolute -bottom-8 -right-2 h-20 w-20 rounded-full bg-white/[0.04] blur-xs" />
+
+      <div className="relative z-10 flex items-start justify-between">
+        <div>
+          <p className="text-xs font-bold uppercase tracking-wider text-white/80">{title}</p>
+          <p className="mt-2 text-3xl font-extrabold tracking-tight">{value}</p>
+          <p className="mt-1 text-xs text-white/70 font-medium">{subtitle}</p>
+        </div>
+        <div className="rounded-2xl bg-white/15 p-3 backdrop-blur-xs ring-1 ring-white/10">
+          <Icon className="h-5.5 w-5.5 text-white" />
+        </div>
+      </div>
+
+      {trend !== undefined && (
+        <div className="relative z-10 mt-4 flex items-center gap-1 text-[11px] font-bold">
+          {isPositive ? (
+            <ArrowUpRight className="h-3.5 w-3.5 text-emerald-300" />
+          ) : (
+            <ArrowDownRight className="h-3.5 w-3.5 text-red-300" />
+          )}
+          <span className={isPositive ? "text-emerald-200" : "text-red-200"}>
+            {Math.abs(trend).toFixed(1)}% so với kỳ trước
+          </span>
+        </div>
+      )}
+    </div>
+  )
 }
 
 export function RevenueAnalytics() {
@@ -319,73 +368,52 @@ export function RevenueAnalytics() {
 
       {/* Key Metrics */}
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
-        <Card className="cursor-pointer transition-shadow hover:shadow-lg" onClick={fetchRevenueByService}>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 p-[10px] pb-2 sm:p-6 sm:pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Tổng doanh thu</CardTitle>
-            <DollarSign className="h-5 w-5 text-primary" />
-          </CardHeader>
-          <CardContent className="p-[10px] sm:p-6">
-            {loading ? (
-              <Skeleton className="h-8 w-24 mb-2" />
-            ) : (
-              <>
-                <div className="text-2xl font-bold text-foreground">
-                  {((revenueData?.totalRevenue ?? 0) / 1000000).toFixed(1)}M₫
-                </div>
-              </>
-            )}
-          </CardContent>
-        </Card>
-
-        <Card className="cursor-pointer transition-shadow hover:shadow-lg" onClick={fetchAppointments}>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 p-[10px] pb-2 sm:p-6 sm:pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Tổng lịch hẹn</CardTitle>
-            <Calendar className="h-5 w-5 text-accent" />
-          </CardHeader>
-          <CardContent className="p-[10px] sm:p-6">
-            {loading ? (
-              <Skeleton className="h-8 w-20 mb-2" />
-            ) : (
-              <>
-                <div className="text-2xl font-bold text-foreground">{revenueData?.totalAppointments ?? 0}</div>
-              </>
-            )}
-          </CardContent>
-        </Card>
-
-        <Card className="cursor-pointer transition-shadow hover:shadow-lg" onClick={fetchCustomers}>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 p-[10px] pb-2 sm:p-6 sm:pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Tổng khách hàng</CardTitle>
-            <Users className="h-5 w-5 text-secondary" />
-          </CardHeader>
-          <CardContent className="p-[10px] sm:p-6">
-            {loading ? (
-              <Skeleton className="h-8 w-20 mb-2" />
-            ) : (
-              <>
-                <div className="text-2xl font-bold text-foreground">{revenueData?.totalCustomers ?? 0}</div>
-              </>
-            )}
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 p-[10px] pb-2 sm:p-6 sm:pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Giá trị trung bình</CardTitle>
-            <BarChart3 className="h-5 w-5 text-primary" />
-          </CardHeader>
-          <CardContent className="p-[10px] sm:p-6">
-            {loading ? (
-              <Skeleton className="h-8 w-24 mb-2" />
-            ) : (
-              <>
-                <div className="text-2xl font-bold text-foreground">
-                  {((revenueData?.averageOrderValue ?? 0) / 1000).toFixed(0)}K₫
-                </div>
-              </>
-            )}
-          </CardContent>
-        </Card>
+        {loading ? (
+          <>
+            <Skeleton className="h-[140px] w-full rounded-3xl" />
+            <Skeleton className="h-[140px] w-full rounded-3xl" />
+            <Skeleton className="h-[140px] w-full rounded-3xl" />
+            <Skeleton className="h-[140px] w-full rounded-3xl" />
+          </>
+        ) : (
+          <>
+            <KpiCard
+              title="Tổng doanh thu"
+              value={`${((revenueData?.totalRevenue ?? 0) / 1000000).toFixed(1)}M₫`}
+              subtitle={`${(revenueData?.totalRevenue ?? 0).toLocaleString('vi-VN')}₫`}
+              icon={DollarSign}
+              trend={revenueGrowth}
+              gradient="bg-gradient-to-br from-orange-500 to-pink-500"
+              onClick={fetchRevenueByService}
+            />
+            <KpiCard
+              title="Tổng lịch hẹn"
+              value={String(revenueData?.totalAppointments ?? 0)}
+              subtitle="Lịch hẹn trong khoảng thời gian"
+              icon={Calendar}
+              trend={appointmentGrowth}
+              gradient="bg-gradient-to-br from-purple-600 to-indigo-600"
+              onClick={fetchAppointments}
+            />
+            <KpiCard
+              title="Tổng khách hàng"
+              value={String(revenueData?.totalCustomers ?? 0)}
+              subtitle="Khách hàng duy nhất"
+              icon={Users}
+              trend={customerGrowth}
+              gradient="bg-gradient-to-br from-blue-500 to-cyan-500"
+              onClick={fetchCustomers}
+            />
+            <KpiCard
+              title="Giá trị trung bình"
+              value={`${((revenueData?.averageOrderValue ?? 0) / 1000).toFixed(0)}K₫`}
+              subtitle="Doanh thu trên mỗi lịch hẹn"
+              icon={BarChart3}
+              trend={aovGrowth}
+              gradient="bg-gradient-to-br from-teal-500 to-emerald-500"
+            />
+          </>
+        )}
       </div>
 
       {/* Revenue Chart */}

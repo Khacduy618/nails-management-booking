@@ -122,39 +122,40 @@ export function PayrollDialog({
 
     return (
         <Dialog open={isOpen} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-[1000px] max-h-[85vh] overflow-y-auto">
-                <DialogHeader>
-                    <DialogTitle>
-                        💰 Bảng Lương - {staffName} ({formatMonthYear(month.toISOString())})
+            <DialogContent className="sm:max-w-[1000px] max-h-[85vh] overflow-y-auto rounded-3xl border border-neutral-200 bg-white/95 backdrop-blur-lg p-6 shadow-2xl">
+                <DialogHeader className="mb-4">
+                    <DialogTitle className="text-xl font-extrabold text-neutral-800 flex items-center gap-2">
+                        <span>💰 Bảng Lương - {staffName}</span>
+                        <span className="text-sm font-bold text-muted-foreground bg-neutral-100 px-3 py-1 rounded-full border">
+                            {formatMonthYear(month.toISOString())}
+                        </span>
                     </DialogTitle>
                 </DialogHeader>
 
                 {loading ? (
                     <div className="space-y-4">
-                        <Skeleton className="h-24 w-full" />
-                        <Skeleton className="h-64 w-full" />
+                        <Skeleton className="h-24 w-full rounded-2xl" />
+                        <Skeleton className="h-64 w-full rounded-2xl" />
                     </div>
                 ) : payroll ? (
                     <div className="space-y-6">
-                        {/* Tóm tắt lương */}
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                            <div className="border rounded-lg p-3">
-                                <p className="text-xs text-muted-foreground">Lương Cứng</p>
-                                <p className="text-lg font-bold">{formatCurrency(payroll.baseSalary)}</p>
+                        {/* Tóm tắt lương bento grid */}
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                            <div className="border border-neutral-200/60 rounded-2xl p-4 bg-white/50 hover:shadow-sm transition-shadow">
+                                <p className="text-[10px] text-neutral-500 font-bold uppercase tracking-wider">Lương Cơ Bản</p>
+                                <p className="text-2xl font-extrabold text-neutral-800 mt-1">{formatCurrency(payroll.baseSalary)}</p>
                             </div>
 
-                            <div className="border rounded-lg p-3">
-                                <p className="text-xs text-muted-foreground">Hoa Hồng</p>
-                                <p className="text-lg font-bold text-green-600">
+                            <div className="border border-green-100 rounded-2xl p-4 bg-gradient-to-br from-green-50/40 to-emerald-50/40 hover:shadow-sm transition-shadow">
+                                <p className="text-[10px] text-green-600 font-bold uppercase tracking-wider">Tổng Hoa Hồng</p>
+                                <p className="text-2xl font-extrabold text-green-600 mt-1">
                                     {formatCurrency(payroll.totalCommission)}
                                 </p>
                             </div>
 
-
-
-                            <div className="border rounded-lg p-3 bg-primary/5">
-                                <p className="text-xs text-muted-foreground font-semibold">Lương Cuối</p>
-                                <p className="text-lg font-bold text-primary">
+                            <div className="border border-primary/20 rounded-2xl p-4 bg-gradient-to-br from-orange-50/40 to-pink-50/40 shadow-sm">
+                                <p className="text-[10px] text-primary font-bold uppercase tracking-wider">Thực Lĩnh (Final)</p>
+                                <p className="text-2xl font-black text-primary mt-1">
                                     {formatCurrency(payroll.finalSalary)}
                                 </p>
                             </div>
@@ -162,131 +163,125 @@ export function PayrollDialog({
 
                         {/* Chi tiết hoa hồng */}
                         {payroll.commissionDetails && payroll.commissionDetails.length > 0 ? (
-                            <div className="border rounded-lg p-4">
-                                <h3 className="font-semibold mb-3 flex items-center gap-2">
-                                    <TrendingUp className="w-4 h-4" />
-                                    Chi Tiết Hoa Hồng ({payroll.commissionDetails.length} dịch vụ)
+                            <div className="border border-neutral-200/60 rounded-2xl p-5 bg-white/30 backdrop-blur-xs">
+                                <h3 className="font-extrabold text-neutral-800 text-sm mb-4 flex items-center gap-2">
+                                    <TrendingUp className="w-4 h-4 text-primary" />
+                                    Chi Tiết Hoa Hồng Phục Vụ ({payroll.commissionDetails.length} dịch vụ)
                                 </h3>
 
-                                <div className="overflow-x-auto">
-                                    <table className="w-full text-sm">
-                                        <thead className="border-b bg-muted/50">
-                                            <tr>
-                                                <th className="text-left p-2">Ngày</th>
-                                                <th className="text-left p-2">Giờ</th>
-                                                <th className="text-right p-2">Giá</th>
-                                                <th className="text-center p-2">Công Việc</th>
-                                                <th className="text-center p-2">Loại</th>
-                                                <th className="text-center p-2">%</th>
-                                                <th className="text-left p-2 text-xs">Lý Do</th>
-                                                <th className="text-right p-2">Hoa Hồng</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {paginatedData.map((item, idx) => (
-                                                <tr key={idx} className="border-b hover:bg-muted/30">
-                                                    <td className="p-2">
-                                                        {new Date(item.date).toLocaleDateString('vi-VN')}
+                                <div className="overflow-hidden rounded-xl border border-neutral-200/50 bg-white/40">
+                                    <div className="overflow-x-auto">
+                                        <table className="w-full text-xs">
+                                            <thead>
+                                                <tr className="border-b border-neutral-200 bg-neutral-100/50 text-neutral-500 font-bold uppercase tracking-wider text-[10px]">
+                                                    <th className="text-left p-3">Ngày</th>
+                                                    <th className="text-left p-3">Giờ</th>
+                                                    <th className="text-right p-3">Đơn Giá</th>
+                                                    <th className="text-center p-3">Công Việc</th>
+                                                    <th className="text-center p-3">Loại Ca</th>
+                                                    <th className="text-center p-3">Tỷ Lệ</th>
+                                                    <th className="text-left p-3 max-w-[150px]">Ghi chú ca trễ</th>
+                                                    <th className="text-right p-3 pr-4">Hoa Hồng</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {paginatedData.map((item, idx) => (
+                                                    <tr key={idx} className="border-b border-neutral-200/50 hover:bg-neutral-50/50 transition-colors">
+                                                        <td className="p-3 text-neutral-600">
+                                                            {new Date(item.date).toLocaleDateString('vi-VN')}
+                                                        </td>
+                                                        <td className="p-3 font-semibold text-neutral-800">{item.time.substring(0, 5)}</td>
+                                                        <td className="text-right p-3 font-bold text-neutral-700">
+                                                            {formatCurrency(item.price)}
+                                                        </td>
+                                                        <td className="text-center p-3">
+                                                            <Badge variant="outline" className="border-neutral-300 text-neutral-600 bg-white/60 font-semibold">
+                                                                {item.workShare}%
+                                                            </Badge>
+                                                        </td>
+                                                        <td className="text-center p-3">
+                                                            {getCommissionBadge(item.percentage)}
+                                                        </td>
+                                                        <td className="text-center p-3 font-bold text-neutral-800">
+                                                            {item.percentage}%
+                                                        </td>
+                                                        <td className="p-3 text-neutral-500 max-w-[150px] truncate">
+                                                            {item.otReason || '—'}
+                                                        </td>
+                                                        <td className="text-right p-3 pr-4 font-extrabold text-green-600">
+                                                            {formatCurrency(item.amount)}
+                                                        </td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                            <tfoot className="bg-neutral-50 font-bold border-t border-neutral-200">
+                                                <tr>
+                                                    <td colSpan={7} className="text-right p-3 text-neutral-600 text-xs">
+                                                        Tổng Hoa Hồng Kỳ Này:
                                                     </td>
-                                                    <td className="p-2 font-medium">{item.time.substring(0, 5)}</td>
-                                                    <td className="text-right p-2 font-medium">
-                                                        {formatCurrency(item.price)}
-                                                    </td>
-                                                    <td className="text-center p-2">
-                                                        <Badge variant="outline">{item.workShare}%</Badge>
-                                                    </td>
-                                                    <td className="text-center p-2">
-                                                        {getCommissionBadge(item.percentage)}
-                                                    </td>
-                                                    <td className="text-center p-2 font-semibold">
-                                                        {item.percentage}%
-                                                    </td>
-                                                    <td className="p-2 text-xs text-muted-foreground max-w-[150px]">
-                                                        {item.otReason || 'N/A'}
-                                                    </td>
-                                                    <td className="text-right p-2 font-semibold text-green-600">
-                                                        {formatCurrency(item.amount)}
+                                                    <td className="text-right p-3 pr-4 text-green-600 text-sm font-extrabold">
+                                                        {formatCurrency(payroll.totalCommission)}
                                                     </td>
                                                 </tr>
-                                            ))}
-                                        </tbody>
-                                        <tfoot className="border-t bg-muted/50 font-semibold">
-                                            <tr>
-                                                <td colSpan={7} className="text-right p-2">
-                                                    Tổng Hoa Hồng:
-                                                </td>
-                                                <td className="text-right p-2 text-green-600">
-                                                    {formatCurrency(payroll.totalCommission)}
-                                                </td>
-                                            </tr>
-                                        </tfoot>
-                                    </table>
+                                            </tfoot>
+                                        </table>
+                                    </div>
                                 </div>
 
                                 {/* Pagination Controls */}
                                 {totalPages > 1 && (
-                                    <div className="flex items-center justify-between mt-4 pt-4 border-t">
-                                        <div className="text-sm text-muted-foreground">
-                                            Trang {currentPage} / {totalPages} ({(currentPage - 1) * ITEMS_PER_PAGE + 1}-{Math.min(currentPage * ITEMS_PER_PAGE, payroll.commissionDetails.length)} / {payroll.commissionDetails.length})
+                                    <div className="flex items-center justify-between mt-4 pt-4 border-t border-neutral-200/60">
+                                        <div className="text-[11px] font-medium text-neutral-500">
+                                            Trang {currentPage} / {totalPages} (hiển thị {(currentPage - 1) * ITEMS_PER_PAGE + 1}-{Math.min(currentPage * ITEMS_PER_PAGE, payroll.commissionDetails.length)} trong tổng số {payroll.commissionDetails.length} dòng)
                                         </div>
                                         <div className="flex gap-2">
                                             <Button
                                                 variant="outline"
                                                 size="sm"
+                                                className="h-8 rounded-lg"
                                                 onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
                                                 disabled={currentPage === 1}
                                             >
-                                                ← Trước
+                                                Trước
                                             </Button>
                                             <Button
                                                 variant="outline"
                                                 size="sm"
+                                                className="h-8 rounded-lg"
                                                 onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
                                                 disabled={currentPage === totalPages}
                                             >
-                                                Sau →
+                                                Sau
                                             </Button>
                                         </div>
                                     </div>
                                 )}
-
-                                {/* Ghi chú về dữ liệu */}
-                                {/* <div className="mt-4 bg-gray-50 border border-gray-200 rounded p-3 text-xs text-gray-700">
-                                    <p className="font-semibold mb-2">📊 Dữ liệu Hoa Hồng được tính từ:</p>
-                                    <ul className="space-y-1">
-                                        <li>✓ <span className="font-semibold">Lịch hẹn hoàn thành:</span> Từ bảng `appointments` (status = "completed")</li>
-                                        <li>✓ <span className="font-semibold">Chi tiết dịch vụ:</span> Từ bảng `appointment_services` (giá, hoa hồng %)</li>
-                                        <li>✓ <span className="font-semibold">Nhân viên gán:</span> Từ cột `staff_id` trong `appointment_services`</li>
-                                        <li>✓ <span className="font-semibold">Công việc (%):</span> Từ cột `work_share` (50% = hợp tác, 100% = toàn bộ)</li>
-                                        <li>✓ <span className="font-semibold">Thời gian hoàn thành:</span> Từ `appointment_time` của lịch hẹn</li>
-                                    </ul>
-                                </div> */}
                             </div>
                         ) : (
-                            <div className="border rounded-lg p-4 text-center text-muted-foreground">
-                                Không có dịch vụ hoàn thành trong tháng này
+                            <div className="border border-dashed border-neutral-200 rounded-2xl p-8 text-center text-muted-foreground bg-white/40">
+                                Không có lịch hẹn hoàn thành phát sinh hoa hồng trong kỳ này.
                             </div>
                         )}
 
                         {/* Ghi chú về cách tính */}
-                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-sm">
-                            <p className="font-semibold text-blue-900 mb-2">Cách Tính Hoa Hồng:</p>
-                            <ul className="space-y-1 text-blue-800">
-                                <li>• <span className="font-semibold">10%:</span> Hoàn thành trước 17:00 + 100% công việc</li>
-                                <li>• <span className="font-semibold">5%:</span> Hoàn thành trước 17:00 + 50% công việc (hợp tác)</li>
-                                <li>• <span className="font-semibold">OT 30%:</span> Hoàn thành từ 17:00 trở đi + 100% công việc (ngoài giờ)</li>
+                        <div className="bg-blue-50/50 border border-blue-200/50 rounded-2xl p-4 text-xs text-blue-900 leading-relaxed">
+                            <p className="font-extrabold text-blue-950 mb-1">Quy định tính phần trăm hoa hồng:</p>
+                            <ul className="space-y-1 text-blue-800 font-medium list-disc list-inside">
+                                <li>Phục vụ giờ hành chính (trước 17:00) và làm trọn vẹn: <span className="font-bold">10%</span></li>
+                                <li>Phục vụ giờ hành chính (trước 17:00) và hợp tác chia việc (50%): <span className="font-bold">5%</span></li>
+                                <li>Tăng ca ngoài giờ hành chính (từ 17:00 trở đi) và làm trọn vẹn: <span className="font-bold">30%</span></li>
                             </ul>
                         </div>
                     </div>
                 ) : (
-                    <div className="text-center py-8 text-muted-foreground">
-                        Không tìm thấy dữ liệu lương
+                    <div className="text-center py-12 text-muted-foreground">
+                        Không tìm thấy dữ liệu lương của nhân viên trong kỳ này.
                     </div>
                 )}
 
-                <DialogFooter>
-                    <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-                        Đóng
+                <DialogFooter className="mt-4 pt-4 border-t border-neutral-100">
+                    <Button type="button" variant="outline" className="rounded-xl h-10 px-5" onClick={() => onOpenChange(false)}>
+                        Đóng cửa sổ
                     </Button>
                 </DialogFooter>
             </DialogContent>

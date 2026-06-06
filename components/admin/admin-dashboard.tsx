@@ -87,10 +87,10 @@ export function AdminDashboard() {
 
   const statCards = stats ? [
     {
-      title: "Tổng doanh thu hôm nay",
-      value: formatCurrency(stats.totalRevenueToday),
-      change: `${stats.totalRevenueToday > 0 ? '+' : ''}${stats.totalRevenueToday.toLocaleString('vi-VN')}₫`,
-      icon: DollarSign,
+      title: "Dịch vụ phổ biến",
+      value: stats.topService.name,
+      change: `${stats.topService.count} lượt`,
+      icon: Scissors,
       color: "text-primary",
     },
     {
@@ -107,13 +107,6 @@ export function AdminDashboard() {
       icon: Users,
       color: "text-secondary",
     },
-    {
-      title: "Dịch vụ phổ biến",
-      value: stats.topService.name,
-      change: `${stats.topService.count} lượt`,
-      icon: Scissors,
-      color: "text-primary",
-    },
   ] : []
 
   if (loading) {
@@ -128,8 +121,8 @@ export function AdminDashboard() {
         </div>
 
         {/* Stats Grid Loading */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {[...Array(4)].map((_, i) => (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {[...Array(3)].map((_, i) => (
             <Card key={i}>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 p-[10px] pb-2 sm:p-6 sm:pb-2">
                 <Skeleton className="h-4 w-20" />
@@ -166,7 +159,7 @@ export function AdminDashboard() {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4 xl:gap-6">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3 xl:gap-6">
         {statCards.map((stat, index) => (
           <Card key={index}>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 p-[10px] pb-2 sm:p-6 sm:pb-2">

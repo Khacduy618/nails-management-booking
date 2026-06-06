@@ -22,14 +22,23 @@ async function ProtectedLayout({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="flex min-h-screen bg-background">
-      <div className="hidden lg:flex">
+    <div className="flex min-h-screen premium-page-container">
+      {/* Background decorations */}
+      <div className="premium-page-bg" aria-hidden="true">
+        <img src="/cleanstoneimg.webp" alt="" className="premium-page-texture opacity-[0.18]" />
+        <div className="premium-page-overlay-top" />
+        <div className="premium-page-overlay-bottom" />
+        <div className="hero-blob hero-blob-1 opacity-20" />
+        <div className="hero-blob hero-blob-2 opacity-15" />
+      </div>
+
+      <div className="hidden lg:flex relative z-10">
         <div className="sticky top-0 h-screen">
           <AdminSidebar />
         </div>
       </div>
-      <div className="flex min-h-screen flex-1 flex-col">
-        <div className="sticky top-0 z-10">
+      <div className="flex min-h-screen flex-1 flex-col relative z-10 min-w-0">
+        <div className="sticky top-0 z-40">
           <AdminHeader />
         </div>
         <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">

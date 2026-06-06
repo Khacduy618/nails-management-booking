@@ -200,53 +200,49 @@ export function ServicesManagement() {
 
   return (
     <div className="space-y-6">
-
-
-      <Card>
-        <CardContent className="px-6 sm:px-4">
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
-            {/* Input tìm kiếm */}
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Tìm kiếm dịch vụ..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-            {/* Lọc theo category - Select Box */}
-            <div className="flex gap-2 items-center">
-              <Label htmlFor="category-filter" className="text-sm shrink-0">Danh mục:</Label>
-              <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                <SelectTrigger id="category-filter" className="w-full">
-                  <SelectValue placeholder="Chọn danh mục" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Tất cả danh mục</SelectItem>
-                  {categories.map((category) => (
-                    <SelectItem key={category.id} value={category.name}>{category.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="flex items-center gap-2">
-              <Label htmlFor="sort-by" className="text-sm shrink-0">Sắp xếp:</Label>
-              <Select value={sortBy} onValueChange={setSortBy}>
-                <SelectTrigger id="sort-by" className="w-full">
-                  <SelectValue placeholder="Sắp xếp theo..." />
-                </SelectTrigger>
-                <SelectContent>
-                  {sortOptions.map(opt => <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>)}
-                </SelectContent>
-              </Select>
-            </div>
-            <Button className="w-full" onClick={handleAddService}>
-              <Plus className="h-4 w-4 mr-2" />Thêm dịch vụ
-            </Button>
+      <div className="rounded-3xl border border-neutral-200/50 bg-white/70 p-5 shadow-[0_8px_30px_-6px_rgba(15,15,15,0.06)] backdrop-blur-md">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
+          {/* Input tìm kiếm */}
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-400" />
+            <Input
+              placeholder="Tìm kiếm dịch vụ..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10 rounded-xl border-neutral-200 bg-white/80 focus:bg-white"
+            />
           </div>
-        </CardContent>
-      </Card>
+          {/* Lọc theo category - Select Box */}
+          <div className="flex gap-2 items-center">
+            <Label htmlFor="category-filter" className="text-xs font-bold uppercase tracking-wider text-neutral-500 shrink-0">Danh mục:</Label>
+            <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+              <SelectTrigger id="category-filter" className="w-full rounded-xl border-neutral-200 bg-white/80">
+                <SelectValue placeholder="Chọn danh mục" />
+              </SelectTrigger>
+              <SelectContent className="rounded-xl border-neutral-200">
+                <SelectItem value="all">Tất cả danh mục</SelectItem>
+                {categories.map((category) => (
+                  <SelectItem key={category.id} value={category.name}>{category.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="flex items-center gap-2">
+            <Label htmlFor="sort-by" className="text-xs font-bold uppercase tracking-wider text-neutral-500 shrink-0">Sắp xếp:</Label>
+            <Select value={sortBy} onValueChange={setSortBy}>
+              <SelectTrigger id="sort-by" className="w-full rounded-xl border-neutral-200 bg-white/80">
+                <SelectValue placeholder="Sắp xếp theo..." />
+              </SelectTrigger>
+              <SelectContent className="rounded-xl border-neutral-200">
+                {sortOptions.map(opt => <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </div>
+          <Button className="w-full bg-primary hover:bg-primary/95 text-primary-foreground font-bold rounded-xl shadow-sm hover:shadow active:scale-98 transition-all cursor-pointer" onClick={handleAddService}>
+            <Plus className="h-4 w-4 mr-2" />Thêm dịch vụ
+          </Button>
+        </div>
+      </div>
 
       <PhantomWrapper loading={isLoading} animation="wave">
         {(() => {
@@ -255,24 +251,27 @@ export function ServicesManagement() {
             <>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 {displayServices.map((service) => (
-                  <Card key={service.id} className="gap-0 group flex flex-col overflow-hidden rounded-xl border bg-card text-card-foreground shadow-sm transition-all duration-300 hover:shadow-lg hover:-translate-y-1 p-0">
+                  <div key={service.id} className="group relative rounded-3xl border border-neutral-200/50 bg-white/70 shadow-[0_8px_30px_-6px_rgba(15,15,15,0.05)] backdrop-blur-md transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_12px_40px_-8px_rgba(15,15,15,0.1)] flex flex-col overflow-hidden">
                     {/* Image Section */}
-                    <div className="relative aspect-[4/3] overflow-hidden bg-muted">
+                    <div className="relative aspect-[4/3] overflow-hidden bg-neutral-100">
                       {service.imageUrl ? (
                         <img
                           src={service.imageUrl}
                           alt={service.name}
-                          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                          className="h-full w-full object-cover transition-transform duration-550 ease-out group-hover:scale-105"
+                          onError={(e) => {
+                            e.currentTarget.src = "/placeholder.svg"
+                          }}
                         />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center text-muted-foreground bg-slate-200 dark:bg-slate-800">
+                        <div className="w-full h-full flex items-center justify-center text-xs font-bold uppercase tracking-wider text-neutral-400 bg-neutral-100">
                           Ảnh dịch vụ
                         </div>
                       )}
                       <Badge
-                        className={`absolute right-3 top-3 shadow-sm ${service.status === "active"
-                          ? "bg-green-500 hover:bg-green-600"
-                          : "bg-gray-500 hover:bg-gray-600"
+                        className={`absolute right-3 top-3 shadow-sm border-none px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider rounded-lg ${service.status === "active"
+                          ? "bg-emerald-500 hover:bg-emerald-600 text-white"
+                          : "bg-neutral-500 hover:bg-neutral-600 text-white"
                           }`}
                       >
                         {service.status === "active" ? "Hoạt động" : "Tạm dừng"}
@@ -280,53 +279,53 @@ export function ServicesManagement() {
                     </div>
 
                     {/* Content Section */}
-                    <CardContent className="flex flex-1 flex-col p-4">
-                      <div className="mb-3 flex items-start justify-between gap-2">
-                        <h3 className="font-bold leading-tight text-foreground line-clamp-2 group-hover:text-primary transition-colors">
+                    <div className="flex flex-1 flex-col p-5">
+                      <div className="mb-2.5 flex items-start justify-between gap-2">
+                        <h3 className="font-extrabold text-neutral-800 leading-tight group-hover:text-primary transition-colors line-clamp-2">
                           {service.name}
                         </h3>
                         {service.category?.name && (
-                          <Badge variant="outline" className="shrink-0 font-normal text-muted-foreground">
+                          <Badge variant="outline" className="shrink-0 font-bold text-[10px] uppercase tracking-wide border-neutral-200 text-neutral-500 rounded-lg">
                             {service.category.name}
                           </Badge>
                         )}
                       </div>
 
                       {service.description && (
-                        <p className="mb-2 text-sm text-muted-foreground line-clamp-2">
+                        <p className="mb-4 text-xs text-neutral-500 font-medium leading-relaxed line-clamp-2">
                           {service.description}
                         </p>
                       )}
 
-                      <div className="mt-auto flex items-center justify-between border-t pt-3">
-                        <span className="text-lg font-bold text-orange-600">
-                          {Number(service.price).toLocaleString("vi-VN")}đ
+                      <div className="mt-auto flex items-center justify-between border-t border-neutral-100 pt-3">
+                        <span className="text-base font-extrabold text-primary">
+                          {Number(service.price).toLocaleString("vi-VN")}₫
                         </span>
-                        <span className="flex items-center text-sm text-muted-foreground">
-                          <Clock className="mr-1 h-3 w-3" />
+                        <span className="flex items-center text-xs font-semibold text-neutral-500">
+                          <Clock className="mr-1 h-3.5 w-3.5" />
                           {service.duration} phút
                         </span>
                       </div>
 
-                      <div className="mt-4 grid grid-cols-3 gap-2">
+                      <div className="mt-4 grid grid-cols-3 gap-1.5">
                         <Button
                           variant="outline"
                           size="sm"
-                          className="h-8 w-full hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200"
+                          className="h-8 w-full rounded-xl border-neutral-200 bg-white text-xs font-semibold hover:bg-blue-50 hover:text-blue-600 hover:border-blue-205 hover:shadow-xs transition-all active:scale-95 cursor-pointer"
                           onClick={() => handleViewService(service)}
                           disabled={isLoading}
                         >
-                          <Eye className="mr-1.5 h-3.5 w-3.5" />
+                          <Eye className="mr-1 h-3.5 w-3.5" />
                           Xem
                         </Button>
                         <Button
                           variant="outline"
                           size="sm"
-                          className="h-8 w-full hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
+                          className="h-8 w-full rounded-xl border-neutral-200 bg-white text-xs font-semibold hover:bg-orange-50 hover:text-orange-600 hover:border-orange-205 hover:shadow-xs transition-all active:scale-95 cursor-pointer"
                           onClick={() => handleEditService(service)}
                           disabled={isLoading}
                         >
-                          <Edit className="mr-1.5 h-3.5 w-3.5" />
+                          <Edit className="mr-1 h-3.5 w-3.5" />
                           Sửa
                         </Button>
                         <ConfirmDialog
@@ -337,24 +336,22 @@ export function ServicesManagement() {
                           <Button
                             variant="outline"
                             size="sm"
-                            className="h-8 w-full text-destructive hover:bg-red-50 hover:text-red-600 hover:border-red-200"
+                            className="h-8 w-full rounded-xl border-neutral-200 bg-white text-xs font-semibold text-destructive hover:bg-red-50 hover:text-red-600 hover:border-red-205 hover:shadow-xs transition-all active:scale-95 cursor-pointer"
                             disabled={isLoading}
                           >
-                            <Trash2 className="mr-1.5 h-3.5 w-3.5" />
+                            <Trash2 className="mr-1 h-3.5 w-3.5" />
                             Xóa
                           </Button>
                         </ConfirmDialog>
                       </div>
-                    </CardContent>
-                  </Card>
+                    </div>
+                  </div>
                 ))}
               </div>
               {!isLoading && services.length === 0 && (
-                <Card>
-                  <CardContent className="p-2.5 text-center sm:p-12">
-                    <p className="text-muted-foreground">Không tìm thấy dịch vụ nào.</p>
-                  </CardContent>
-                </Card>
+                <div className="rounded-3xl border border-neutral-200/50 bg-white/70 p-8 text-center shadow-[0_8px_30px_-6px_rgba(15,15,15,0.06)] backdrop-blur-md">
+                  <p className="text-neutral-500 font-medium">Không tìm thấy dịch vụ nào.</p>
+                </div>
               )}
             </>
           );

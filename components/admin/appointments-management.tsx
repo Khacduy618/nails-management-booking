@@ -146,61 +146,60 @@ export function AppointmentsManagement() {
 
   return (
     <div className="space-y-6">
-
-      <Card>
-        <CardContent className="px-6 sm:px-4">
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-5">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Tìm kiếm..."
-                value={filters.searchTerm}
-                onChange={(e) => setFilters(p => ({ ...p, searchTerm: e.target.value }))}
-                className="pl-10"
-              />
-            </div>
-            <Select value={filters.status} onValueChange={(v) => setFilters(p => ({ ...p, status: v }))}>
-              <SelectTrigger><SelectValue placeholder="Trạng thái" /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Tất cả trạng thái</SelectItem>
-                {Object.entries(statusConfig).map(([key, value]) => (
-                  <SelectItem key={key} value={key}>{value.label}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Select value={filters.staffId} onValueChange={(v) => setFilters(p => ({ ...p, staffId: v }))}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Tất cả nhân viên</SelectItem>
-                {staffList.map((staff) => (
-                  <SelectItem key={staff.id} value={staff.id.toString()}>{staff.name}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <div className="relative">
-              <Input
-                type="date"
-                value={filters.date}
-                onChange={(e) => setFilters(p => ({ ...p, date: e.target.value }))}
-                className="w-full appearance-none [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:right-2 [&::-webkit-calendar-picker-indicator]:opacity-50 [&::-webkit-calendar-picker-indicator]:hover:opacity-100 [&::-webkit-calendar-picker-indicator]:cursor-pointer"
-              />
-            </div>
-            <Button className="w-full" onClick={() => setShowBookingForm(true)}>
-              <Plus className="h-4 w-4 mr-2" />
-              Thêm lịch mới
-            </Button>
+      <div className="rounded-3xl border border-neutral-200/50 bg-white/70 p-5 shadow-[0_8px_30px_-6px_rgba(15,15,15,0.06)] backdrop-blur-md">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-5">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-400" />
+            <Input
+              placeholder="Tìm kiếm..."
+              value={filters.searchTerm}
+              onChange={(e) => setFilters(p => ({ ...p, searchTerm: e.target.value }))}
+              className="pl-10 rounded-xl border-neutral-200 bg-white/80 focus:bg-white"
+            />
           </div>
-        </CardContent>
-      </Card>      {error && <Alert variant="destructive"><AlertCircle className="h-4 w-4" /><AlertDescription>{error}</AlertDescription></Alert>}
+          <Select value={filters.status} onValueChange={(v) => setFilters(p => ({ ...p, status: v }))}>
+            <SelectTrigger className="rounded-xl border-neutral-200 bg-white/80"><SelectValue placeholder="Trạng thái" /></SelectTrigger>
+            <SelectContent className="rounded-xl border-neutral-200">
+              <SelectItem value="all">Tất cả trạng thái</SelectItem>
+              {Object.entries(statusConfig).map(([key, value]) => (
+                <SelectItem key={key} value={key}>{value.label}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Select value={filters.staffId} onValueChange={(v) => setFilters(p => ({ ...p, staffId: v }))}>
+            <SelectTrigger className="rounded-xl border-neutral-200 bg-white/80"><SelectValue /></SelectTrigger>
+            <SelectContent className="rounded-xl border-neutral-200">
+              <SelectItem value="all">Tất cả nhân viên</SelectItem>
+              {staffList.map((staff) => (
+                <SelectItem key={staff.id} value={staff.id.toString()}>{staff.name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <div className="relative">
+            <Input
+              type="date"
+              value={filters.date}
+              onChange={(e) => setFilters(p => ({ ...p, date: e.target.value }))}
+              className="w-full rounded-xl border-neutral-200 bg-white/80 appearance-none [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:right-2 [&::-webkit-calendar-picker-indicator]:opacity-50 [&::-webkit-calendar-picker-indicator]:hover:opacity-100 [&::-webkit-calendar-picker-indicator]:cursor-pointer"
+            />
+          </div>
+          <Button className="w-full bg-primary hover:bg-primary/95 text-primary-foreground font-bold rounded-xl shadow-sm hover:shadow active:scale-98 transition-all cursor-pointer" onClick={() => setShowBookingForm(true)}>
+            <Plus className="h-4 w-4 mr-2" />
+            Thêm lịch mới
+          </Button>
+        </div>
+      </div>
+
+      {error && <Alert variant="destructive" className="rounded-2xl"><AlertCircle className="h-4 w-4" /><AlertDescription>{error}</AlertDescription></Alert>}
       {!isLoading && pagination && (
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <p>
-            Tổng số lịch: <span className="font-medium text-primary">{pagination.total}</span>
-          </p>
+        <div className="flex items-center gap-2 text-xs font-bold text-neutral-500 uppercase tracking-wider px-2">
+          <span>Tổng số lịch hẹn:</span>
+          <span className="text-primary text-sm font-extrabold">{pagination.total}</span>
         </div>
       )}
-      <Card>
-        <CardContent className="p-0">
+
+      <div className="rounded-3xl border border-neutral-200/50 bg-white/70 shadow-[0_8px_30px_-6px_rgba(15,15,15,0.06)] backdrop-blur-md overflow-hidden">
+        <div className="p-0">
           <PhantomWrapper loading={isLoading} animation="wave">
             {(() => {
               const displayAppointments = isLoading && appointments.length === 0 ? MOCK_APPOINTMENTS : appointments;
@@ -208,15 +207,15 @@ export function AppointmentsManagement() {
                 <>
                   <div className="hidden md:block overflow-x-auto">
                     <table className="w-full text-sm">
-                      <thead className="border-b bg-muted/50">
+                      <thead className="border-b border-neutral-200/50 bg-neutral-50/50">
                         <tr>
-                          <th className="p-4 font-medium text-left">Khách hàng</th>
-                          <th className="p-4 font-medium text-left">Dịch vụ</th>
-                          <th className="p-4 font-medium text-left">Nhân viên</th>
-                          <th className="p-4 font-medium text-left">Thời gian</th>
-                          <th className="p-4 font-medium text-left">Giá</th>
-                          <th className="p-4 font-medium text-left">Trạng thái</th>
-                          <th className="p-4 font-medium text-left">Thao tác</th>
+                          <th className="p-4 font-bold text-neutral-800 text-left">Khách hàng</th>
+                          <th className="p-4 font-bold text-neutral-800 text-left">Dịch vụ</th>
+                          <th className="p-4 font-bold text-neutral-800 text-left">Nhân viên</th>
+                          <th className="p-4 font-bold text-neutral-800 text-left">Thời gian</th>
+                          <th className="p-4 font-bold text-neutral-800 text-left">Giá</th>
+                          <th className="p-4 font-bold text-neutral-800 text-left">Trạng thái</th>
+                          <th className="p-4 font-bold text-neutral-800 text-left">Thao tác</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -225,7 +224,7 @@ export function AppointmentsManagement() {
                           const serviceNames = appointment.appointmentServices.map(as => as.service.name).join(' + ')
                           const config = statusConfig[appointment.status]
                           return (
-                            <tr key={appointment.id} className="border-b hover:bg-muted/30">
+                            <tr key={appointment.id} className="border-b border-neutral-100/70 hover:bg-neutral-50/40 transition-colors">
                               <td className="p-4 align-top">
                                 <div className="font-medium flex items-center gap-2">
                                   <User className="h-4 w-4 text-muted-foreground" />
@@ -390,8 +389,8 @@ export function AppointmentsManagement() {
               );
             })()}
           </PhantomWrapper>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
       {/* Pagination */}
       {pagination && pagination.totalPages > 1 && !isLoading && (
         <div className="flex items-center justify-between pt-4">

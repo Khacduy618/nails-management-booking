@@ -5,6 +5,7 @@ import { appointments, reviews, staff } from "@/db/schema"
 
 // Mocks
 const mockFindFirstAppointment = vi.fn()
+const mockFindManyReviews = vi.fn()
 const mockSelect = vi.fn()
 const mockTransaction = vi.fn()
 
@@ -14,6 +15,9 @@ vi.mock("@/db", () => {
       query: {
         appointments: {
           findFirst: (...args: any[]) => mockFindFirstAppointment(...args),
+        },
+        reviews: {
+          findMany: (...args: any[]) => mockFindManyReviews(...args),
         },
       },
       select: (...args: any[]) => mockSelect(...args),
@@ -30,21 +34,43 @@ describe("Reviews API Routes", () => {
   beforeEach(() => {
     vi.restoreAllMocks()
     mockFindFirstAppointment.mockReset()
+    mockFindManyReviews.mockReset()
     mockSelect.mockReset()
     mockTransaction.mockReset()
   })
 
   describe("GET /api/reviews", () => {
-    it("should return 400 if token is missing", async () => {
+    it("should return public reviews if token is missing", async () => {
+      mockFindManyReviews.mockResolvedValue([
+        {
+          id: 1,
+          comment: "Dịch vụ rất tốt",
+          rating: 5,
+          createdAt: new Date().toISOString(),
+          appointment: {
+            customerName: "Khách Test",
+            appointmentDate: "2026-06-01",
+            appointmentServices: [
+              {
+                service: { name: "Cắt Tóc" }
+              }
+            ]
+          },
+          staff: {
+            user: { name: "Staff Test" }
+          }
+        }
+      ])
+
       const req = new NextRequest("http://localhost:3000/api/reviews", {
         method: "GET",
       })
 
       const res = await getReview(req)
-      expect(res.status).toBe(400)
+      expect(res.status).toBe(200)
       const data = await res.json()
-      expect(data.success).toBe(false)
-      expect(data.error.code).toBe("MISSING_TOKEN")
+      expect(data.success).toBe(true)
+      expect(data.data[0].content).toBe("Dịch vụ rất tốt")
     })
 
     it("should return 404 if appointment is not found", async () => {

@@ -484,7 +484,7 @@
 .premium-page-container {
   background-color: var(--hero-bg);
   position: relative;
-  overflow: hidden;
+  overflow-x: clip;
 }
 
 .premium-page-bg {
@@ -524,4 +524,27 @@
 @keyframes hero-mobile-flow { 
   0% { transform: translate(-50%); }
   100% { transform: translate(0px); }
+}
+
+/* ── Testimonials Marquee ── */
+.reviews-marquee {
+  animation: reviews-marquee-scroll 50s linear infinite;
+}
+
+.reviews-marquee:hover {
+  animation-play-state: paused;
+}
+
+@keyframes reviews-marquee-scroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.reviews-mask {
+  mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+  -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
 }

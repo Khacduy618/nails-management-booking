@@ -156,7 +156,7 @@ export function TopServicesTable({ dateRange }: TopServicesTableProps) {
       </CardHeader>
       <CardContent>
         <div className="overflow-x-auto">
-          <table className="w-full">
+          <table className="w-full min-w-[650px]">
             <thead className="border-b border-border">
               <tr>
                 <th className="text-left p-3 font-medium text-muted-foreground">Dịch vụ</th>

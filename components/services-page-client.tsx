@@ -68,7 +68,9 @@ export function ServicesPageClient() {
     // SỬA CÚ PHÁP: Khai báo hàm async ở đây
     const fetchData = async () => {
       setIsLoading(true);
-      setIsMetaLoading(true);
+      if (!filterOptionsRef.current) {
+        setIsMetaLoading(true);
+      }
       setError(null);
 
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || '/api/';

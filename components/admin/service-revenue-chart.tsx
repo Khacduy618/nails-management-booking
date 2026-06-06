@@ -116,8 +116,8 @@ export function ServiceRevenueChart({ dateRange }: ServiceRevenueChartProps) {
         <CardTitle className="text-foreground">Doanh thu theo dịch vụ</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="overflow-y-auto max-h-[300px]">
-          <table className="w-full text-sm">
+        <div className="overflow-auto max-h-[300px]">
+          <table className="w-full text-sm min-w-[500px]">
             <thead className="sticky top-0 bg-background">
               <tr className="border-b border-border">
                 <th className="text-left py-3 px-4 font-medium text-muted-foreground">Dịch vụ</th>
