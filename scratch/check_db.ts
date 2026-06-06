@@ -1,13 +1,10 @@
 import { db } from '../db';
-import { customers, appointments } from '../db/schema';
+import { appointments } from '../db/schema';
+import { gte } from 'drizzle-orm';
 
 async function check() {
-  const allCustomers = await db.select().from(customers);
-  const allAppointments = await db.select().from(appointments);
-  console.log('Customers count:', allCustomers.length);
-  console.log('Customers:', allCustomers);
-  console.log('Appointments count:', allAppointments.length);
-  console.log('Appointments:', allAppointments);
+  const result = await db.select().from(appointments).where(gte(appointments.id, 90));
+  console.log('Appointments ID >= 90:', result);
   process.exit(0);
 }
 

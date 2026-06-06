@@ -365,6 +365,8 @@ export async function sendOTP(phone: string, code: string, customerName: string)
             return true
         }
 
+        console.log(`[OTP] Initiating Twilio SMS using Account SID: ${accountSid.substring(0, 8)}... and From number: ${fromNumber}`)
+
         // Format to E.164 for Twilio (e.g., +84...)
         let formattedPhone = phone.trim().replace(/\s+/g, '')
         if (formattedPhone.startsWith('0')) {
