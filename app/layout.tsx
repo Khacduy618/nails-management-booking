@@ -40,6 +40,8 @@ export const metadata: Metadata = {
   },
 }
 
+export const dynamic = 'force-dynamic'
+
 export default async function RootLayout({
   children,
 }: Readonly<{
@@ -47,7 +49,7 @@ export default async function RootLayout({
 }>) {
   const nonce = (await headers()).get('x-nonce') ?? undefined
   return (
-    <html lang="vi">
+    <html lang="vi" nonce={nonce}>
       <body className={`font-sans ${GeistSans.variable} ${GeistMono.variable} ${playfair.variable} ${manrope.variable} antialiased relative min-h-screen bg-[#f5f4f2] text-neutral-800`} suppressHydrationWarning>
         {/* Global Background Texture */}
         <div className="pointer-events-none fixed inset-0 -z-50 bg-[#f5f4f2]" aria-hidden="true">
