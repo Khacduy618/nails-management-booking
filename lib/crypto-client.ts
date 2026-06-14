@@ -4,7 +4,7 @@
  */
 
 const getSecret = (): string => {
-  let secret = process.env.ENCRYPTION_KEY || "nails-booking-app-default-secure-secret-32-chars"
+  let secret = process.env.NEXT_PUBLIC_ENCRYPTION_KEY || "nails-booking-app-default-secure-secret-32-chars"
   if (secret.startsWith('"') && secret.endsWith('"')) {
     secret = secret.slice(1, -1)
   }
