@@ -6,7 +6,7 @@ const getEncryptionKey = (): Buffer => {
 }
 
 const getBlindIndexSecret = (): string => {
-  return process.env.ENCRYPTION_SECRET || process.env.NEXTAUTH_SECRET || "nails-booking-app-default-blind-index-secret"
+  return process.env.ENCRYPTION_SECRET || "nails-booking-app-default-blind-index-secret"
 }
 
 /**
