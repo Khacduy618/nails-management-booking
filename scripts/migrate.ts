@@ -20,6 +20,18 @@ async function main() {
 
   console.log('Migrations finished!');
 
+  // Run data migration to populate hashes on existing data
+  try {
+    console.log('Running data migration to populate hashes...');
+    execSync('npx tsx ./scripts/populate-hashes.ts', {
+      stdio: 'inherit',
+      env: process.env,
+    });
+  } catch (err) {
+    console.error('Failed to run populate-hashes data migration:', err);
+    process.exit(1);
+  }
+
   // Run credentials update script automatically
   try {
     console.log('Running credentials update script...');
