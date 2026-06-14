@@ -1,10 +1,11 @@
+import { withEncryption } from "@/lib/api-middleware";
 import { type NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { services, staffServices } from "@/db/schema";
 import { eq } from "drizzle-orm";
 
 // --- GET: Lấy chi tiết một dịch vụ ---
-export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+async function _GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id: paramId } = await params
     const id = Number.parseInt(paramId);
@@ -47,7 +48,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 }
 
 // --- PUT: Cập nhật dịch vụ ---
-export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+async function _PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id: paramId } = await params
     const id = Number.parseInt(paramId);
@@ -86,7 +87,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
 }
 
 // --- DELETE: Xóa dịch vụ ---
-export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+async function _DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id: paramId } = await params
     const id = Number.parseInt(paramId);
@@ -111,3 +112,8 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
     return NextResponse.json({ success: false, error: "An unexpected error occurred" }, { status: 500 });
   }
 }
+
+// Wrapped exports for encryption/decryption
+export const GET = withEncryption(_GET);
+export const PUT = withEncryption(_PUT);
+export const DELETE = withEncryption(_DELETE);

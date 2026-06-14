@@ -18,6 +18,7 @@ import { Switch } from "@/components/ui/switch"
 import { toast } from "sonner"
 import { validateBookingForm, validatePhone, validateEmail } from "@/lib/form-validation"
 import { bookingReducer, initialState } from "@/lib/booking-reducer"
+import { encryptAsync } from "@/lib/crypto-client"
 
 // --- Định nghĩa các kiểu dữ liệu ---
 interface ApiService { id: number; name: string; description: string | null; price: string; duration: number; }
@@ -240,7 +241,7 @@ export function BookingForm({ onBookingComplete }: BookingFormProps) {
         date: format(selectedDate, "yyyy-MM-dd"),
         time: selectedTime,
         staffId: finalStaffId,
-        notes,
+        notes: notes || undefined,
       };
       const response = await fetch(`${apiUrl}appointments`, {
         method: "POST",

@@ -1,10 +1,12 @@
+import { withEncryption } from "@/lib/api-middleware";
 import { type NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { staff, appointments, appointmentServices, services, staffBaseSalaries, users } from "@/db/schema";
 import { eq, count, sql } from "drizzle-orm";
+import { decrypt, encrypt, generateBlindIndex } from "@/lib/crypto";
 
 // --- GET: Lấy chi tiết nhân viên với lịch hẹn và thống kê ---
-export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+async function _GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id: paramId } = await params
     const id = Number.parseInt(paramId);
@@ -144,7 +146,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 }
 
 // --- PUT: Cập nhật nhân viên ---
-export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+async function _PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id: paramId } = await params
     const id = Number.parseInt(paramId);
@@ -360,11 +362,18 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     }
 
     const updatedStaff = await db.transaction(async (tx: any) => {
-      // Update user table if email or phone provided
-      if (body.email || body.phone) {
+      // Update user table if email, phone or name provided
+      if (body.email || body.phone || body.name) {
         const userUpdateData: any = {}
-        if (body.email) userUpdateData.email = body.email
-        if (body.phone) userUpdateData.phone = body.phone
+        if (body.name) userUpdateData.name = encrypt(body.name)
+        if (body.email) {
+          userUpdateData.email = encrypt(body.email)
+          userUpdateData.emailHash = generateBlindIndex(body.email)
+        }
+        if (body.phone) {
+          userUpdateData.phone = encrypt(body.phone)
+          userUpdateData.phoneHash = generateBlindIndex(body.phone)
+        }
 
         await tx
           .update(users)
@@ -447,7 +456,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
 }
 
 // --- PATCH: Thay đổi trạng thái nhân viên ---
-export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+async function _PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id: paramId } = await params
     const id = Number.parseInt(paramId);
@@ -502,3 +511,8 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     );
   }
 }
+
+// Wrapped exports for encryption/decryption
+export const GET = withEncryption(_GET);
+export const PUT = withEncryption(_PUT);
+export const PATCH = withEncryption(_PATCH);

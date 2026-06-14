@@ -1,6 +1,14 @@
 import { StoreSchedule } from "@/components/store-schedule"
+import { getServerSession } from "next-auth"
+import { authOptions } from "@/lib/auth"
+import { redirect } from "next/navigation"
 
-export default function SchedulePage() {
+export default async function SchedulePage() {
+  const session = await getServerSession(authOptions)
+  if (session?.user?.role === "staff") {
+    redirect("/admin/appointments")
+  }
+
   return (
     <div className="space-y-6">
         

@@ -1,8 +1,10 @@
+import { withEncryption } from "@/lib/api-middleware";
 import { type NextRequest, NextResponse } from "next/server"
 import { db } from "@/db"
 import { appointments, otpTokens } from "@/db/schema"
 import { eq } from "drizzle-orm"
 import { sendOTP } from "@/lib/email-service"
+import { decrypt } from "@/lib/crypto"
 import { fail, ok } from "@/lib/api-response"
 import { logError, logDebug, logInfo } from "@/lib/logger"
 import { getClientKey, rateLimit, rateLimitResponse, LIMITS } from "@/lib/rate-limit"
@@ -10,7 +12,7 @@ import { randomInt } from "crypto"
 
 const sanitizePhone = (input: string) => input.replace(/\D/g, "")
 
-export async function POST(request: NextRequest) {
+async function _POST(request: NextRequest) {
     try {
         // Rate limiting for OTP requests
         const key = `otp-send:${getClientKey(request as unknown as Request)}`
@@ -62,7 +64,8 @@ export async function POST(request: NextRequest) {
             }
         }
 
-        const sanitizedPhone = sanitizePhone(phone)
+        const decryptedPhone = decrypt(phone) || phone
+        const sanitizedPhone = sanitizePhone(decryptedPhone)
 
         // Verify appointment exists and phone matches
         const appointment = await db.query.appointments.findFirst({
@@ -87,7 +90,7 @@ export async function POST(request: NextRequest) {
             return normalize(c1) === normalize(c2)
         }
 
-        if (!isPhoneMatch(appointment.customerPhone, phone)) {
+        if (!isPhoneMatch(decrypt(appointment.customerPhone) || "", decryptedPhone)) {
             return fail("UNAUTHORIZED", "Phone number does not match appointment", 403)
         }
 
@@ -127,7 +130,7 @@ export async function POST(request: NextRequest) {
 
         // Send OTP via SMS/Email
         try {
-            await sendOTP(phone, otp, appointment.customerName)
+            await sendOTP(decryptedPhone, otp, appointment.customerName)
             
             // Secure logging: no plaintext OTP, masked phone
             logInfo("OTP sent successfully", { 
@@ -150,3 +153,7 @@ export async function POST(request: NextRequest) {
         return fail("SERVER_ERROR", "Unable to send OTP", 500)
     }
 }
+
+
+// Wrapped exports for encryption/decryption
+export const POST = withEncryption(_POST);

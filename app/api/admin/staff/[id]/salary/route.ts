@@ -1,10 +1,11 @@
+import { withEncryption } from "@/lib/api-middleware";
 import { type NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { staffBaseSalaries, staff } from "@/db/schema";
 import { eq } from "drizzle-orm";
 
 // --- GET: Lấy lương cứng của nhân viên ---
-export async function GET(
+async function _GET(
     request: NextRequest,
     { params }: { params: Promise<{ id: string }> }
 ) {
@@ -62,7 +63,7 @@ export async function GET(
 }
 
 // --- PUT: Cập nhật lương cứng của nhân viên ---
-export async function PUT(
+async function _PUT(
     request: NextRequest,
     { params }: { params: Promise<{ id: string }> }
 ) {
@@ -155,3 +156,8 @@ export async function PUT(
         );
     }
 }
+
+
+// Wrapped exports for encryption/decryption
+export const GET = withEncryption(_GET);
+export const PUT = withEncryption(_PUT);

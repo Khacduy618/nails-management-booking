@@ -26,9 +26,11 @@ export const appointmentStatusEnum = pgEnum('appointment_status', ['pending', 'c
 // --- Bảng Users (Authentication) ---
 export const users = pgTable('users', {
   id: serial('id').primaryKey(),
-  name: varchar('name', { length: 255 }).notNull(),
-  email: varchar('email', { length: 255 }).unique().notNull(),
-  phone: varchar('phone', { length: 20 }).notNull().unique(),
+  name: text('name').notNull(),
+  email: text('email').notNull(),
+  emailHash: varchar('email_hash', { length: 255 }).notNull().unique(),
+  phone: text('phone').notNull(),
+  phoneHash: varchar('phone_hash', { length: 255 }).notNull().unique(),
   password: varchar('password', { length: 255 }),
   role: roleEnum('role').default('customer').notNull(),
   createdAt: timestamp('created_at').defaultNow(),
@@ -53,9 +55,11 @@ export const staff = pgTable('staff', {
 // --- Bảng Customers (Khách hàng) ---
 export const customers = pgTable('customers', {
   id: serial('id').primaryKey(),
-  phone: varchar('phone', { length: 20 }).notNull().unique(),
-  name: varchar('name', { length: 255 }).notNull(),
-  email: varchar('email', { length: 255 }),
+  phone: text('phone').notNull(),
+  phoneHash: varchar('phone_hash', { length: 255 }).notNull().unique(),
+  name: text('name').notNull(),
+  email: text('email'),
+  emailHash: varchar('email_hash', { length: 255 }),
   lastAppointmentDate: date('last_appointment_date'),
   notes: text('notes'),
   createdAt: timestamp('created_at').defaultNow(),
@@ -136,8 +140,9 @@ export const payrolls = pgTable('payrolls', {
 export const appointments = pgTable('appointments', {
   id: serial('id').primaryKey(),
   customerId: integer('customer_id').references(() => customers.id, { onDelete: 'cascade' }),
-  customerName: varchar('customer_name', { length: 255 }).notNull(),
-  customerPhone: varchar('customer_phone', { length: 20 }).notNull(),
+  customerName: text('customer_name').notNull(),
+  customerPhone: text('customer_phone').notNull(),
+  customerPhoneHash: varchar('customer_phone_hash', { length: 255 }).notNull(),
   notes: text('notes'),
   appointmentDate: date('appointment_date').notNull(),
   appointmentTime: time('appointment_time').notNull(),
@@ -150,7 +155,7 @@ export const appointments = pgTable('appointments', {
   updatedAt: timestamp('updated_at').defaultNow().$onUpdate(() => new Date()),
 }, (table) => ({
   appointmentDateIdx: index('appointments_appointment_date_idx').on(table.appointmentDate),
-  customerPhoneIdx: index('appointments_customer_phone_idx').on(table.customerPhone),
+  customerPhoneHashIdx: index('appointments_customer_phone_hash_idx').on(table.customerPhoneHash),
   statusIdx: index('appointments_status_idx').on(table.status),
 }))
 

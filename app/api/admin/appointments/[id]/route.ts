@@ -1,9 +1,11 @@
+import { withEncryption } from "@/lib/api-middleware";
 import { type NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { appointments } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { randomUUID } from "node:crypto";
 import { sendReviewRequestEmail, sendConfirmationEmail, sendCancellationEmail } from "@/lib/email-service";
+import { encrypt, decrypt } from "@/lib/crypto";
 
 async function executeQuery<T>(query: any): Promise<T[]> {
   if (query && typeof query.returning === "function") {
@@ -16,7 +18,7 @@ async function executeQuery<T>(query: any): Promise<T[]> {
 }
 
 // --- GET: Lấy chi tiết một lịch hẹn ---
-export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+async function _GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id: paramId } = await params
   try {
     const id = Number.parseInt(paramId);
@@ -54,7 +56,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 }
 
 // --- PUT: Cập nhật một lịch hẹn (trạng thái, ghi chú, etc.) ---
-export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+async function _PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id: paramId } = await params
   try {
     const id = Number.parseInt(paramId);
@@ -65,7 +67,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
 
     // Chỉ cho phép cập nhật các trường an toàn
     const { status, notes } = body;
-    const updateData: { status?: any, notes?: string, reviewToken?: string } = {};
+    const updateData: { status?: any, notes?: string | null, reviewToken?: string } = {};
     if (status) updateData.status = status;
     if (notes !== undefined) updateData.notes = notes;
 
@@ -123,12 +125,13 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
       });
 
       if (fullApt && fullApt.customer?.email) {
-        const staffName = fullApt.appointmentServices?.[0]?.staff?.user?.name || "Nhân viên";
+        const rawStaffName = fullApt.appointmentServices?.[0]?.staff?.user?.name || "Nhân viên";
+        const staffName = rawStaffName.startsWith("v1:") ? (decrypt(rawStaffName) || rawStaffName) : rawStaffName;
         const emailData = {
           appointmentId: fullApt.id,
-          customerName: fullApt.customerName,
-          customerEmail: fullApt.customer.email,
-          customerPhone: fullApt.customerPhone,
+          customerName: decrypt(fullApt.customerName) || "",
+          customerEmail: decrypt(fullApt.customer.email) || "",
+          customerPhone: decrypt(fullApt.customerPhone) || "",
           appointmentDate: fullApt.appointmentDate,
           appointmentTime: fullApt.appointmentTime,
           services: fullApt.appointmentServices.map((as: any) => ({
@@ -138,7 +141,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
           staffName,
           totalPrice: Number(fullApt.priceAtBooking),
           totalDuration: fullApt.durationAtBooking,
-          notes: fullApt.notes,
+          notes: fullApt.notes || "",
           reviewToken: fullApt.reviewToken || updateData.reviewToken || "",
         };
         
@@ -166,7 +169,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
 }
 
 // --- DELETE: Xóa mềm một lịch hẹn (cập nhật status thành 'cancelled') ---
-export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+async function _DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id: paramId } = await params
   try {
     const id = Number.parseInt(paramId);
@@ -189,3 +192,8 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
     return NextResponse.json({ success: false, error: "An unexpected error occurred" }, { status: 500 });
   }
 }
+
+// Wrapped exports for encryption/decryption
+export const GET = withEncryption(_GET);
+export const PUT = withEncryption(_PUT);
+export const DELETE = withEncryption(_DELETE);

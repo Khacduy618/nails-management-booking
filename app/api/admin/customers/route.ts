@@ -1,11 +1,13 @@
+import { withEncryption } from "@/lib/api-middleware";
 import { db } from '@/db'
 import { customers, appointments, appointmentServices } from '@/db/schema'
-import { desc, asc, like, or, count, sql } from 'drizzle-orm'
+import { desc, asc, like, or, count, sql, eq } from 'drizzle-orm'
 import { NextRequest, NextResponse } from 'next/server'
 import { ok, fail } from '@/lib/api-response'
 import { verifyAdminOnly } from "@/lib/auth"
+import { decrypt, generateBlindIndex } from '@/lib/crypto'
 
-export async function GET(request: NextRequest) {
+async function _GET(request: NextRequest) {
     const auth = await verifyAdminOnly()
     if (!auth.authorized) return auth.response
 
@@ -44,11 +46,13 @@ export async function GET(request: NextRequest) {
         let whereConditions: any = undefined
         if (search && search.trim()) {
             const searchTerm = `%${search.trim()}%`
-            whereConditions = or(
-                like(customers.name, searchTerm),
-                like(customers.phone, searchTerm),
-                like(customers.email, searchTerm)
-            )
+            const hashedSearch = generateBlindIndex(search.trim())
+            const searchOrs = [like(customers.name, searchTerm)]
+            if (hashedSearch) {
+                searchOrs.push(eq(customers.phoneHash, hashedSearch))
+                searchOrs.push(eq(customers.emailHash, hashedSearch))
+            }
+            whereConditions = or(...searchOrs)
         }
 
         console.log('[API] WHERE condition:', whereConditions ? 'set' : 'undefined')
@@ -116,3 +120,7 @@ export async function GET(request: NextRequest) {
         return fail('FETCH_ERROR', errorMsg, 500)
     }
 }
+
+
+// Wrapped exports for encryption/decryption
+export const GET = withEncryption(_GET);

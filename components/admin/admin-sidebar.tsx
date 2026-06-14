@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { LayoutDashboard, Scissors, Calendar, Users, BarChart3, Settings, Menu, DollarSign, PieChart } from "lucide-react"
 import { useSession } from "next-auth/react"
+import { useState, useEffect } from "react"
 
 type NavItem = {
   name: string
@@ -35,7 +36,13 @@ type AdminSidebarProps = {
 export function AdminSidebar({ className, onNavigate, variant = "desktop" }: AdminSidebarProps) {
   const pathname = usePathname()
   const { data: session } = useSession()
-  const role = session?.user?.role ?? "admin"
+  const [isMounted, setIsMounted] = useState(false)
+
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
+
+  const role = isMounted ? (session?.user?.role ?? "admin") : "admin"
 
   const visibleNavigation = adminNavigation.filter((item) => !item.roles || item.roles.includes(role as "admin" | "staff"))
 

@@ -1,3 +1,4 @@
+import { withEncryption } from "@/lib/api-middleware";
 import { type NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { services, customers } from "@/db/schema";
@@ -8,7 +9,7 @@ let cachedStats: { totalCustomers: number; totalServices: number } | null = null
 let cacheExpiry = 0;
 const CACHE_TTL = 5 * 60 * 1000; // Cache 5 phút
 
-export async function GET(request: NextRequest) {
+async function _GET(request: NextRequest) {
   try {
     const key = `stats-public:${getClientKey(request as unknown as Request)}`;
     const rl = await rateLimit(key, LIMITS.catalog);
@@ -60,3 +61,7 @@ export async function GET(request: NextRequest) {
     );
   }
 }
+
+
+// Wrapped exports for encryption/decryption
+export const GET = withEncryption(_GET);

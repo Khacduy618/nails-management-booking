@@ -1,3 +1,4 @@
+import { withEncryption } from "@/lib/api-middleware";
 import { type NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { services, serviceCategories } from "@/db/schema";
@@ -21,7 +22,7 @@ function createDurationConditions(durationRanges: string[]) {
     return conditions.length > 0 ? [sql.join(conditions, sql` OR `)] : [];
 }
 
-export async function GET(request: NextRequest) {
+async function _GET(request: NextRequest) {
   try {
     const { searchTerm, categories, durations, minPrice, maxPrice } = parseMetaQueryParams(request.nextUrl.searchParams);
 
@@ -118,3 +119,6 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "An unexpected error occurred" }, { status: 500 });
   }
 }
+
+// Wrapped exports for encryption/decryption
+export const GET = withEncryption(_GET);

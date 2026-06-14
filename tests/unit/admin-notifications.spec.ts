@@ -58,9 +58,9 @@ describe("Admin Notifications API Routes (/api/admin/notifications)", () => {
         { id: 2, title: "Khách hủy lịch", message: "Khách hủy #2", isRead: false, createdAt: new Date() },
       ]
 
-      const mockOrderBy = vi.fn().mockResolvedValue(mockNotifications)
-      const mockWhere = vi.fn().mockReturnValue({ orderBy: mockOrderBy })
-      const mockFrom = vi.fn().mockReturnValue({ where: mockWhere })
+      const mockLimit = vi.fn().mockResolvedValue(mockNotifications)
+      const mockOrderBy = vi.fn().mockReturnValue({ limit: mockLimit })
+      const mockFrom = vi.fn().mockReturnValue({ orderBy: mockOrderBy })
       mockSelect.mockReturnValue({ from: mockFrom })
 
       const req = new NextRequest("http://localhost:3000/api/admin/notifications")

@@ -1,10 +1,12 @@
+import { withEncryption } from "@/lib/api-middleware";
 import { db } from '@/db'
 import { customers, appointments, appointmentServices, services } from '@/db/schema'
 import { eq, inArray } from 'drizzle-orm'
 import { NextResponse } from 'next/server'
 import { ok, fail } from '@/lib/api-response'
+import { decrypt } from '@/lib/crypto'
 
-export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
+async function _GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
     try {
         const { id } = await params
         const customerId = parseInt(id, 10)
@@ -110,9 +112,9 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
                 customer: {
                     id: customer.id,
                     name: customer.name,
-                    email: customer.email || '',
+                    email: customer.email,
                     phone: customer.phone,
-                    notes: customer.notes || '',
+                    notes: customer.notes,
                     createdAt: customer.createdAt,
                 },
                 appointments: appointmentsWithServices,
@@ -142,3 +144,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
         return fail('FETCH_ERROR', errorMsg, 500)
     }
 }
+
+
+// Wrapped exports for encryption/decryption
+export const GET = withEncryption(_GET);

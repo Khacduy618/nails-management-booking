@@ -1,9 +1,11 @@
+import { withEncryption } from "@/lib/api-middleware";
 import { type NextRequest, NextResponse } from "next/server"
 import { db } from "@/db"
 import { appointments, appointmentServices, services, customers, staff, staffServices, staffSchedules } from "@/db/schema"
 import { eq, and, sql, inArray, not, desc } from "drizzle-orm"
 import { addMinutes, format } from "date-fns"
 import { ok, fail } from "@/lib/api-response"
+import { encrypt, decrypt, generateBlindIndex } from "@/lib/crypto"
 import { logError, logDebug, logInfo } from "@/lib/logger"
 import { sendConfirmationEmail } from "@/lib/email-service"
 import { getClientKey, rateLimit, rateLimitResponse, LIMITS } from "@/lib/rate-limit"
@@ -32,7 +34,7 @@ const isBusinessHours = (date: Date) => {
   return hour >= 9 && hour < 18
 }
 
-export async function GET(request: NextRequest) {
+async function _GET(request: NextRequest) {
   try {
     // Rate limiting for lookup
     const key = `apt-lookup:${getClientKey(request as unknown as Request)}`
@@ -48,7 +50,8 @@ export async function GET(request: NextRequest) {
       return fail("MISSING_PHONE", "Phone number is required", 400)
     }
 
-    const cleanedPhone = sanitizePhone(phone)
+    const decryptedPhone = decrypt(phone) || phone
+    const cleanedPhone = sanitizePhone(decryptedPhone)
     logDebug('GET /api/appointments request', { phone: cleanedPhone })
 
     const phoneVariants = [cleanedPhone]
@@ -62,8 +65,12 @@ export async function GET(request: NextRequest) {
         phoneVariants.push('+' + cleanedPhone)
     }
 
+    const hashedPhoneVariants = phoneVariants
+      .map((p) => generateBlindIndex(p))
+      .filter((p): p is string => p !== null)
+
     const userAppointments = await db.query.appointments.findMany({
-      where: inArray(appointments.customerPhone, phoneVariants),
+      where: inArray(appointments.customerPhoneHash, hashedPhoneVariants),
       with: {
         review: true,
         appointmentServices: {
@@ -85,6 +92,8 @@ export async function GET(request: NextRequest) {
         status: true,
         durationAtBooking: true,
         reviewToken: true,
+        customerPhone: true,
+        notes: true,
       },
       orderBy: [desc(appointments.appointmentDate), desc(appointments.appointmentTime)],
     })
@@ -104,6 +113,8 @@ export async function GET(request: NextRequest) {
         reviewToken: apt.reviewToken,
         staffId,
         staffName,
+        customerPhone: apt.customerPhone,
+        notes: apt.notes,
         review: apt.review ? {
           rating: apt.review.rating,
           comment: apt.review.comment,
@@ -118,7 +129,7 @@ export async function GET(request: NextRequest) {
   }
 }
 
-export async function POST(request: NextRequest) {
+async function _POST(request: NextRequest) {
   try {
     // Rate limiting for booking
     const key = `apt-book:${getClientKey(request as unknown as Request)}`
@@ -144,13 +155,18 @@ export async function POST(request: NextRequest) {
     const { serviceIds, customerName, customerPhone, customerEmail, date, time, staffId, notes } = body
     logDebug('POST /api/appointments received', { body })
 
-    if (!serviceIds?.length || !customerName || !customerPhone || !date || !time || !staffId) {
-      logDebug('POST /api/appointments invalid input', { serviceIds, customerName, customerPhone, date, time, staffId })
-      logInfo('POST /api/appointments: VALIDATION FAILED - Missing required fields', { serviceIds, customerName, customerPhone, date, time, staffId })
+    const plainName = customerName ? (decrypt(customerName) || customerName) : ""
+    const plainPhone = decrypt(customerPhone) || customerPhone
+    const plainEmail = customerEmail ? (decrypt(customerEmail) || customerEmail) : undefined
+    const plainNotes = notes
+
+    if (!serviceIds?.length || !plainName || !plainPhone || !date || !time || !staffId) {
+      logDebug('POST /api/appointments invalid input', { serviceIds, plainName, plainPhone, date, time, staffId })
+      logInfo('POST /api/appointments: VALIDATION FAILED - Missing required fields', { serviceIds, plainName, plainPhone, date, time, staffId })
       return fail("INVALID_INPUT", "Missing required fields", 400)
     }
 
-    const sanitizedPhone = sanitizePhone(customerPhone)
+    const sanitizedPhone = sanitizePhone(plainPhone)
 
     const servicesSelected = await db.query.services.findMany({ where: inArray(services.id, serviceIds) })
     logDebug('Fetched services for booking', { serviceIds, found: servicesSelected.map((s: any) => ({ id: s.id, name: s.name, price: s.price, duration: s.duration })) })
@@ -253,11 +269,14 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    const phoneHash = generateBlindIndex(sanitizedPhone)!
+
     // Prepare payloads for logging
     const appointmentInsertPayload = {
-      customerName,
-      customerPhone: sanitizedPhone,
-      notes,
+      customerName: encrypt(plainName)!,
+      customerPhone: encrypt(sanitizedPhone)!,
+      customerPhoneHash: phoneHash,
+      notes: plainNotes,
       appointmentDate: appointmentDateStr,
       appointmentTime: time,
       status: 'pending' as const,
@@ -282,7 +301,7 @@ export async function POST(request: NextRequest) {
 
       try {
         const existingCustomer = await tx.query.customers.findFirst({
-          where: eq(customers.phone, sanitizedPhone),
+          where: eq(customers.phoneHash, phoneHash),
         })
 
         if (existingCustomer) {
@@ -292,7 +311,9 @@ export async function POST(request: NextRequest) {
             .update(customers)
             .set({
               lastAppointmentDate: format(appointmentStart, 'yyyy-MM-dd'),
-              email: customerEmail || existingCustomer.email,
+              name: encrypt(plainName)!,
+              email: plainEmail ? encrypt(plainEmail) : existingCustomer.email,
+              emailHash: plainEmail ? generateBlindIndex(plainEmail) : existingCustomer.emailHash,
               updatedAt: new Date(),
             })
             .where(eq(customers.id, existingCustomer.id))
@@ -301,9 +322,11 @@ export async function POST(request: NextRequest) {
           const insertResult = await tx
             .insert(customers)
             .values({
-              phone: sanitizedPhone,
-              name: customerName,
-              email: customerEmail || undefined,
+              phone: encrypt(sanitizedPhone)!,
+              phoneHash: phoneHash,
+              name: encrypt(plainName)!,
+              email: plainEmail ? encrypt(plainEmail) : undefined,
+              emailHash: plainEmail ? generateBlindIndex(plainEmail) : undefined,
               lastAppointmentDate: format(appointmentStart, 'yyyy-MM-dd'),
               createdAt: new Date(),
               updatedAt: new Date(),
@@ -371,16 +394,17 @@ export async function POST(request: NextRequest) {
     })
 
     // Send confirmation email if customer provided email
-    if (customerEmail && createdAppointment) {
-      const staffName = createdAppointment.appointmentServices?.[0]?.staff?.user?.name
+    if (plainEmail && createdAppointment) {
+      const rawStaffName = createdAppointment.appointmentServices?.[0]?.staff?.user?.name
         || createdAppointment.appointmentServices?.[0]?.staff?.user?.email
         || 'Nhân viên'
+      const staffName = rawStaffName.startsWith("v1:") ? (decrypt(rawStaffName) || rawStaffName) : rawStaffName
 
       try {
         await sendConfirmationEmail({
           appointmentId: createdAppointment.id,
-          customerName,
-          customerEmail,
+          customerName: plainName,
+          customerEmail: plainEmail,
           customerPhone: sanitizedPhone,
           appointmentDate: format(appointmentStart, 'yyyy-MM-dd'),
           appointmentTime: time,
@@ -391,7 +415,7 @@ export async function POST(request: NextRequest) {
           staffName,
           totalPrice: totalPrice,
           totalDuration: totalDuration,
-          notes,
+          notes: plainNotes,
         })
       } catch (err) {
         logError(err, { context: 'email_sending', appointmentId: createdAppointment.id })
@@ -404,3 +428,8 @@ export async function POST(request: NextRequest) {
     return fail("SERVER_ERROR", "Unable to create appointment", 500)
   }
 }
+
+
+// Wrapped exports for encryption/decryption
+export const GET = withEncryption(_GET);
+export const POST = withEncryption(_POST);

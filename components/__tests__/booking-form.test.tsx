@@ -113,6 +113,8 @@ describe("BookingForm", () => {
     await waitFor(() => expect(screen.getByText("Đặt lịch thành công!")).toBeInTheDocument())
 
     const payload = JSON.parse((fetchMock.mock.calls[3][1] as RequestInit).body as string)
+    expect(payload.customerPhone).toBe("0901234567")
+
     expect(payload).toMatchObject({
       customerName: "Khách Test",
       customerPhone: "0901234567",

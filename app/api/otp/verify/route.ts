@@ -1,3 +1,4 @@
+import { withEncryption } from "@/lib/api-middleware";
 import { type NextRequest, NextResponse } from "next/server"
 import { db } from "@/db"
 import { appointments, otpTokens, adminNotifications } from "@/db/schema"
@@ -6,10 +7,11 @@ import { fail, ok } from "@/lib/api-response"
 import { logError, logDebug, logInfo } from "@/lib/logger"
 import { getClientKey, rateLimit, rateLimitResponse, LIMITS } from "@/lib/rate-limit"
 import { sendCancellationEmail, sendAdminCancellationNotification } from "@/lib/email-service"
+import { decrypt } from "@/lib/crypto"
 
 const sanitizePhone = (input: string) => input.replace(/\D/g, "")
 
-export async function POST(request: NextRequest) {
+async function _POST(request: NextRequest) {
     try {
         // Rate limiting for OTP verification
         const key = `otp-verify:${getClientKey(request as unknown as Request)}`
@@ -28,7 +30,8 @@ export async function POST(request: NextRequest) {
             return fail("MISSING_FIELDS", "Appointment ID, OTP code, and phone are required", 400)
         }
 
-        const sanitizedPhone = sanitizePhone(phone)
+        const decryptedPhone = decrypt(phone) || phone
+        const sanitizedPhone = sanitizePhone(decryptedPhone)
 
         // Verify OTP from database
         const storedOTP = await db.query.otpTokens.findFirst({
@@ -86,7 +89,7 @@ export async function POST(request: NextRequest) {
             return normalize(c1) === normalize(c2)
         }
 
-        if (!isPhoneMatch(appointment.customerPhone, phone)) {
+        if (!isPhoneMatch(decrypt(appointment.customerPhone) || "", decryptedPhone)) {
             return fail("UNAUTHORIZED", "Phone number does not match appointment", 403)
         }
 
@@ -118,13 +121,13 @@ export async function POST(request: NextRequest) {
             })
 
             // Async send emails
-            const customerEmail = appointment.customer?.email || ""
+            const customerEmail = decrypt(appointment.customer?.email) || ""
             const staffName = appointment.appointmentServices?.[0]?.staff?.user?.name || "Nhân viên"
             const emailData = {
                 appointmentId,
                 customerName: appointment.customerName,
                 customerEmail,
-                customerPhone: appointment.customerPhone,
+                customerPhone: decrypt(appointment.customerPhone) || "",
                 appointmentDate: appointment.appointmentDate,
                 appointmentTime: appointment.appointmentTime,
                 services: appointment.appointmentServices.map((as: any) => ({
@@ -134,7 +137,7 @@ export async function POST(request: NextRequest) {
                 staffName,
                 totalPrice: Number(appointment.priceAtBooking),
                 totalDuration: appointment.durationAtBooking,
-                notes: appointment.notes,
+                notes: decrypt(appointment.notes) || "",
             }
 
             if (customerEmail) {
@@ -157,3 +160,7 @@ export async function POST(request: NextRequest) {
         return fail("SERVER_ERROR", "Unable to verify OTP", 500)
     }
 }
+
+
+// Wrapped exports for encryption/decryption
+export const POST = withEncryption(_POST);

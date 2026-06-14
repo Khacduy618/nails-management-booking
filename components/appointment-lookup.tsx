@@ -12,6 +12,7 @@ import { useState } from "react"
 import { toast } from "sonner"
 import { ConfirmDialog } from "@/components/ui/confirm-dialog"
 import { OTPVerificationDialog } from "@/components/otp-verification-dialog"
+import { encryptAsync } from "@/lib/crypto-client"
 
 // --- Định nghĩa kiểu dữ liệu ---
 type AppointmentStatus = "pending" | "confirmed" | "completed" | "cancelled" | "in-progress";
@@ -110,7 +111,8 @@ export function AppointmentLookup() {
 
     try {
       const apiBase = (process.env.NEXT_PUBLIC_API_URL || '/api').replace(/\/$/, '')
-      const res = await fetch(`${apiBase}/appointments?phone=${encodeURIComponent(cleanedPhone)}`)
+      const encryptedPhone = (await encryptAsync(cleanedPhone)) || cleanedPhone
+      const res = await fetch(`${apiBase}/appointments?phone=${encodeURIComponent(encryptedPhone)}`)
 
       const result = await res.json();
       if (!res.ok || !result.success) {

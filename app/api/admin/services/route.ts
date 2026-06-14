@@ -1,3 +1,4 @@
+import { withEncryption } from "@/lib/api-middleware";
 import { type NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { services, serviceCategories, staffServices } from "@/db/schema";
@@ -5,7 +6,7 @@ import { eq, and, sql, asc, desc, count } from "drizzle-orm";
 import { verifyAdminOnly } from "@/lib/auth";
 
 // --- GET: Lấy toàn bộ dịch vụ cho trang admin ---
-export async function GET(request: NextRequest) {
+async function _GET(request: NextRequest) {
   const auth = await verifyAdminOnly();
   if (!auth.authorized) return auth.response;
 
@@ -95,7 +96,7 @@ export async function GET(request: NextRequest) {
 }
 
 // --- POST: Tạo dịch vụ mới ---
-export async function POST(request: NextRequest) {
+async function _POST(request: NextRequest) {
   const auth = await verifyAdminOnly();
   if (!auth.authorized) return auth.response;
 
@@ -133,3 +134,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Invalid request body or server error" }, { status: 500 });
   }
 }
+
+// Wrapped exports for encryption/decryption
+export const GET = withEncryption(_GET);
+export const POST = withEncryption(_POST);

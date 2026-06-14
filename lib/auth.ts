@@ -5,6 +5,7 @@ import { getServerSession, type NextAuthOptions } from "next-auth"
 import Credentials from "next-auth/providers/credentials"
 import bcrypt from "bcryptjs"
 import { NextResponse } from "next/server"
+import { decrypt, generateBlindIndex } from "@/lib/crypto"
 
 type AppRole = "admin" | "staff" | "customer"
 
@@ -33,9 +34,14 @@ export const authOptions: NextAuthOptions = {
         }
 
         const normalizedEmail = credentials.email.toLowerCase().trim()
+        const emailHashVal = generateBlindIndex(normalizedEmail)
+
+        if (!emailHashVal) {
+          throw new Error("Lỗi xác thực email")
+        }
 
         const user = await db.query.users.findFirst({
-          where: eq(users.email, normalizedEmail),
+          where: eq(users.emailHash, emailHashVal),
           columns: {
             id: true,
             name: true,
@@ -59,10 +65,13 @@ export const authOptions: NextAuthOptions = {
           throw new Error("Sai mật khẩu")
         }
 
+        const decryptedName = decrypt(user.name) || "Người dùng"
+        const decryptedEmail = decrypt(user.email) || normalizedEmail
+
         return {
           id: user.id.toString(),
-          name: user.name,
-          email: user.email,
+          name: decryptedName,
+          email: decryptedEmail,
           role: user.role,
         }
       },

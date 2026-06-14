@@ -1,12 +1,14 @@
+import { withEncryption } from "@/lib/api-middleware";
 import { type NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { staff, staffBaseSalaries, users } from "@/db/schema";
 import { eq, asc, desc, or, count, ilike, and } from "drizzle-orm";
-import { verifyAdminOnly } from "@/lib/auth";
+import { verifyAdminOnly, verifyAdminOrStaff } from "@/lib/auth";
+import { encrypt, generateBlindIndex } from "@/lib/crypto";
 
 // --- GET: Lấy danh sách nhân viên với pagination, search, sort, filter ---
-export async function GET(request: NextRequest) {
-  const auth = await verifyAdminOnly();
+async function _GET(request: NextRequest) {
+  const auth = await verifyAdminOrStaff();
   if (!auth.authorized) return auth.response;
 
   try {
@@ -129,7 +131,7 @@ export async function GET(request: NextRequest) {
 }
 
 // --- POST: Tạo nhân viên mới ---
-export async function POST(request: NextRequest) {
+async function _POST(request: NextRequest) {
   const auth = await verifyAdminOnly();
   if (!auth.authorized) return auth.response;
 
@@ -291,9 +293,11 @@ export async function POST(request: NextRequest) {
     const result = await db.transaction(async (tx: any) => {
       // 1. Create user first
       const userResult = await tx.insert(users).values({
-        name: normalizedName,
-        email: normalizedEmail,
-        phone: normalizedPhone,
+        name: encrypt(normalizedName)!,
+        email: encrypt(normalizedEmail)!,
+        emailHash: generateBlindIndex(normalizedEmail)!,
+        phone: encrypt(normalizedPhone)!,
+        phoneHash: generateBlindIndex(normalizedPhone)!,
         role: 'staff',
       }).returning({ id: users.id })
 
@@ -371,3 +375,7 @@ export async function POST(request: NextRequest) {
     )
   }
 }
+
+// Wrapped exports for encryption/decryption
+export const GET = withEncryption(_GET);
+export const POST = withEncryption(_POST);
