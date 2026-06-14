@@ -1,12 +1,19 @@
 import crypto from "crypto"
 
 const getEncryptionKey = (): Buffer => {
-  const secret = process.env.NEXT_PUBLIC_ENCRYPTION_KEY || process.env.ENCRYPTION_KEY || "nails-booking-app-default-secure-secret-32-chars"
+  let secret = process.env.NEXT_PUBLIC_ENCRYPTION_KEY || process.env.ENCRYPTION_KEY || "nails-booking-app-default-secure-secret-32-chars"
+  if (secret.startsWith('"') && secret.endsWith('"')) {
+    secret = secret.slice(1, -1)
+  }
   return crypto.createHash("sha256").update(secret).digest()
 }
 
 const getBlindIndexSecret = (): string => {
-  return process.env.ENCRYPTION_SECRET || "nails-booking-app-default-blind-index-secret"
+  let secret = process.env.ENCRYPTION_SECRET || "nails-booking-app-default-blind-index-secret"
+  if (secret.startsWith('"') && secret.endsWith('"')) {
+    secret = secret.slice(1, -1)
+  }
+  return secret
 }
 
 /**

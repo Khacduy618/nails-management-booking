@@ -4,10 +4,11 @@
  */
 
 const getSecret = (): string => {
-  return (
-    process.env.NEXT_PUBLIC_ENCRYPTION_KEY ||
-    "nails-booking-app-default-secure-secret-32-chars"
-  )
+  let secret = process.env.NEXT_PUBLIC_ENCRYPTION_KEY || "nails-booking-app-default-secure-secret-32-chars"
+  if (secret.startsWith('"') && secret.endsWith('"')) {
+    secret = secret.slice(1, -1)
+  }
+  return secret
 }
 
 // Helper to convert hex string to Uint8Array
