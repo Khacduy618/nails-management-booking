@@ -3,8 +3,13 @@ import { db } from '@/db'
 import { appointments, appointmentServices, staff, payrolls, staffBaseSalaries, users } from '@/db/schema'
 import { eq, gte, lte, and } from 'drizzle-orm'
 import { calculateCommissionAmount, calculateCommissionPercentage } from '@/lib/payroll-utils'
+import { verifyAdminOnly } from '@/lib/auth'
 
 export async function GET(request: NextRequest) {
+    const auth = await verifyAdminOnly()
+    if (!auth.authorized) return auth.response
+
+
     try {
         const { searchParams } = new URL(request.url)
         const staffId = parseInt(searchParams.get('staffId') || '0')
@@ -169,6 +174,9 @@ export async function GET(request: NextRequest) {
 
 // PUT endpoint để cập nhật bonus và deduction
 export async function PUT(request: NextRequest) {
+    const auth = await verifyAdminOnly()
+    if (!auth.authorized) return auth.response
+
     try {
         const body = await request.json()
         const { staffId, startDate, endDate, totalBonus, totalDeduction } = body

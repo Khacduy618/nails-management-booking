@@ -2,9 +2,13 @@ import { type NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { services, serviceCategories, staffServices } from "@/db/schema";
 import { eq, and, sql, asc, desc, count } from "drizzle-orm";
+import { verifyAdminOnly } from "@/lib/auth";
 
 // --- GET: Lấy toàn bộ dịch vụ cho trang admin ---
 export async function GET(request: NextRequest) {
+  const auth = await verifyAdminOnly();
+  if (!auth.authorized) return auth.response;
+
   try {
     const { searchParams } = new URL(request.url);
 
@@ -92,6 +96,9 @@ export async function GET(request: NextRequest) {
 
 // --- POST: Tạo dịch vụ mới ---
 export async function POST(request: NextRequest) {
+  const auth = await verifyAdminOnly();
+  if (!auth.authorized) return auth.response;
+
   try {
     const body = await request.json();
     const { staffIds, ...serviceData } = body;

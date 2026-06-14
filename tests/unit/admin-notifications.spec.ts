@@ -120,7 +120,7 @@ describe("Admin Notifications API Routes (/api/admin/notifications)", () => {
     })
 
     it("should mark specific notification as read when ID is passed", async () => {
-      mockGetServerSession.mockResolvedValue({ user: { role: "staff" } })
+      mockGetServerSession.mockResolvedValue({ user: { role: "admin" } })
 
       // Mock update chain for update(...).set(...).where(...).returning()
       const mockReturnedData = [{ id: 123, isRead: true }]

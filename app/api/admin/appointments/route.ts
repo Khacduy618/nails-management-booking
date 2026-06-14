@@ -2,11 +2,16 @@ import { type NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { appointments, appointmentServices, services, staff } from "@/db/schema";
 import { eq, and, inArray, sql, asc, desc, like, or, SQL, count } from "drizzle-orm";
+import { verifyAdminOrStaff } from "@/lib/auth";
 
 const validStatuses = appointments.status.enumValues;
 type AppointmentStatus = (typeof validStatuses)[number];
 
 export async function GET(request: NextRequest) {
+  const auth = await verifyAdminOrStaff();
+  if (!auth.authorized) return auth.response;
+
+
   try {
     const { searchParams } = new URL(request.url);
     const date = searchParams.get("date");

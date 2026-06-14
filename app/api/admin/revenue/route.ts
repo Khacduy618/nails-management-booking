@@ -3,8 +3,14 @@ import { db } from "@/db";
 import { appointments, services, staff, appointmentServices, users } from "@/db/schema";
 import { sql, sum, count, eq, and, gte, lte, type SQL } from "drizzle-orm";
 import { parseISO, format } from "date-fns";
+import { verifyAdminOnly } from "@/lib/auth";
 
 export async function GET(request: NextRequest) {
+    const auth = await verifyAdminOnly();
+    if (!auth.authorized) return auth.response;
+
+
+
     try {
         const { searchParams } = new URL(request.url);
         // Lấy ngày bắt đầu và kết thúc từ query, ví dụ: ?startDate=2024-07-01&endDate=2024-07-31
