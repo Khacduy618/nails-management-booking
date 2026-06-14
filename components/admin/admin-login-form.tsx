@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Loader2 } from "lucide-react"
 import { validateEmail, validateText } from "@/lib/form-validation"
+import { encryptAsync } from "@/lib/crypto-client"
 
 export function AdminLoginForm() {
   const router = useRouter()
@@ -37,22 +38,34 @@ export function AdminLoginForm() {
     setError(null)
     setIsLoading(true)
 
-    const result = await signIn("credentials", {
-      email,
-      password,
-      redirect: false,
-    })
+    try {
+      const encryptedEmail = await encryptAsync(email)
+      const encryptedPassword = await encryptAsync(password)
 
-    setIsLoading(false)
+      if (!encryptedEmail || !encryptedPassword) {
+        throw new Error("Mã hóa thông tin thất bại")
+      }
 
-    if (result?.error) {
-      setError(result.error)
-      return
-    }
+      const result = await signIn("credentials", {
+        email: encryptedEmail,
+        password: encryptedPassword,
+        redirect: false,
+      })
 
-    if (result?.ok) {
-      router.push("/admin")
-      router.refresh()
+      setIsLoading(false)
+
+      if (result?.error) {
+        setError(result.error)
+        return
+      }
+
+      if (result?.ok) {
+        router.push("/admin")
+        router.refresh()
+      }
+    } catch (err: any) {
+      setIsLoading(false)
+      setError(err.message || "Đã xảy ra lỗi đăng nhập")
     }
   }
 

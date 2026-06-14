@@ -33,7 +33,21 @@ export const authOptions: NextAuthOptions = {
           throw new Error("Vui lòng nhập email và mật khẩu")
         }
 
-        const normalizedEmail = credentials.email.toLowerCase().trim()
+        let email = credentials.email
+        let password = credentials.password
+
+        if (email.startsWith("v1:")) {
+          const decrypted = decrypt(email)
+          if (!decrypted) throw new Error("Giải mã email thất bại")
+          email = decrypted
+        }
+        if (password.startsWith("v1:")) {
+          const decrypted = decrypt(password)
+          if (!decrypted) throw new Error("Giải mã mật khẩu thất bại")
+          password = decrypted
+        }
+
+        const normalizedEmail = email.toLowerCase().trim()
         const emailHashVal = generateBlindIndex(normalizedEmail)
 
         if (!emailHashVal) {
@@ -59,7 +73,7 @@ export const authOptions: NextAuthOptions = {
           throw new Error("Tài khoản không có quyền truy cập")
         }
 
-        const isValidPassword = await bcrypt.compare(credentials.password, user.password)
+        const isValidPassword = await bcrypt.compare(password, user.password)
 
         if (!isValidPassword) {
           throw new Error("Sai mật khẩu")
