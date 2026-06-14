@@ -1,6 +1,6 @@
 import 'dotenv/config';
 import { db } from '../db';
-import { appointments, customers } from '../db/schema';
+import { appointments, customers, users } from '../db/schema';
 import { eq, sql } from 'drizzle-orm';
 import { decrypt, generateBlindIndex } from '../lib/crypto';
 
@@ -71,16 +71,61 @@ export async function populateHashes() {
     }
     console.log(`✅ Updated ${updatedCustomersCount} customers with hashes. Deleted ${deletedDuplicatesCount} duplicates.`);
 
-    // 3. Apply database-level constraints
+    // 3. Fetch and update all users missing emailHash/phoneHash, cleaning duplicates
+    const usersList = await db.select().from(users);
+    const seenUserEmailHashes = new Set<string>();
+    const seenUserPhoneHashes = new Set<string>();
+    let updatedUsersCount = 0;
+    let deletedUserDuplicatesCount = 0;
+
+    for (const u of usersList) {
+        if (!u.email || !u.phone) continue;
+
+        const decryptedEmail = decrypt(u.email);
+        const decryptedPhone = decrypt(u.phone);
+        if (!decryptedEmail || !decryptedPhone) continue;
+
+        const emailHash = generateBlindIndex(decryptedEmail);
+        const phoneHash = generateBlindIndex(decryptedPhone);
+        if (!emailHash || !phoneHash) continue;
+
+        // Clean duplicates
+        if (seenUserEmailHashes.has(emailHash) || seenUserPhoneHashes.has(phoneHash)) {
+            console.warn(`⚠️ Duplicate user record found. Deleting duplicate user ID: ${u.id}`);
+            await db.delete(users).where(eq(users.id, u.id));
+            deletedUserDuplicatesCount++;
+            continue;
+        }
+        seenUserEmailHashes.add(emailHash);
+        seenUserPhoneHashes.add(phoneHash);
+
+        await db.update(users)
+            .set({ 
+                emailHash, 
+                phoneHash 
+            })
+            .where(eq(users.id, u.id));
+        updatedUsersCount++;
+    }
+    console.log(`✅ Updated ${updatedUsersCount} users with hashes. Deleted ${deletedUserDuplicatesCount} duplicates.`);
+
+    // 4. Apply database-level constraints
     console.log('🔒 Applying NOT NULL and UNIQUE database constraints...');
     await db.execute(sql`
         -- Set NOT NULL constraints
         ALTER TABLE "appointments" ALTER COLUMN "customer_phone_hash" SET NOT NULL;
         ALTER TABLE "customers" ALTER COLUMN "phone_hash" SET NOT NULL;
+        ALTER TABLE "users" ALTER COLUMN "email_hash" SET NOT NULL;
+        ALTER TABLE "users" ALTER COLUMN "phone_hash" SET NOT NULL;
         
-        -- Apply UNIQUE constraint to customers phone_hash
+        -- Apply UNIQUE constraints
         ALTER TABLE "customers" DROP CONSTRAINT IF EXISTS "customers_phone_hash_unique";
         ALTER TABLE "customers" ADD CONSTRAINT "customers_phone_hash_unique" UNIQUE("phone_hash");
+        
+        ALTER TABLE "users" DROP CONSTRAINT IF EXISTS "users_email_hash_unique";
+        ALTER TABLE "users" DROP CONSTRAINT IF EXISTS "users_phone_hash_unique";
+        ALTER TABLE "users" ADD CONSTRAINT "users_email_hash_unique" UNIQUE("email_hash");
+        ALTER TABLE "users" ADD CONSTRAINT "users_phone_hash_unique" UNIQUE("phone_hash");
     `);
     console.log('✅ Database constraints applied successfully!');
 }
