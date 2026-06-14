@@ -1,3 +1,4 @@
+import { withEncryption } from "@/lib/api-middleware";
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/db'
 import { appointments, appointmentServices, staff, payrolls, staffBaseSalaries, users } from '@/db/schema'
@@ -5,7 +6,7 @@ import { eq, gte, lte, and } from 'drizzle-orm'
 import { calculateCommissionAmount, calculateCommissionPercentage } from '@/lib/payroll-utils'
 import { verifyAdminOnly } from '@/lib/auth'
 
-export async function GET(request: NextRequest) {
+async function _GET(request: NextRequest) {
     const auth = await verifyAdminOnly()
     if (!auth.authorized) return auth.response
 
@@ -173,7 +174,7 @@ export async function GET(request: NextRequest) {
 }
 
 // PUT endpoint để cập nhật bonus và deduction
-export async function PUT(request: NextRequest) {
+async function _PUT(request: NextRequest) {
     const auth = await verifyAdminOnly()
     if (!auth.authorized) return auth.response
 
@@ -331,3 +332,8 @@ export async function PUT(request: NextRequest) {
         )
     }
 }
+
+
+// Wrapped exports for encryption/decryption
+export const GET = withEncryption(_GET);
+export const PUT = withEncryption(_PUT);

@@ -1,11 +1,13 @@
+import { withEncryption } from "@/lib/api-middleware";
 import { type NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { appointments, services, staff, appointmentServices, users } from "@/db/schema";
 import { sql, sum, count, eq, and, gte, lte, type SQL } from "drizzle-orm";
 import { parseISO, format } from "date-fns";
 import { verifyAdminOnly } from "@/lib/auth";
+import { decrypt } from "@/lib/crypto";
 
-export async function GET(request: NextRequest) {
+async function _GET(request: NextRequest) {
     const auth = await verifyAdminOnly();
     if (!auth.authorized) return auth.response;
 
@@ -45,7 +47,7 @@ export async function GET(request: NextRequest) {
                 totalRevenue: sql<number>`COALESCE(sum(case when ${appointments.status} = 'completed' then ${appointmentServices.priceAtBooking} else 0 end), 0)`,
                 totalAppointments: sql<number>`count(case when ${appointments.status} != 'cancelled' then 1 end)`,
                 completedAppointments: sql<number>`count(case when ${appointments.status} = 'completed' then 1 end)`,
-                totalCustomers: sql<number>`count(distinct ${appointments.customerPhone})`,
+                totalCustomers: sql<number>`count(distinct ${appointments.customerPhoneHash})`,
             })
             .from(appointments)
             .leftJoin(appointmentServices, eq(appointments.id, appointmentServices.appointmentId));
@@ -97,6 +99,7 @@ export async function GET(request: NextRequest) {
                 appointmentTime: appointments.appointmentTime,
                 customerName: appointments.customerName,
                 customerPhone: appointments.customerPhone,
+                customerPhoneHash: appointments.customerPhoneHash,
                 customerId: appointments.customerId,
                 status: appointments.status,
                 serviceName: services.name,
@@ -120,6 +123,7 @@ export async function GET(request: NextRequest) {
             appointmentTime: record.appointmentTime,
             customerName: record.customerName,
             customerPhone: record.customerPhone,
+            customerPhoneHash: record.customerPhoneHash,
             customerId: record.customerId,
             status: record.status,
             serviceName: record.serviceName,
@@ -200,3 +204,6 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ error: "An unexpected error occurred" }, { status: 500 });
     }
 }
+
+// Wrapped exports for encryption/decryption
+export const GET = withEncryption(_GET);

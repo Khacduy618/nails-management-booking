@@ -80,7 +80,7 @@ export function AdminHeader() {
         }
 
         setNotifications(newList)
-        setUnreadCount(newList.length)
+        setUnreadCount(newList.filter(n => !n.isRead).length)
       }
     } catch (err) {
       console.error("Failed to fetch notifications:", err)
@@ -106,7 +106,7 @@ export function AdminHeader() {
         body: JSON.stringify({ id }),
       })
       if (res.ok) {
-        setNotifications(prev => prev.filter(n => n.id !== id))
+        setNotifications(prev => prev.map(n => n.id === id ? { ...n, isRead: true } : n))
         setUnreadCount(prev => Math.max(0, prev - 1))
       }
     } catch (err) {
@@ -122,7 +122,7 @@ export function AdminHeader() {
         body: JSON.stringify({ all: true }),
       })
       if (res.ok) {
-        setNotifications([])
+        setNotifications(prev => prev.map(n => ({ ...n, isRead: true })))
         setUnreadCount(0)
         toast.success("Đã đánh dấu đọc tất cả thông báo")
       }
@@ -199,23 +199,32 @@ export function AdminHeader() {
                 </div>
               ) : (
                 notifications.map((item) => (
-                  <div key={item.id} className="p-4 text-xs hover:bg-neutral-50/50 transition-colors flex justify-between items-start gap-2.5">
+                  <div key={item.id} className={`p-4 text-xs hover:bg-neutral-50/50 transition-colors flex justify-between items-start gap-2.5 ${!item.isRead ? 'bg-primary/5' : ''}`}>
                     <div className="space-y-1 flex-1 min-w-0">
-                      <p className="font-bold text-neutral-800 leading-tight">{item.title}</p>
+                      <p className="font-bold text-neutral-800 leading-tight flex items-center gap-1.5">
+                        {!item.isRead && (
+                          <span className="h-1.5 w-1.5 rounded-full bg-red-500 shrink-0" />
+                        )}
+                        {item.title}
+                      </p>
                       <p className="text-neutral-500 leading-relaxed">{item.message}</p>
                       <p className="text-[10px] text-muted-foreground">
                         {new Date(item.createdAt).toLocaleTimeString("vi-VN", { hour: '2-digit', minute: '2-digit' })} - {new Date(item.createdAt).toLocaleDateString("vi-VN")}
                       </p>
                     </div>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-6 w-6 text-neutral-400 hover:text-primary hover:bg-neutral-100 rounded-md shrink-0"
-                      onClick={() => handleMarkAsRead(item.id)}
-                      title="Đánh dấu đã đọc"
-                    >
-                      <Check className="h-3.5 w-3.5" />
-                    </Button>
+                    {!item.isRead ? (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-6 w-6 text-neutral-400 hover:text-primary hover:bg-neutral-100 rounded-md shrink-0"
+                        onClick={() => handleMarkAsRead(item.id)}
+                        title="Đánh dấu đã đọc"
+                      >
+                        <Check className="h-3.5 w-3.5" />
+                      </Button>
+                    ) : (
+                      <div className="w-6 h-6 shrink-0" />
+                    )}
                   </div>
                 ))
               )}

@@ -1,22 +1,23 @@
+import { withEncryption } from "@/lib/api-middleware";
 import { type NextRequest, NextResponse } from "next/server"
 import { db } from "@/db"
 import { adminNotifications } from "@/db/schema"
 import { eq, desc } from "drizzle-orm"
 import { fail, ok } from "@/lib/api-response"
 import { logError } from "@/lib/logger"
-import { verifyAdminOnly } from "@/lib/auth"
+import { verifyAdminOnly, verifyAdminOrStaff } from "@/lib/auth"
 
-export async function GET(request: NextRequest) {
+async function _GET(request: NextRequest) {
     try {
-        const auth = await verifyAdminOnly()
+        const auth = await verifyAdminOrStaff()
         if (!auth.authorized) return auth.response
 
-        // Lấy tất cả thông báo chưa đọc, sắp xếp mới nhất lên đầu
+        // Lấy 50 thông báo mới nhất, sắp xếp mới nhất lên đầu
         const notificationsList = await db
             .select()
             .from(adminNotifications)
-            .where(eq(adminNotifications.isRead, false))
             .orderBy(desc(adminNotifications.createdAt))
+            .limit(50)
 
         return ok({ data: notificationsList })
     } catch (error) {
@@ -25,9 +26,9 @@ export async function GET(request: NextRequest) {
     }
 }
 
-export async function PUT(request: NextRequest) {
+async function _PUT(request: NextRequest) {
     try {
-        const auth = await verifyAdminOnly()
+        const auth = await verifyAdminOrStaff()
         if (!auth.authorized) return auth.response
 
         const body = await request.json()
@@ -64,3 +65,8 @@ export async function PUT(request: NextRequest) {
         return fail("SERVER_ERROR", "Unable to update notification", 500)
     }
 }
+
+
+// Wrapped exports for encryption/decryption
+export const GET = withEncryption(_GET);
+export const PUT = withEncryption(_PUT);

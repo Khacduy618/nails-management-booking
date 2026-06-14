@@ -1,3 +1,4 @@
+import { withEncryption } from "@/lib/api-middleware";
 import { type NextRequest } from "next/server"
 import { db } from "@/db"
 import { staff, staffServices, appointments, appointmentServices, staffSchedules, services } from "@/db/schema"
@@ -7,7 +8,7 @@ import { ok, fail } from "@/lib/api-response"
 import { logError } from "@/lib/logger"
 
 // Map JavaScript getDay (0=Sunday) to day_of_week enum index
-export async function GET(request: NextRequest) {
+async function _GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
     const dateParam = searchParams.get("date")
@@ -175,3 +176,7 @@ export async function GET(request: NextRequest) {
     return fail("SERVER_ERROR", "Unable to compute time slots", 500)
   }
 }
+
+
+// Wrapped exports for encryption/decryption
+export const GET = withEncryption(_GET);

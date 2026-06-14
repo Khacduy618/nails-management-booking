@@ -1,3 +1,4 @@
+import { withEncryption } from "@/lib/api-middleware";
 import { type NextRequest } from "next/server"
 import { db } from "@/db"
 import { serviceCategories, services } from "@/db/schema"
@@ -11,7 +12,7 @@ type UpdateCategoryPayload = {
     status?: "active" | "inactive"
 }
 
-export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+async function _PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
     try {
         const { id } = await params
         const categoryId = parseInt(id)
@@ -78,7 +79,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     }
 }
 
-export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+async function _DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
     try {
         const { id } = await params
         const categoryId = parseInt(id)
@@ -136,7 +137,7 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
     }
 }
 
-export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+async function _POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
     try {
         const { id } = await params
         const categoryId = parseInt(id)
@@ -188,3 +189,9 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
         return fail("SERVER_ERROR", "Unable to restore category", 500)
     }
 }
+
+
+// Wrapped exports for encryption/decryption
+export const POST = withEncryption(_POST);
+export const PUT = withEncryption(_PUT);
+export const DELETE = withEncryption(_DELETE);

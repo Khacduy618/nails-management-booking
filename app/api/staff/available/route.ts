@@ -1,3 +1,4 @@
+import { withEncryption } from "@/lib/api-middleware";
 import { type NextRequest } from "next/server"
 import { db } from "@/db"
 import { staff, staffServices, appointments, services, appointmentServices, staffSchedules } from "@/db/schema"
@@ -12,7 +13,7 @@ const getDayOfWeek = (date: Date): string => {
   return days[getDay(date)]
 }
 
-export async function GET(request: NextRequest) {
+async function _GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
     const serviceIdsParam = searchParams.get("serviceIds")
@@ -175,3 +176,7 @@ export async function GET(request: NextRequest) {
     return fail("SERVER_ERROR", "Unable to fetch staff availability", 500)
   }
 }
+
+
+// Wrapped exports for encryption/decryption
+export const GET = withEncryption(_GET);

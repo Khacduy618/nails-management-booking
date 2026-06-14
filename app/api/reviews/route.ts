@@ -1,3 +1,4 @@
+import { withEncryption } from "@/lib/api-middleware";
 import { type NextRequest } from "next/server"
 import { db } from "@/db"
 import { appointments, reviews, staff, appointmentServices } from "@/db/schema"
@@ -6,7 +7,7 @@ import { addMinutes, format } from "date-fns"
 import { ok, fail } from "@/lib/api-response"
 import { logError, logInfo } from "@/lib/logger"
 
-export async function GET(request: NextRequest) {
+async function _GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
     const token = searchParams.get("token")
@@ -124,7 +125,7 @@ export async function GET(request: NextRequest) {
   }
 }
 
-export async function POST(request: NextRequest) {
+async function _POST(request: NextRequest) {
   try {
     const body = await request.json()
     const { token, rating, comment } = body
@@ -213,3 +214,8 @@ export async function POST(request: NextRequest) {
     return fail("SERVER_ERROR", "Unable to submit review", 500)
   }
 }
+
+
+// Wrapped exports for encryption/decryption
+export const GET = withEncryption(_GET);
+export const POST = withEncryption(_POST);

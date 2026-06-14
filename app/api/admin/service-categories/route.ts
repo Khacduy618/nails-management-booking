@@ -1,3 +1,4 @@
+import { withEncryption } from "@/lib/api-middleware";
 import { type NextRequest } from "next/server"
 import { db } from "@/db"
 import { serviceCategories, services } from "@/db/schema"
@@ -16,7 +17,7 @@ type UpdateCategoryPayload = {
     description?: string
 }
 
-export async function GET(request: NextRequest) {
+async function _GET(request: NextRequest) {
     const auth = await verifyAdminOnly()
     if (!auth.authorized) return auth.response
 
@@ -112,7 +113,7 @@ export async function GET(request: NextRequest) {
     }
 }
 
-export async function POST(request: NextRequest) {
+async function _POST(request: NextRequest) {
     const auth = await verifyAdminOnly()
     if (!auth.authorized) return auth.response
 
@@ -156,3 +157,8 @@ export async function POST(request: NextRequest) {
         return fail("SERVER_ERROR", "Unable to create category", 500)
     }
 }
+
+
+// Wrapped exports for encryption/decryption
+export const GET = withEncryption(_GET);
+export const POST = withEncryption(_POST);

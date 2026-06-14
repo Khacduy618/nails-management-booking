@@ -1,3 +1,4 @@
+import { withEncryption } from "@/lib/api-middleware";
 import { type NextRequest } from "next/server"
 import { db } from "@/db"
 import { appointments } from "@/db/schema"
@@ -7,7 +8,7 @@ import { sendReviewRequestEmail } from "@/lib/email-service"
 import { ok, fail } from "@/lib/api-response"
 import { logError } from "@/lib/logger"
 
-export async function POST(request: NextRequest) {
+async function _POST(request: NextRequest) {
   try {
     const body = await request.json()
     const { appointmentId } = body
@@ -85,3 +86,7 @@ export async function POST(request: NextRequest) {
     return fail("SERVER_ERROR", "Unable to resend review email", 500)
   }
 }
+
+
+// Wrapped exports for encryption/decryption
+export const POST = withEncryption(_POST);

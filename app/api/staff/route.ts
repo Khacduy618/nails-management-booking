@@ -1,3 +1,4 @@
+import { withEncryption } from "@/lib/api-middleware";
 import { type NextRequest, NextResponse } from "next/server"
 import { db } from "@/db"
 import { staff, users } from "@/db/schema"
@@ -8,7 +9,7 @@ import { asc, desc, eq } from "drizzle-orm"
  * Public endpoint to fetch staff members for public-facing pages (homepage, services page, etc.)
  * Returns basic staff information without admin details
  */
-export async function GET(request: NextRequest) {
+async function _GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams
     const limit = Math.max(1, Math.min(100, parseInt(searchParams.get('limit') || '12', 10)))
@@ -87,3 +88,7 @@ export async function GET(request: NextRequest) {
     )
   }
 }
+
+
+// Wrapped exports for encryption/decryption
+export const GET = withEncryption(_GET);

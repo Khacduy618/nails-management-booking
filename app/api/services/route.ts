@@ -1,3 +1,4 @@
+import { withEncryption } from "@/lib/api-middleware";
 import { type NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { services, serviceCategories } from "@/db/schema";
@@ -26,7 +27,7 @@ function parseQueryParams(searchParams: URLSearchParams) {
   return { category, search, page, limit, popular, minPrice, maxPrice, duration };
 }
 
-export async function GET(request: NextRequest) {
+async function _GET(request: NextRequest) {
   try {
     const key = `catalog:${getClientKey(request as unknown as Request)}`
     const rl = await rateLimit(key, LIMITS.catalog)
@@ -161,3 +162,6 @@ export async function GET(request: NextRequest) {
     );
   }
 }
+
+// Wrapped exports for encryption/decryption
+export const GET = withEncryption(_GET);

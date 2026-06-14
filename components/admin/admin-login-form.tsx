@@ -115,13 +115,15 @@ export function AdminLoginForm() {
       </form>
 
       {/* Demo credentials info */}
-      <div className="pt-4 border-t bg-muted/50 rounded-lg p-3">
-        <p className="text-xs font-semibold text-muted-foreground mb-2">Demo Credentials:</p>
-        <div className="space-y-1 text-xs text-muted-foreground font-mono">
-          <p><span className="text-foreground">Admin:</span> admin@example.com / password123</p>
-          <p><span className="text-foreground">Staff:</span> sarah@example.com / password123</p>
+      {process.env.NODE_ENV !== 'production' && (
+        <div className="pt-4 border-t bg-muted/50 rounded-lg p-3">
+          <p className="text-xs font-semibold text-muted-foreground mb-2">Demo Credentials:</p>
+          <div className="space-y-1 text-xs text-muted-foreground font-mono">
+            <p><span className="text-foreground">Admin:</span> admin@example.com / password123</p>
+            <p><span className="text-foreground">Staff:</span> sarah@example.com / password123</p>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   )
 }

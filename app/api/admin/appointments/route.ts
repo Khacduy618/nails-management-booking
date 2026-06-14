@@ -1,13 +1,15 @@
+import { withEncryption } from "@/lib/api-middleware";
 import { type NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { appointments, appointmentServices, services, staff } from "@/db/schema";
 import { eq, and, inArray, sql, asc, desc, like, or, SQL, count } from "drizzle-orm";
 import { verifyAdminOrStaff } from "@/lib/auth";
+import { decrypt, generateBlindIndex } from "@/lib/crypto";
 
 const validStatuses = appointments.status.enumValues;
 type AppointmentStatus = (typeof validStatuses)[number];
 
-export async function GET(request: NextRequest) {
+async function _GET(request: NextRequest) {
   const auth = await verifyAdminOrStaff();
   if (!auth.authorized) return auth.response;
 
@@ -40,7 +42,12 @@ export async function GET(request: NextRequest) {
       }
       if (searchTerm) {
         const searchPattern = `%${searchTerm.toLowerCase()}%`;
-        const customerCondition = or(like(sql`LOWER(${appointments.customerName})`, searchPattern), like(appointments.customerPhone, `%${searchTerm}%`));
+        const hashedSearch = generateBlindIndex(searchTerm.trim());
+        const customerOrs: any[] = [];
+        if (hashedSearch) {
+          customerOrs.push(eq(appointments.customerPhoneHash, hashedSearch));
+        }
+        const customerCondition = customerOrs.length > 0 ? or(...customerOrs) : sql`false`;
         const serviceIdsSubquery = db.select({ id: services.id }).from(services).where(like(sql`LOWER(${services.name})`, searchPattern));
         subqueryConditions.push(or(inArray(appointmentServices.appointmentId, db.select({ id: appointments.id }).from(appointments).where(customerCondition)), inArray(appointmentServices.serviceId, serviceIdsSubquery)));
       }
@@ -68,7 +75,7 @@ export async function GET(request: NextRequest) {
               staff: {
                 with: {
                   user: {
-                    columns: { email: true, phone: true }
+                    columns: { name: true, email: true, phone: true }
                   }
                 }
               }
@@ -97,3 +104,6 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "An unexpected error occurred" }, { status: 500 });
   }
 }
+
+// Wrapped exports for encryption/decryption
+export const GET = withEncryption(_GET);

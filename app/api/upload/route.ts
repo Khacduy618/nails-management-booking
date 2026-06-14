@@ -1,3 +1,4 @@
+import { withEncryption } from "@/lib/api-middleware";
 import { put } from '@vercel/blob';
 import { NextResponse } from 'next/server';
 import { getServerSession } from "next-auth";
@@ -12,7 +13,7 @@ const ALLOWED_MIME: Record<string, { ext: string; maxSize: number }> = {
   // "video/mp4": { ext: "mp4", maxSize: 4.5 * 1024 * 1024 }, // Tạm tắt video vì giới hạn 4.5MB của Serverless
 }
 
-export async function POST(request: Request): Promise<NextResponse> {
+async function _POST(request: Request): Promise<NextResponse> {
   const session = await getServerSession(authOptions);
 
   // 1. Kiểm tra quyền truy cập
@@ -61,3 +62,7 @@ export async function POST(request: Request): Promise<NextResponse> {
     return NextResponse.json({ success: false, error: "Failed to upload file." }, { status: 500 });
   }
 }
+
+
+// Wrapped exports for encryption/decryption
+export const POST = withEncryption(_POST);

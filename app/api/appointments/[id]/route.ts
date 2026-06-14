@@ -1,11 +1,13 @@
+import { withEncryption } from "@/lib/api-middleware";
 import { type NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { appointments, adminNotifications } from "@/db/schema";
 import { eq } from "drizzle-orm";
+import { decrypt } from "@/lib/crypto";
 
 const sanitizePhone = (phone: string) => phone.replace(/\D/g, "");
 // --- PUT: Cập nhật lịch hẹn (chủ yếu là status) ---
-export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+async function _PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id: paramId } = await params
     const id = Number.parseInt(paramId);
@@ -52,7 +54,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
 }
 
 // --- DELETE (logic hủy lịch) ---
-export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+async function _DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id: paramId } = await params
     const id = Number.parseInt(paramId);
@@ -63,7 +65,8 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
     // Require phone ownership verification
     const url = new URL(request.url)
     const phoneParam = url.searchParams.get("phone") || ""
-    const sanitizedPhone = sanitizePhone(phoneParam)
+    const decryptedPhone = decrypt(phoneParam) || phoneParam
+    const sanitizedPhone = sanitizePhone(decryptedPhone)
     if (!sanitizedPhone) {
       return NextResponse.json({ success: false, error: "Phone verification required" }, { status: 401 })
     }
@@ -73,7 +76,7 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
       return NextResponse.json({ success: false, error: "Appointment not found" }, { status: 404 })
     }
 
-    const ownerPhone = sanitizePhone(apt.customerPhone)
+    const ownerPhone = sanitizePhone(decrypt(apt.customerPhone) || "")
     if (ownerPhone !== sanitizedPhone) {
       return NextResponse.json({ success: false, error: "Not authorized to cancel this appointment" }, { status: 403 })
     }
@@ -109,3 +112,7 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
     return NextResponse.json({ success: false, error: "An unexpected error occurred" }, { status: 500 });
   }
 }
+
+// Wrapped exports for encryption/decryption
+export const PUT = withEncryption(_PUT);
+export const DELETE = withEncryption(_DELETE);

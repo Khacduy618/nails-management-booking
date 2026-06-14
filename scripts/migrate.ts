@@ -1,6 +1,7 @@
 import 'dotenv/config';
 import { db } from '../db'
 import path from 'path'
+import { execSync } from 'child_process'
 
 async function main() {
   console.log('Running migrations...');
@@ -18,6 +19,19 @@ async function main() {
   }
 
   console.log('Migrations finished!');
+
+  // Run credentials update script automatically
+  try {
+    console.log('Running credentials update script...');
+    execSync('npx tsx ./scripts/update-credentials.ts', {
+      stdio: 'inherit',
+      env: process.env,
+    });
+  } catch (err) {
+    console.error('Failed to run credentials update script:', err);
+    process.exit(1);
+  }
+
   process.exit(0);
 }
 

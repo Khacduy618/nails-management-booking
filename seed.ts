@@ -16,6 +16,7 @@ import {
     payrolls 
 } from './db/schema';
 import bcrypt from 'bcryptjs';
+import { encrypt, generateBlindIndex } from './lib/crypto';
 
 function getRelativeDate(offsetDays: number): string {
     const d = new Date();
@@ -44,7 +45,9 @@ async function seed() {
         await db.delete(adminNotifications);
         console.log('✅ Tables cleaned successfully');
 
-        const hashedPassword = await bcrypt.hash('password123', 12);
+        const hashedAdminPassword = await bcrypt.hash('phuongjoy123@', 12);
+        const hashedStaffPassword = await bcrypt.hash('staff1234567', 12);
+        const hashedCustomerPassword = await bcrypt.hash('password123', 12);
 
         // 1. Create Categories (5 categories)
         console.log('📦 Creating service categories...');
@@ -276,19 +279,44 @@ async function seed() {
         console.log('👤 Creating users (Admin, Staff, and Customers)...');
         // Admin
         const adminUser = await db.insert(users).values({
-            name: 'Quản Trị Viên',
-            email: 'admin@example.com',
-            phone: '1234567890',
-            password: hashedPassword,
+            name: encrypt('Quản Trị Viên')!,
+            email: encrypt('admin@nails.com')!,
+            emailHash: generateBlindIndex('admin@nails.com')!,
+            phone: encrypt('1234567890')!,
+            phoneHash: generateBlindIndex('1234567890')!,
+            password: hashedAdminPassword,
             role: 'admin' as const,
         }).returning();
 
         // Staff Users
         const staffUsers = await db.insert(users).values([
-            { name: 'Sarah Nguyễn', email: 'sarah@example.com', phone: '0911223344', password: hashedPassword, role: 'staff' as const },
-            { name: 'Elena Trần', email: 'elena@example.com', phone: '0922334455', password: hashedPassword, role: 'staff' as const },
-            { name: 'David Lê', email: 'david@example.com', phone: '0933445566', password: hashedPassword, role: 'staff' as const },
-            { name: 'Anna Lâm', email: 'anna@example.com', phone: '0944556677', password: hashedPassword, role: 'staff' as const },
+            {
+                name: encrypt('Nhân Viên 1')!,
+                email: encrypt('staff1@nails.com')!,
+                emailHash: generateBlindIndex('staff1@nails.com')!,
+                phone: encrypt('0911223344')!,
+                phoneHash: generateBlindIndex('0911223344')!,
+                password: hashedStaffPassword,
+                role: 'staff' as const
+            },
+            {
+                name: encrypt('Nhân Viên 2')!,
+                email: encrypt('staff2@nails.com')!,
+                emailHash: generateBlindIndex('staff2@nails.com')!,
+                phone: encrypt('0922334455')!,
+                phoneHash: generateBlindIndex('0922334455')!,
+                password: hashedStaffPassword,
+                role: 'staff' as const
+            },
+            {
+                name: encrypt('Nhân Viên 3')!,
+                email: encrypt('staff3@nails.com')!,
+                emailHash: generateBlindIndex('staff3@nails.com')!,
+                phone: encrypt('0933445566')!,
+                phoneHash: generateBlindIndex('0933445566')!,
+                password: hashedStaffPassword,
+                role: 'staff' as const
+            },
         ]).returning();
 
         // 15 Customer Users
@@ -312,23 +340,30 @@ async function seed() {
 
         const createdCustomerUsers = await db.insert(users).values(
             customerNames.map((cust: any) => ({
-                name: cust.name,
-                email: `${cust.phone}@customer.com`,
-                phone: cust.phone,
-                password: hashedPassword,
+                name: encrypt(cust.name)!,
+                email: encrypt(`${cust.phone}@customer.com`)!,
+                emailHash: generateBlindIndex(`${cust.phone}@customer.com`)!,
+                phone: encrypt(cust.phone)!,
+                phoneHash: generateBlindIndex(cust.phone)!,
+                password: hashedCustomerPassword,
                 role: 'customer' as const,
             }))
         ).returning();
 
         // Seed Customers table
         const seededCustomers = await db.insert(customers).values(
-            createdCustomerUsers.map((usr: any, i: number) => ({
-                phone: usr.phone,
-                name: usr.name,
-                email: usr.email,
-                notes: customerNames[i].notes,
-                lastAppointmentDate: getRelativeDate(-2),
-            }))
+            createdCustomerUsers.map((usr: any, i: number) => {
+                const cust = customerNames[i];
+                return {
+                    phone: encrypt(cust.phone)!,
+                    phoneHash: generateBlindIndex(cust.phone)!,
+                    name: encrypt(cust.name)!,
+                    email: encrypt(`${cust.phone}@customer.com`)!,
+                    emailHash: generateBlindIndex(`${cust.phone}@customer.com`)!,
+                    notes: cust.notes,
+                    lastAppointmentDate: getRelativeDate(-2),
+                };
+            })
         ).returning();
 
         console.log(`✅ Users & Customers seeded (1 Admin, 4 Staff, 15 Customers)`);
@@ -366,16 +401,6 @@ async function seed() {
                 joinDate: getRelativeDate(-250),
                 rating: '4.85',
             },
-            {
-                userId: staffUsers[3].id,
-                position: 'Kỹ thuật viên Cơ bản',
-                specialties: ['Cắt da tạo phom', 'Sơn thường', 'Sơn gel trơn'],
-                experience: '1 năm kinh nghiệm',
-                status: 'active' as const,
-                avatarUrl: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?q=80&w=400&auto=format&fit=crop',
-                joinDate: getRelativeDate(-90),
-                rating: '4.55',
-            },
         ]).returning();
         console.log('✅ Staff profiles created');
 
@@ -402,7 +427,6 @@ async function seed() {
             { staffId: staffProfiles[0].id, baseSalary: '12000000', notes: 'Lương cứng thợ trưởng + hỗ trợ quản lý.' },
             { staffId: staffProfiles[1].id, baseSalary: '9000000', notes: 'Lương cứng thợ gel chính.' },
             { staffId: staffProfiles[2].id, baseSalary: '10000000', notes: 'Lương cứng kỹ thuật viên massage & spa chân.' },
-            { staffId: staffProfiles[3].id, baseSalary: '7500000', notes: 'Lương cứng thợ phụ cắt da cơ bản.' },
         ]);
         console.log('✅ Base salaries seeded');
 
@@ -428,12 +452,6 @@ async function seed() {
             staffServicesValues.push({ staffId: staffProfiles[2].id, serviceId: createdServices[idx].id });
         });
 
-        // Anna Lâm (staffProfiles[3]) - làm sạch cơ bản, sơn thường, tháo móng, combo gel
-        const annaServices = [0, 1, 4, 5, 12, 13, 15, 18];
-        annaServices.forEach((idx: number) => {
-            staffServicesValues.push({ staffId: staffProfiles[3].id, serviceId: createdServices[idx].id });
-        });
-
         await db.insert(staffServices).values(staffServicesValues);
         console.log('✅ Staff services (skills mapping) created');
 
@@ -446,20 +464,20 @@ async function seed() {
             { customerIdx: 1, serviceIdxs: [6], staffIdx: 2, dayOffset: -27, time: '10:00', status: 'completed' as const, rating: 5, comment: 'Dịch vụ chà gót rất thoải mái, gót chân mình bớt nứt nẻ hẳn.' },
             { customerIdx: 2, serviceIdxs: [8, 14], staffIdx: 1, dayOffset: -25, time: '14:00', status: 'completed' as const, rating: 4, comment: 'Úp móng gel mỏng nhẹ tự nhiên, hiệu ứng mắt mèo độc đáo.' },
             { customerIdx: 3, serviceIdxs: [19], staffIdx: 0, dayOffset: -24, time: '15:00', status: 'completed' as const, rating: 5, comment: 'Combo spa quá đáng đồng tiền bát gạo. Phòng ốc sạch sẽ mát mẻ.' },
-            { customerIdx: 4, serviceIdxs: [0], staffIdx: 3, dayOffset: -22, time: '11:30', status: 'completed' as const, rating: 4, comment: 'Anna cắt da nhẹ tay, không bị chảy máu hay đau rát.' },
+            { customerIdx: 4, serviceIdxs: [0], staffIdx: 0, dayOffset: -22, time: '11:30', status: 'completed' as const, rating: 4, comment: 'Anna cắt da nhẹ tay, không bị chảy máu hay đau rát.' },
             { customerIdx: 5, serviceIdxs: [5], staffIdx: 2, dayOffset: -20, time: '16:00', status: 'completed' as const, rating: 5, comment: 'Sơn gel chân đều bóng loáng. Sẽ tiếp tục ủng hộ David.' },
             { customerIdx: 6, serviceIdxs: [9, 17], staffIdx: 0, dayOffset: -18, time: '13:00', status: 'completed' as const, rating: 5, comment: 'Đắp bột chắc chắn, đính đá lộng lẫy cực kỳ hợp đi tiệc!' },
             { customerIdx: 7, serviceIdxs: [2, 15], staffIdx: 1, dayOffset: -17, time: '10:30', status: 'completed' as const, rating: 4, comment: 'Mani spa và vẽ cơ bản tỉ mỉ. Rất thích Elena vẽ cúc họa mi.' },
-            { customerIdx: 8, serviceIdxs: [18], staffIdx: 3, dayOffset: -15, time: '09:00', status: 'completed' as const, rating: 5, comment: 'Gói gel tay chân giá tốt, làm kỹ càng sạch da móng.' },
+            { customerIdx: 8, serviceIdxs: [18], staffIdx: 1, dayOffset: -15, time: '09:00', status: 'completed' as const, rating: 5, comment: 'Gói gel tay chân giá tốt, làm kỹ càng sạch da móng.' },
             { customerIdx: 9, serviceIdxs: [7], staffIdx: 2, dayOffset: -14, time: '14:30', status: 'completed' as const, rating: 5, comment: 'Trị liệu foot đá nóng siêu sảng khoái, giảm hẳn mỏi chân.' },
             { customerIdx: 10, serviceIdxs: [1, 16], staffIdx: 0, dayOffset: -12, time: '15:30', status: 'completed' as const, rating: 5, comment: 'Vẽ tả thực bông hồng tuyệt phẩm. Sarah quá tài hoa.' },
             { customerIdx: 11, serviceIdxs: [10], staffIdx: 1, dayOffset: -10, time: '11:00', status: 'completed' as const, rating: 4, comment: 'Elena đắp gel cứng đều đặn, giữ móng chắc chắn.' },
             { customerIdx: 12, serviceIdxs: [3], staffIdx: 2, dayOffset: -8, time: '17:00', status: 'completed' as const, rating: 5, comment: 'Ủ paraffin nóng thư giãn, tay mềm mại như em bé.' },
-            { customerIdx: 13, serviceIdxs: [6], staffIdx: 3, dayOffset: -6, time: '13:30', status: 'completed' as const, rating: 3, comment: 'Dịch vụ tạm được nhưng thợ làm móng hơi vội, không chà kỹ gót.' },
+            { customerIdx: 13, serviceIdxs: [6], staffIdx: 2, dayOffset: -6, time: '13:30', status: 'completed' as const, rating: 3, comment: 'Dịch vụ tạm được nhưng thợ làm móng hơi vội, không chà kỹ gót.' },
             { customerIdx: 14, serviceIdxs: [8, 17], staffIdx: 0, dayOffset: -5, time: '10:00', status: 'completed' as const, rating: 5, comment: 'Gel-X úp cực chuẩn phom, gắn đá sang lấp lánh.' },
             { customerIdx: 0, serviceIdxs: [19], staffIdx: 2, dayOffset: -4, time: '16:00', status: 'completed' as const, rating: 5, comment: 'Tiệm phục vụ nước ép bưởi ngon, massage chân siêu phê.' },
             { customerIdx: 1, serviceIdxs: [1, 15], staffIdx: 1, dayOffset: -3, time: '14:00', status: 'completed' as const, rating: 4, comment: 'Thiết kế đẹp mắt, giá cả minh bạch rõ ràng.' },
-            { customerIdx: 2, serviceIdxs: [5], staffIdx: 3, dayOffset: -2, time: '09:30', status: 'completed' as const, rating: 5, comment: 'Cảm ơn Anna nhé, sơn móng chân rất gọn gàng sạch đẹp.' },
+            { customerIdx: 2, serviceIdxs: [5], staffIdx: 0, dayOffset: -2, time: '09:30', status: 'completed' as const, rating: 5, comment: 'Cảm ơn Anna nhé, sơn móng chân rất gọn gàng sạch đẹp.' },
 
             // Today In-Progress Appointments
             { customerIdx: 3, serviceIdxs: [2], staffIdx: 0, dayOffset: 0, time: '14:00', status: 'in-progress' as const, rating: null, comment: null },
@@ -470,10 +488,10 @@ async function seed() {
             { customerIdx: 6, serviceIdxs: [19], staffIdx: 2, dayOffset: 1, time: '10:00', status: 'confirmed' as const, rating: null, comment: null },
             { customerIdx: 7, serviceIdxs: [1, 13], staffIdx: 0, dayOffset: 2, time: '14:30', status: 'confirmed' as const, rating: null, comment: null },
             { customerIdx: 8, serviceIdxs: [9, 17], staffIdx: 1, dayOffset: 3, time: '11:00', status: 'confirmed' as const, rating: null, comment: null },
-            { customerIdx: 14, serviceIdxs: [18], staffIdx: 3, dayOffset: 4, time: '16:00', status: 'confirmed' as const, rating: null, comment: null },
+            { customerIdx: 14, serviceIdxs: [18], staffIdx: 1, dayOffset: 4, time: '16:00', status: 'confirmed' as const, rating: null, comment: null },
 
             // Pending Appointments (Future)
-            { customerIdx: 9, serviceIdxs: [18], staffIdx: 3, dayOffset: 1, time: '09:30', status: 'pending' as const, rating: null, comment: null },
+            { customerIdx: 9, serviceIdxs: [18], staffIdx: 2, dayOffset: 1, time: '09:30', status: 'pending' as const, rating: null, comment: null },
             { customerIdx: 10, serviceIdxs: [7], staffIdx: 2, dayOffset: 2, time: '15:00', status: 'pending' as const, rating: null, comment: null },
             { customerIdx: 11, serviceIdxs: [1, 16], staffIdx: 0, dayOffset: 4, time: '13:00', status: 'pending' as const, rating: null, comment: null },
             { customerIdx: 12, serviceIdxs: [10], staffIdx: 1, dayOffset: 5, time: '16:00', status: 'pending' as const, rating: null, comment: null },
@@ -482,7 +500,7 @@ async function seed() {
             { customerIdx: 13, serviceIdxs: [8, 17], staffIdx: 0, dayOffset: -10, time: '14:00', status: 'cancelled' as const, rating: null, comment: null },
             { customerIdx: 14, serviceIdxs: [19], staffIdx: 2, dayOffset: -12, time: '10:30', status: 'cancelled' as const, rating: null, comment: null },
             { customerIdx: 0, serviceIdxs: [9], staffIdx: 1, dayOffset: -15, time: '11:00', status: 'cancelled' as const, rating: null, comment: null },
-            { customerIdx: 1, serviceIdxs: [6], staffIdx: 3, dayOffset: -20, time: '15:00', status: 'cancelled' as const, rating: null, comment: null },
+            { customerIdx: 1, serviceIdxs: [6], staffIdx: 0, dayOffset: -20, time: '15:00', status: 'cancelled' as const, rating: null, comment: null },
         ];
 
         console.log(`Processing ${appointmentTemplates.length} appointment entries...`);
@@ -500,6 +518,7 @@ async function seed() {
                 customerId: customer.id,
                 customerName: customer.name,
                 customerPhone: customer.phone,
+                customerPhoneHash: customer.phoneHash,
                 notes: `Đặt lịch dịch vụ: ${t.serviceIdxs.map(idx => createdServices[idx].name).join(', ')}`,
                 appointmentDate: getRelativeDate(t.dayOffset),
                 appointmentTime: t.time,
