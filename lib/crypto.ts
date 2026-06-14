@@ -1,7 +1,7 @@
 import crypto from "crypto"
 
 const getEncryptionKey = (): Buffer => {
-  const secret = process.env.ENCRYPTION_KEY || process.env.NEXTAUTH_SECRET || "nails-booking-app-default-secure-secret-32-chars"
+  const secret = process.env.NEXT_PUBLIC_ENCRYPTION_KEY || process.env.ENCRYPTION_KEY || "nails-booking-app-default-secure-secret-32-chars"
   return crypto.createHash("sha256").update(secret).digest()
 }
 
