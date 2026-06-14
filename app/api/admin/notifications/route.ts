@@ -4,23 +4,12 @@ import { adminNotifications } from "@/db/schema"
 import { eq, desc } from "drizzle-orm"
 import { fail, ok } from "@/lib/api-response"
 import { logError } from "@/lib/logger"
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/lib/auth"
-
-// Middleware auth check helper
-async function checkAdminAuth() {
-    const session = await getServerSession(authOptions)
-    if (!session || (session.user?.role !== "admin" && session.user?.role !== "staff")) {
-        return false
-    }
-    return true
-}
+import { verifyAdminOnly } from "@/lib/auth"
 
 export async function GET(request: NextRequest) {
     try {
-        if (!(await checkAdminAuth())) {
-            return fail("UNAUTHORIZED", "Unauthorized access", 401)
-        }
+        const auth = await verifyAdminOnly()
+        if (!auth.authorized) return auth.response
 
         // Lấy tất cả thông báo chưa đọc, sắp xếp mới nhất lên đầu
         const notificationsList = await db
@@ -38,9 +27,8 @@ export async function GET(request: NextRequest) {
 
 export async function PUT(request: NextRequest) {
     try {
-        if (!(await checkAdminAuth())) {
-            return fail("UNAUTHORIZED", "Unauthorized access", 401)
-        }
+        const auth = await verifyAdminOnly()
+        if (!auth.authorized) return auth.response
 
         const body = await request.json()
         const { id, all } = body

@@ -4,6 +4,7 @@ import { serviceCategories, services } from "@/db/schema"
 import { eq, and, isNull, not, count, asc, desc, like, sql } from "drizzle-orm"
 import { ok, fail } from "@/lib/api-response"
 import { logError, logInfo } from "@/lib/logger"
+import { verifyAdminOnly } from "@/lib/auth"
 
 type CreateCategoryPayload = {
     name: string
@@ -16,6 +17,9 @@ type UpdateCategoryPayload = {
 }
 
 export async function GET(request: NextRequest) {
+    const auth = await verifyAdminOnly()
+    if (!auth.authorized) return auth.response
+
     try {
         const { searchParams } = new URL(request.url)
         const includeDeleted = searchParams.get("includeDeleted") === "true"
@@ -109,6 +113,9 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+    const auth = await verifyAdminOnly()
+    if (!auth.authorized) return auth.response
+
     try {
         const body = (await request.json()) as Partial<CreateCategoryPayload>
         const { name, description } = body

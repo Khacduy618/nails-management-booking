@@ -1,9 +1,10 @@
 import { db } from "@/db"
 import { users } from "@/db/schema"
 import { eq } from "drizzle-orm"
-import type { NextAuthOptions } from "next-auth"
+import { getServerSession, type NextAuthOptions } from "next-auth"
 import Credentials from "next-auth/providers/credentials"
 import bcrypt from "bcryptjs"
+import { NextResponse } from "next/server"
 
 type AppRole = "admin" | "staff" | "customer"
 
@@ -107,3 +108,33 @@ export const authOptions: NextAuthOptions = {
     },
   },
 }
+
+export async function verifyAdminOrStaff() {
+  const session = await getServerSession(authOptions)
+  if (!session || !session.user || (session.user.role !== "admin" && session.user.role !== "staff")) {
+    return {
+      authorized: false,
+      response: NextResponse.json(
+        { success: false, error: { code: "UNAUTHORIZED", message: "Unauthorized access" } },
+        { status: 401 }
+      ),
+    } as const
+  }
+  return { authorized: true, session } as const
+}
+
+export async function verifyAdminOnly() {
+  const session = await getServerSession(authOptions)
+  if (!session || !session.user || session.user.role !== "admin") {
+    return {
+      authorized: false,
+      response: NextResponse.json(
+        { success: false, error: { code: "UNAUTHORIZED", message: "Unauthorized access" } },
+        { status: 401 }
+      ),
+    } as const
+  }
+  return { authorized: true, session } as const
+}
+
+

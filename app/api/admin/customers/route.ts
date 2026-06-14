@@ -3,9 +3,14 @@ import { customers, appointments, appointmentServices } from '@/db/schema'
 import { desc, asc, like, or, count, sql } from 'drizzle-orm'
 import { NextRequest, NextResponse } from 'next/server'
 import { ok, fail } from '@/lib/api-response'
-import { getToken } from 'next-auth/jwt'
+import { verifyAdminOnly } from "@/lib/auth"
 
 export async function GET(request: NextRequest) {
+    const auth = await verifyAdminOnly()
+    if (!auth.authorized) return auth.response
+
+
+
     try {
         console.log('[API] /api/admin/customers called')
 

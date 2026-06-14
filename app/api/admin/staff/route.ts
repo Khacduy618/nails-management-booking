@@ -2,9 +2,13 @@ import { type NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { staff, staffBaseSalaries, users } from "@/db/schema";
 import { eq, asc, desc, or, count, ilike, and } from "drizzle-orm";
+import { verifyAdminOnly } from "@/lib/auth";
 
 // --- GET: Lấy danh sách nhân viên với pagination, search, sort, filter ---
 export async function GET(request: NextRequest) {
+  const auth = await verifyAdminOnly();
+  if (!auth.authorized) return auth.response;
+
   try {
     const searchParams = request.nextUrl.searchParams
     const page = Math.max(1, parseInt(searchParams.get('page') || '1', 10))
@@ -126,6 +130,9 @@ export async function GET(request: NextRequest) {
 
 // --- POST: Tạo nhân viên mới ---
 export async function POST(request: NextRequest) {
+  const auth = await verifyAdminOnly();
+  if (!auth.authorized) return auth.response;
+
   try {
     const body = await request.json()
 
