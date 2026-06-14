@@ -17,7 +17,7 @@ const manrope = Manrope({
   variable: "--font-manrope",
   weight: ["400", "500", "600", "700", "800"],
 })
-import { Analytics } from "@vercel/analytics/next"
+// import { Analytics } from "@vercel/analytics/next"
 import { Suspense } from "react"
 import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider } from "@/components/providers/session-provider"
@@ -69,7 +69,7 @@ export default async function RootLayout({
             </div>
           </Suspense>
         </AuthProvider>
-        <Analytics />
+        {/* <Analytics /> */}
         <Toaster richColors position="top-right" />
       </body>
     </html>
