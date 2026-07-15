@@ -18,11 +18,9 @@ import { Switch } from "@/components/ui/switch"
 import { toast } from "sonner"
 import { validateBookingForm, validatePhone, validateEmail } from "@/lib/form-validation"
 import { bookingReducer, initialState } from "@/lib/booking-reducer"
-import { encryptAsync } from "@/lib/crypto-client"
 
 // --- Định nghĩa các kiểu dữ liệu ---
 interface ApiService { id: number; name: string; description: string | null; price: string; duration: number; }
-interface ApiStaff { id: number; name: string; rating?: number; appointmentCount?: number; appointment_count_today?: number; }
 
 const stepLabels = ["Dịch vụ", "Ngày & Giờ", "Nhân viên", "Thông tin"];
 
@@ -494,7 +492,7 @@ export function BookingForm({ onBookingComplete }: BookingFormProps) {
                         variant={isSelected ? "default" : "outline"}
                         onClick={() => handleTimeSelect(time)}
                         disabled={isTimeSlotDisabled(time)}
-                        className={`rounded-xl font-bold shadow-sm transition-all duration-200 ${isSelected ? 'bg-primary text-white shadow-md' : 'bg-white/60 hover:bg-white hover:border-neutral-300 hover:-translate-y-0.5'}`}
+                        className={`rounded-xl font-bold shadow-sm transition-all duration-200 ${isSelected ? 'bg-primary text-white shadow-md' : 'bg-white/60 hover:bg-red-50 hover:text-primary hover:border-primary/30 hover:-translate-y-0.5'}`}
                       >
                         {time}
                       </Button>

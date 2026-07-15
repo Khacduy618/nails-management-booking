@@ -45,9 +45,23 @@ async function seed() {
         await db.delete(adminNotifications);
         console.log('✅ Tables cleaned successfully');
 
-        const hashedAdminPassword = await bcrypt.hash('phuongjoy123@', 12);
-        const hashedStaffPassword = await bcrypt.hash('staff1234567', 12);
-        const hashedCustomerPassword = await bcrypt.hash('password123', 12);
+        // Seed passwords from environment variables (required)
+        const adminPassword = process.env.SEED_ADMIN_PASSWORD
+        const staffPassword = process.env.SEED_STAFF_PASSWORD
+        const customerPassword = process.env.SEED_CUSTOMER_PASSWORD
+
+        if (!adminPassword || !staffPassword || !customerPassword) {
+            throw new Error(
+                '❌ Seed passwords not configured. Set these environment variables:\n' +
+                '   SEED_ADMIN_PASSWORD\n' +
+                '   SEED_STAFF_PASSWORD\n' +
+                '   SEED_CUSTOMER_PASSWORD'
+            )
+        }
+
+        const hashedAdminPassword = await bcrypt.hash(adminPassword, 12);
+        const hashedStaffPassword = await bcrypt.hash(staffPassword, 12);
+        const hashedCustomerPassword = await bcrypt.hash(customerPassword, 12);
 
         // 1. Create Categories (5 categories)
         console.log('📦 Creating service categories...');
