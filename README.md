@@ -194,7 +194,7 @@ nailsapp/
 
 ### 1️⃣ Cấu hình môi trường (Environment Variables)
 Ứng dụng sử dụng tệp `.env` ở thư mục gốc để cấu hình. Bản mẫu `.env` mặc định đã được cấu hình sẵn để kết nối với cơ sở dữ liệu Postgres chạy bằng Docker:
-*   `DATABASE_URL="postgresql://postgres:password@localhost:5432/nails_db"` (khi chạy ứng dụng trên Host)
+*   `DATABASE_URL="postgresql://postgres:*******@localhost:5432/db"` (khi chạy ứng dụng trên Host)
 *   `NEXTAUTH_SECRET`: Khóa ký phiên đăng nhập (đã điền mã mặc định cho local dev).
 
 Nếu muốn kết nối với cơ sở dữ liệu khác (như Neon Postgres), hãy cập nhật lại `DATABASE_URL` tương ứng trong tệp `.env`.
@@ -258,9 +258,6 @@ Bạn có thể lựa chọn 1 trong 2 phương án phát triển dưới đây:
 ---
 
 ### 🔑 Tài khoản đăng nhập mặc định (Seed Data)
-Sau khi chạy lệnh `db:seed`, bạn có thể đăng nhập vào trang quản trị (`/admin/login`) bằng:
-*   **Admin Account**: `admin@example.com` / Mật khẩu: `password123`
-*   **Staff Account**: `sarah@example.com` / Mật khẩu: `password123`
 
 ## 🧪 Kiểm Thử (Testing)
 
