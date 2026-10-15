@@ -157,63 +157,60 @@ export async function POST(request: NextRequest) {
             )
         }
 
-        const apiKey = process.env.GEMINI_API_KEY
-        const model = process.env.GEMINI_MODEL || 'gemini-3.8-flash';
-        const baseUrl = process.env.CHATWOOT_BASE_URL?.replace(/\/+$/, '');
-        const accountId = process.env.CHATWOOT_ACCOUNT_ID
-        const botToken = process.env.CHATWOOT_AGENT_BOT_TOKEN
 
-        if (!apiKey || !model || !baseUrl || !accountId || !botToken) {
-            console.error('Missing AI or Chatwoot environment variables')
+        const apiKey = process.env.GROQ_API_KEY;
+        const model = process.env.GROQ_MODEL || 'openai/gpt-oss-20b';
+
+        const baseUrl = process.env.CHATWOOT_BASE_URL?.replace(/\/+$/, '');
+        const accountId = process.env.CHATWOOT_ACCOUNT_ID;
+        const botToken = process.env.CHATWOOT_AGENT_BOT_TOKEN;
+
+        if (!apiKey || !baseUrl || !accountId || !botToken) {
+            console.error('Missing Groq or Chatwoot environment variables');
+
             return NextResponse.json(
                 { error: 'Server configuration error' },
                 { status: 500 },
-            )
+            );
         }
 
-
-
-        const geminiUrl =
-            `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
-
-        const geminiPayload = {
-            systemInstruction: {
-                parts: [{
-                    text: [
-                        'Bạn là trợ lý chăm sóc khách hàng cho dịch vụ nail.',
-                        'Trả lời bằng ngôn ngữ khách đang sử dụng.',
-                        'Thân thiện, lịch sự, ngắn gọn và rõ ràng.',
-                        'Không tự bịa giá, lịch trống hoặc chính sách.',
-                        'Nếu chưa có thông tin, hãy hỏi lại khách.',
-                    ].join(' '),
-                }],
-            },
-            contents: [{
-                role: 'user',
-                parts: [{ text: content }],
-            }],
-            generationConfig: {
-                maxOutputTokens: 400,
-            },
-        };
-
-        const aiResponse = await fetchGeminiWithRetry(
-            geminiUrl,
-            () => ({
+        const aiResponse = await fetch(
+            'https://api.groq.com/openai/v1/chat/completions',
+            {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'x-goog-api-key': apiKey,
+                    Authorization: `Bearer ${apiKey}`,
                 },
-                body: JSON.stringify(geminiPayload),
-                signal: AbortSignal.timeout(20000),
-            }),
+                body: JSON.stringify({
+                    model,
+                    messages: [
+                        {
+                            role: 'system',
+                            content: [
+                                'Bạn là trợ lý chăm sóc khách hàng cho dịch vụ nail.',
+                                'Trả lời bằng ngôn ngữ khách đang sử dụng.',
+                                'Thân thiện, lịch sự, ngắn gọn và rõ ràng.',
+                                'Không tự bịa giá, lịch trống hoặc chính sách.',
+                                'Nếu chưa có thông tin, hãy hỏi lại khách.',
+                            ].join(' '),
+                        },
+                        {
+                            role: 'user',
+                            content,
+                        },
+                    ],
+                    max_tokens: 400,
+                    temperature: 0.4,
+                }),
+                signal: AbortSignal.timeout(15000),
+            },
         );
 
         if (!aiResponse.ok) {
             const errorBody = await aiResponse.text();
 
-            console.error('[Gemini API Error]', {
+            console.error('[Groq API Error]', {
                 status: aiResponse.status,
                 model,
                 body: errorBody.slice(0, 2000),
@@ -227,10 +224,7 @@ export async function POST(request: NextRequest) {
 
         const aiData = await aiResponse.json();
 
-        const reply = aiData.candidates?.[0]?.content?.parts
-            ?.map((part: { text?: string }) => part.text ?? '')
-            .join('')
-            .trim();
+        const reply = aiData.choices?.[0]?.message?.content?.trim();
 
         if (!reply) {
             return NextResponse.json(
