@@ -6,7 +6,7 @@
   "scripts": {
     "build": "next build",
     "dev": "next dev",
-    "lint": "next lint",
+    "lint": "eslint .",
     "start": "next start",
     "db:generate": "drizzle-kit generate --config=drizzle.config.ts",
     "db:migrate": "tsx ./scripts/migrate.ts",
@@ -85,6 +85,7 @@
     "zod": "3.25.67"
   },
   "devDependencies": {
+    "@eslint/eslintrc": "^3.3.7",
     "@playwright/test": "^1.57.0",
     "@tailwindcss/postcss": "^4.1.18",
     "@testing-library/jest-dom": "^6.4.0",
@@ -101,6 +102,8 @@
     "@vitejs/plugin-react": "^5.1.2",
     "dotenv": "^17.2.3",
     "drizzle-kit": "^0.31.8",
+    "eslint": "^9.39.5",
+    "eslint-config-next": "16.0.10",
     "jsdom": "^24.0.0",
     "postcss": "^8.5",
     "tailwindcss": "^4.1.18",
