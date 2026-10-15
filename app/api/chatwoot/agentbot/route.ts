@@ -67,6 +67,40 @@ export async function GET() {
     })
 }
 
+
+async function fetchGeminiWithRetry(
+    url: string,
+    makeInit: () => RequestInit,
+    maxAttempts = 3,
+): Promise<Response> {
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+        const response = await fetch(url, makeInit());
+
+        const shouldRetry =
+            [429, 500, 502, 503, 504].includes(response.status);
+
+        if (!shouldRetry || attempt === maxAttempts) {
+            return response;
+        }
+
+        await response.body?.cancel();
+
+        const delayMs = 800 * 2 ** (attempt - 1);
+
+        console.warn('[Gemini Retry]', {
+            status: response.status,
+            attempt,
+            nextRetryMs: delayMs,
+        });
+
+        await new Promise((resolve) => setTimeout(resolve, delayMs));
+    }
+
+    throw new Error('Gemini retry loop exhausted');
+}
+
+
+
 export async function POST(request: NextRequest) {
     try {
         const secret = process.env.CHATWOOT_WEBHOOK_SECRET
@@ -124,8 +158,8 @@ export async function POST(request: NextRequest) {
         }
 
         const apiKey = process.env.GEMINI_API_KEY
-        const model = process.env.GEMINI_MODEL
-        const baseUrl = process.env.CHATWOOT_BASE_URL?.replace(/\/+$/, '')
+        const model = process.env.GEMINI_MODEL || 'gemini-3.8-flash';
+        const baseUrl = process.env.CHATWOOT_BASE_URL?.replace(/\/+$/, '');
         const accountId = process.env.CHATWOOT_ACCOUNT_ID
         const botToken = process.env.CHATWOOT_AGENT_BOT_TOKEN
 
@@ -137,64 +171,74 @@ export async function POST(request: NextRequest) {
             )
         }
 
-        const aiResponse = await fetch(
-            `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
-            {
+
+
+        const geminiUrl =
+            `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
+
+        const geminiPayload = {
+            systemInstruction: {
+                parts: [{
+                    text: [
+                        'Bạn là trợ lý chăm sóc khách hàng cho dịch vụ nail.',
+                        'Trả lời bằng ngôn ngữ khách đang sử dụng.',
+                        'Thân thiện, lịch sự, ngắn gọn và rõ ràng.',
+                        'Không tự bịa giá, lịch trống hoặc chính sách.',
+                        'Nếu chưa có thông tin, hãy hỏi lại khách.',
+                    ].join(' '),
+                }],
+            },
+            contents: [{
+                role: 'user',
+                parts: [{ text: content }],
+            }],
+            generationConfig: {
+                maxOutputTokens: 400,
+            },
+        };
+
+        const aiResponse = await fetchGeminiWithRetry(
+            geminiUrl,
+            () => ({
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'x-goog-api-key': apiKey,
                 },
-                body: JSON.stringify({
-                    systemInstruction: {
-                        parts: [{
-                            text: [
-                                'Bạn là trợ lý chăm sóc khách hàng cho dịch vụ nail.',
-                                'Trả lời bằng ngôn ngữ khách đang sử dụng.',
-                                'Thân thiện, lịch sự, ngắn gọn và rõ ràng.',
-                                'Không tự bịa giá, lịch trống hoặc chính sách.',
-                                'Nếu chưa có thông tin, hãy hỏi lại khách.',
-                            ].join(' '),
-                        }],
-                    },
-                    contents: [{
-                        role: 'user',
-                        parts: [{ text: content }],
-                    }],
-                    generationConfig: { maxOutputTokens: 400 },
-                }),
+                body: JSON.stringify(geminiPayload),
                 signal: AbortSignal.timeout(20000),
-            },
-        )
-
+            }),
+        );
 
         if (!aiResponse.ok) {
-            const errorBody = await aiResponse.text()
+            const errorBody = await aiResponse.text();
 
             console.error('[Gemini API Error]', {
                 status: aiResponse.status,
+                model,
                 body: errorBody.slice(0, 2000),
-            })
+            });
 
             return NextResponse.json(
                 { error: 'AI generation failed' },
                 { status: 502 },
-            )
+            );
         }
 
+        const aiData = await aiResponse.json();
 
-        const aiData = await aiResponse.json()
         const reply = aiData.candidates?.[0]?.content?.parts
             ?.map((part: { text?: string }) => part.text ?? '')
             .join('')
-            .trim()
+            .trim();
 
         if (!reply) {
             return NextResponse.json(
                 { error: 'AI returned an empty response' },
                 { status: 502 },
-            )
+            );
         }
+
 
         const chatwootResponse = await fetch(
             `${baseUrl}/api/v1/accounts/${accountId}/conversations/${conversationId}/messages`,
