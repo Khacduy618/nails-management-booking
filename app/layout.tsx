@@ -4,6 +4,7 @@ import { GeistSans } from "geist/font/sans"
 import { GeistMono } from "geist/font/mono"
 import { Playfair_Display, Manrope } from "next/font/google"
 import { headers } from "next/headers"
+import ChatwootWidget from '@/components/ChatwootWidget';
 
 const playfair = Playfair_Display({
   subsets: ["vietnamese", "latin"],
@@ -71,22 +72,8 @@ export default async function RootLayout({
         </AuthProvider>
         {/* <Analytics /> */}
         <Toaster richColors position="top-right" />
-        <script>
-          window.chatwootSettings = {"position":"right","type":"standard","launcherTitle":""};
-          (function(d,t) {
-    var BASE_URL="http://localhost:3000";
-          var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
-          g.src=BASE_URL+"/packs/js/sdk.js";
-          g.async = true;
-          s.parentNode.insertBefore(g,s);
-          g.onload=function(){
-            window.chatwootSDK.run({
-              websiteToken: 'S7oG4twWLMkFYfATEsXekWs3',
-              baseUrl: BASE_URL
-            })
-          }
-  })(document,"script");
-        </script>
+        <ChatwootWidget />
+        
       </body>
     </html>
   )
