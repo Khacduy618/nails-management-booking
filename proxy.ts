@@ -4,7 +4,9 @@ import type { NextRequest } from 'next/server'
 export function proxy(request: NextRequest) {
   const nonce = Buffer.from(crypto.randomUUID()).toString('base64')
   const isDev = process.env.NODE_ENV === 'development'
-
+  const chatwootBaseUrl =
+    'https://lightweight-established-strain-identifies.trycloudflare.com'
+  
   const connectSrc = [
     "'self'",
     isDev ? "ws: wss:" : "",
@@ -15,7 +17,8 @@ export function proxy(request: NextRequest) {
     "https://*.neon.tech",
     "wss://*.neon.tech",
     "https://*.vercel-insights.com",
-    "https://vitals.vercel-insights.com"
+    "https://vitals.vercel-insights.com",
+    chatwootBaseUrl,
   ].filter(Boolean).join(' ')
 
   const cspHeader = `
