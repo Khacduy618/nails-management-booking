@@ -167,13 +167,21 @@ export async function POST(request: NextRequest) {
             },
         )
 
+
         if (!aiResponse.ok) {
-            console.error('Gemini API error:', aiResponse.status)
+            const errorBody = await aiResponse.text()
+
+            console.error('[Gemini API Error]', {
+                status: aiResponse.status,
+                body: errorBody.slice(0, 2000),
+            })
+
             return NextResponse.json(
                 { error: 'AI generation failed' },
                 { status: 502 },
             )
         }
+
 
         const aiData = await aiResponse.json()
         const reply = aiData.candidates?.[0]?.content?.parts
