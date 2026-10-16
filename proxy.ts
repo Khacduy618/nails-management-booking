@@ -5,7 +5,7 @@ export function proxy(request: NextRequest) {
   const nonce = Buffer.from(crypto.randomUUID()).toString('base64')
   const isDev = process.env.NODE_ENV === 'development'
   const chatwootBaseUrl =
-    'https://lightweight-established-strain-identifies.trycloudflare.com'
+    process.env.CHATWOOT_BASE_URL?.replace(/\/+$/, "")
   
   const connectSrc = [
     "'self'",
